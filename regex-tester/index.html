@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regex Tester & Debugger | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Regex Tester</h1>
+  <p class="tagline">Test, debug, and visualize regular expressions in real-time. PCRE/JavaScript syntax with match highlighting, capture groups, substitution, and explain mode. Save and share patterns.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Pattern & Input</h2>
+
+    <div class="field">
+      <label for="regex-pattern">Regular Expression <span class="req">*</span></label>
+      <div class="input-with-help">
+        <input type="text" id="regex-pattern" placeholder="/pattern/flags  (e.g., /\\b\\w+\\b/g)" spellcheck="false">
+        <button class="btn-help" id="btn-regex-help" title="Regex reference">?</button>
+      </div>
+      <div class="field-hint">Enter pattern with or without delimiters. Supported flags: g, i, m, s, u, y, d</div>
+    </div>
+
+    <div class="field">
+      <label for="test-string">Test String</label>
+      <textarea id="test-string" rows="8" placeholder="Paste or type text to test against..."></textarea>
+    </div>
+
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="flag-global" checked>
+        <span>Global (g)</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="flag-ignorecase">
+        <span>Ignore Case (i)</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="flag-multiline">
+        <span>Multiline (m)</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="flag-dotall">
+        <span>Dot All (s)</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="flag-unicode">
+        <span>Unicode (u)</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="flag-sticky">
+        <span>Sticky (y)</span>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-test">Test Regex</button>
+      <button class="btn" id="btn-clear">Clear</button>
+      <button class="btn" id="btn-save">Save Pattern</button>
+    </div>
+
+    <div class="validation-status" id="validation-status" hidden></div>
+
+    <!-- Substitution Section -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Substitution</h2>
+      <div class="field">
+        <label for="replacement">Replacement String</label>
+        <input type="text" id="replacement" placeholder="$1-$2  or  {{groupName}}  or  function result">
+        <div class="field-hint">Use $1, $2... for numbered groups, $& for full match, $` for before, $' for after. Or {{name}} for named groups.</div>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="replace-all">
+          <span>Replace All (global)</span>
+        </label>
+      </div>
+      <button class="btn" id="btn-replace" style="margin-top: 0.5rem;">Apply Replacement</button>
+      <div class="field">
+        <label>Result</label>
+        <textarea id="replacement-result" rows="4" readonly></textarea>
+      </div>
+    </div>
+
+    <!-- Explain Mode -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Pattern Explanation</h2>
+      <div id="explanation-output"></div>
+    </div>
+
+    <!-- Quick Reference -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Quick Reference</h2>
+      <div class="preset-buttons" id="regex-presets"></div>
+    </div>
+
+    <!-- Saved Patterns -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Saved Patterns</h2>
+        <button class="btn" id="btn-load-saved" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">Load</button>
+      </div>
+      <select id="saved-patterns-select" style="width: 100%; margin-bottom: 0.5rem;">
+        <option value="">Select a saved pattern...</option>
+      </select>
+      <div class="actions">
+        <button class="btn" id="btn-apply-saved">Apply</button>
+        <button class="btn" id="btn-delete-saved">Delete</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="results-heading">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 id="results-heading">Matches</h2>
+      <div class="results-stats" id="match-stats"></div>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn" id="btn-copy-matches">Copy All Matches</button>
+      <button class="btn" id="btn-copy-groups">Copy Groups</button>
+      <button class="btn" id="btn-export-json">Export JSON</button>
+    </div>
+
+    <div class="results-content" id="results-content">
+      <div class="empty-results">
+        <div class="empty-icon">🔍</div>
+        <p>Enter a pattern and test string, then click <strong>Test Regex</strong></p>
+      </div>
+    </div>
+
+    <!-- Match Details Modal -->
+    <div class="modal" id="match-modal" hidden>
+      <div class="modal-content">
+        <button class="modal-close" id="match-modal-close">✕</button>
+        <h3 id="match-modal-title">Match Details</h3>
+        <div id="match-modal-content"></div>
+      </div>
+    </div>
+
+    <!-- Regex Help Modal -->
+    <div class="modal" id="regex-help-modal" hidden>
+      <div class="modal-content">
+        <button class="modal-close" id="regex-help-close">✕</button>
+        <h3>Regex Quick Reference</h3>
+        <div class="syntax-tabs">
+          <button class="syntax-tab active" data-syntax="anchors">Anchors</button>
+          <button class="syntax-tab" data-syntax="quantifiers">Quantifiers</button>
+          <button class="syntax-tab" data-syntax="classes">Char Classes</button>
+          <button class="syntax-tab" data-syntax="groups">Groups</button>
+          <button class="syntax-tab" data-syntax="assertions">Assertions</button>
+          <button class="syntax-tab" data-syntax="flags">Flags</button>
+          <button class="syntax-tab" data-syntax="examples">Examples</button>
+        </div>
+        <div class="syntax-content" id="regex-help-content"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
