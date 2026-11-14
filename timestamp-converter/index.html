@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timestamp Converter | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Timestamp Converter</h1>
+  <p class="tagline">Convert between Unix timestamps (seconds/milliseconds), ISO 8601, RFC 2822, and human-readable dates. Supports timezones, relative time, batch conversion, and date arithmetic. Copy any format with one click.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Input</h2>
+
+    <div class="field">
+      <label for="ts-input">Timestamp / Date</label>
+      <div class="input-with-help">
+        <input type="text" id="ts-input" placeholder="1704067200 or 2024-01-01T00:00:00Z or now" spellcheck="false">
+        <button class="btn-help" id="btn-format-help" title="Supported formats">?</button>
+      </div>
+      <div class="field-hint">Unix (seconds/ms), ISO 8601, RFC 2822, or "now". Examples: 1704067200, 1704067200000, 2024-01-01T00:00:00Z, Jan 1, 2024</div>
+    </div>
+
+    <div class="field">
+      <label for="ts-timezone">Timezone</label>
+      <select id="ts-timezone">
+        <option value="local" selected>Local Timezone</option>
+        <option value="utc">UTC</option>
+        <option value="america/new_york">America/New_York (EST/EDT)</option>
+        <option value="america/los_angeles">America/Los_Angeles (PST/PDT)</option>
+        <option value="europe/london">Europe/London (GMT/BST)</option>
+        <option value="europe/paris">Europe/Paris (CET/CEST)</option>
+        <option value="asia/tokyo">Asia/Tokyo (JST)</option>
+        <option value="asia/shanghai">Asia/Shanghai (CST)</option>
+        <option value="asia/dubai">Asia/Dubai (GST)</option>
+        <option value="asia/kolkata">Asia/Kolkata (IST)</option>
+        <option value="australia/sydney">Australia/Sydney (AEST/AEDT)</option>
+        <option value="custom">Custom Offset...</option>
+      </select>
+    </div>
+
+    <div class="field" id="custom-offset-field" hidden>
+      <label for="custom-offset">UTC Offset (hours)</label>
+      <input type="number" id="custom-offset" step="0.5" min="-12" max="14" placeholder="+5.5">
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-convert">Convert</button>
+      <button class="btn" id="btn-now">Now</button>
+      <button class="btn" id="btn-random">Random Date</button>
+    </div>
+
+    <!-- Date Arithmetic -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Date Arithmetic</h2>
+      <div class="field">
+        <label for="math-base">Base Date (uses input above if empty)</label>
+        <input type="text" id="math-base" placeholder="Leave empty to use main input">
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+        <div class="field">
+          <label for="math-add">Add</label>
+          <input type="text" id="math-add" placeholder="+ 7d or + 2w 3d">
+        </div>
+        <div class="field">
+          <label for="math-subtract">Subtract</label>
+          <input type="text" id="math-subtract" placeholder="- 1y 6m">
+        </div>
+      </div>
+      <div class="field-hint">Formats: 1y 2m 3w 4d 5h 6m 7s (years, months, weeks, days, hours, minutes, seconds)</div>
+      <button class="btn" id="btn-calculate" style="margin-top: 0.5rem;">Calculate</button>
+      <div id="math-result" style="margin-top: 1rem;"></div>
+    </div>
+
+    <!-- Batch Converter -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Batch Converter</h2>
+      <div class="field">
+        <label for="batch-input">Multiple timestamps (one per line)</label>
+        <textarea id="batch-input" placeholder="1704067200
+1704153600
+2024-01-03T00:00:00Z" rows="6"></textarea>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn" id="btn-batch-convert">Convert All</button>
+        <button class="btn" id="btn-batch-export-csv">Export CSV</button>
+        <button class="btn" id="btn-batch-export-json">Export JSON</button>
+      </div>
+      <div id="batch-output" style="margin-top: 1rem; max-height: 300px; overflow-y: auto;"></div>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="results-heading">
+    <h2 id="results-heading">Conversions</h2>
+
+    <div id="conversions-output">
+      <div class="empty-results">
+        <div class="empty-icon">⏰</div>
+        <p>Enter a timestamp or date and click <strong>Convert</strong></p>
+      </div>
+    </div>
+
+    <!-- Relative Time -->
+    <div class="panel" id="relative-panel" style="margin-top: 1.5rem; display: none;">
+      <h2>Relative Time</h2>
+      <div id="relative-output"></div>
+    </div>
+
+    <!-- Timezone Comparison -->
+    <div class="panel" id="tz-panel" style="margin-top: 1.5rem; display: none;">
+      <h2>Timezone Comparison</h2>
+      <div id="tz-grid" class="tz-grid"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<!-- Format Help Modal -->
+<div class="modal" id="format-modal" hidden>
+  <div class="modal-content">
+    <button class="modal-close" id="format-modal-close">✕</button>
+    <h3>Supported Timestamp Formats</h3>
+    <div class="syntax-content">
+      <div class="syntax-section">
+        <h4>Unix Timestamps</h4>
+        <div class="syntax-row"><span class="syntax-field">1704067200</span><span class="syntax-desc">Seconds since epoch</span></div>
+        <div class="syntax-row"><span class="syntax-field">1704067200000</span><span class="syntax-desc">Milliseconds since epoch</span></div>
+      </div>
+      <div class="syntax-section">
+        <h4>ISO 8601</h4>
+        <div class="syntax-row"><span class="syntax-field">2024-01-01T00:00:00Z</span><span class="syntax-desc">UTC with Z</span></div>
+        <div class="syntax-row"><span class="syntax-field">2024-01-01T00:00:00+05:30</span><span class="syntax-desc">With offset</span></div>
+        <div class="syntax-row"><span class="syntax-field">2024-01-01</span><span class="syntax-desc">Date only</span></div>
+      </div>
+      <div class="syntax-section">
+        <h4>RFC 2822 / Human</h4>
+        <div class="syntax-row"><span class="syntax-field">Mon, 01 Jan 2024 00:00:00 GMT</span><span class="syntax-desc">RFC 2822</span></div>
+        <div class="syntax-row"><span class="syntax-field">January 1, 2024</span><span class="syntax-desc">US format</span></div>
+        <div class="syntax-row"><span class="syntax-field">1 Jan 2024</span><span class="syntax-desc">Short format</span></div>
+      </div>
+      <div class="syntax-section">
+        <h4>Special</h4>
+        <div class="syntax-row"><span class="syntax-field">now</span><span class="syntax-desc">Current time</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

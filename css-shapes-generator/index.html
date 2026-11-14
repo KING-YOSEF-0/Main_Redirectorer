@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS Shapes Generator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">CSS Shapes Generator</h1>
+  <p class="tagline">Create complex CSS shapes using clip-path, border-radius, transform, and gradients. Choose from 20+ preset shapes (polygons, stars, hearts, speech bubbles, gears, frames) or build custom shapes visually. Export clean CSS code.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Shape Builder</h2>
+
+    <div class="field">
+      <label for="shape-preset">Preset Shapes</label>
+      <select id="shape-preset">
+        <option value="custom">Custom / Build Your Own</option>
+        <optgroup label="Basic Geometric">
+          <option value="square">Square</option>
+          <option value="rectangle">Rectangle</option>
+          <option value="circle">Circle</option>
+          <option value="ellipse">Ellipse</option>
+          <option value="triangle">Triangle</option>
+          <option value="right-triangle">Right Triangle</option>
+          <option value="diamond">Diamond / Rhombus</option>
+          <option value="parallelogram">Parallelogram</option>
+          <option value="trapezoid">Trapezoid</option>
+        </optgroup>
+        <optgroup label="Polygons">
+          <option value="pentagon">Pentagon</option>
+          <option value="hexagon">Hexagon</option>
+          <option value="heptagon">Heptagon (7)</option>
+          <option value="octagon">Octagon</option>
+          <option value="decagon">Decagon (10)</option>
+          <option value="dodecagon">Dodecagon (12)</option>
+        </optgroup>
+        <optgroup label="Stars & Bursts">
+          <option value="star-5">5-Point Star</option>
+          <option value="star-6">6-Point Star</option>
+          <option value="star-8">8-Point Star</option>
+          <option value="star-12">12-Point Star</option>
+          <option value="burst-8">8-Point Burst</option>
+          <option value="burst-12">12-Point Burst</option>
+        </optgroup>
+        <optgroup label="Fun Shapes">
+          <option value="heart">Heart</option>
+          <option value="egg">Egg</option>
+          <option value="pill">Pill / Capsule</option>
+          <option value="pacman">Pac-Man</option>
+          <option value="pie">Pie Slice</option>
+          <option value="chevron">Chevron</option>
+          <option value="arrow">Arrow</option>
+          <option value="cross">Cross</option>
+          <option value="frame">Picture Frame</option>
+          <option value="badge">Badge</option>
+        </optgroup>
+        <optgroup label="UI Shapes">
+          <option value="speech-bubble">Speech Bubble</option>
+          <option value="thought-bubble">Thought Bubble</option>
+          <option value="tooltip">Tooltip</option>
+          <option value="tag">Tag / Label</option>
+          <option value="ribbon">Ribbon</option>
+          <option value="bookmark">Bookmark</option>
+          <option value="folder-tab">Folder Tab</option>
+          <option value="chat-bubble">Chat Bubble</option>
+        </optgroup>
+        <optgroup label="Complex">
+          <option value="gear">Gear / Cog</option>
+          <option value="flower">Flower</option>
+          <option value="snowflake">Snowflake</option>
+          <option value="infinity">Infinity</option>
+          <option value="yin-yang">Yin-Yang</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <!-- Custom Polygon Builder -->
+    <div class="panel" id="custom-builder" style="margin-top: 1.5rem; display: none;">
+      <h2>Custom Polygon Builder</h2>
+      <div class="field">
+        <label for="polygon-sides">Number of Points</label>
+        <input type="range" id="polygon-sides" min="3" max="20" value="5">
+        <span id="polygon-sides-value">5</span>
+      </div>
+      <div class="field">
+        <label for="polygon-roundness">Corner Roundness</label>
+        <input type="range" id="polygon-roundness" min="0" max="100" value="0">
+        <span id="polygon-roundness-value">0%</span>
+      </div>
+      <div class="field">
+        <label for="polygon-rotation">Rotation</label>
+        <input type="range" id="polygon-rotation" min="0" max="360" value="0">
+        <span id="polygon-rotation-value">0°</span>
+      </div>
+      <div class="field">
+        <label for="polygon-star-ratio">Star Ratio (0 = polygon, 1 = star)</label>
+        <input type="range" id="polygon-star-ratio" min="0" max="100" value="0" step="1">
+        <span id="polygon-star-ratio-value">0%</span>
+      </div>
+      <div class="field">
+        <label>Clip Path Mode</label>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+            <input type="radio" name="clip-mode" value="polygon" checked> polygon()
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+            <input type="radio" name="clip-mode" value="path"> path() (SVG)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shape Properties -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Appearance</h2>
+      <div class="field">
+        <label for="shape-width">Width</label>
+        <input type="number" id="shape-width" min="50" max="800" value="200" step="10">
+        <span class="field-hint">px</span>
+      </div>
+      <div class="field">
+        <label for="shape-height">Height</label>
+        <input type="number" id="shape-height" min="50" max="800" value="200" step="10">
+        <span class="field-hint">px (ignored for aspect-ratio shapes)</span>
+      </div>
+      <div class="field">
+        <label for="shape-bg-type">Background Type</label>
+        <select id="shape-bg-type">
+          <option value="solid">Solid Color</option>
+          <option value="gradient-linear">Linear Gradient</option>
+          <option value="gradient-radial">Radial Gradient</option>
+          <option value="gradient-conic">Conic Gradient</option>
+          <option value="pattern-stripes">Stripes Pattern</option>
+          <option value="pattern-checkerboard">Checkerboard</option>
+          <option value="pattern-dots">Polka Dots</option>
+        </select>
+      </div>
+
+      <!-- Solid Color -->
+      <div class="field bg-option" data-bg="solid">
+        <label for="shape-color">Color</label>
+        <input type="color" id="shape-color" value="#ff4fa3">
+      </div>
+
+      <!-- Gradient Options -->
+      <div class="field bg-option" data-bg="gradient-linear" hidden>
+        <label>Linear Gradient</label>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="color" id="grad-linear-1" value="#ff4fa3">
+          <input type="color" id="grad-linear-2" value="#35c3ff">
+          <input type="number" id="grad-linear-angle" placeholder="Angle" value="90" min="0" max="360" style="width: 80px;">
+        </div>
+        <div style="margin-top: 0.5rem;">
+          <label for="grad-linear-stops">Color Stops (%, comma-separated)</label>
+          <input type="text" id="grad-linear-stops" placeholder="0, 50, 100">
+        </div>
+      </div>
+
+      <div class="field bg-option" data-bg="gradient-radial" hidden>
+        <label>Radial Gradient</label>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="color" id="grad-radial-1" value="#ff4fa3">
+          <input type="color" id="grad-radial-2" value="#35c3ff">
+          <select id="grad-radial-shape">
+            <option value="circle">Circle</option>
+            <option value="ellipse">Ellipse</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field bg-option" data-bg="gradient-conic" hidden>
+        <label>Conic Gradient</label>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="color" id="grad-conic-1" value="#ff4fa3">
+          <input type="color" id="grad-conic-2" value="#35c3ff">
+          <input type="color" id="grad-conic-3" value="#2ee6a6">
+          <input type="number" id="grad-conic-from" placeholder="From °" value="0" min="0" max="360" style="width: 80px;">
+        </div>
+      </div>
+
+      <div class="field bg-option" data-bg="pattern-stripes" hidden>
+        <label>Stripes</label>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="color" id="stripe-color1" value="#ff4fa3">
+          <input type="color" id="stripe-color2" value="#1a1a24">
+          <input type="number" id="stripe-angle" placeholder="Angle" value="45" min="0" max="180" style="width: 80px;">
+          <input type="number" id="stripe-width" placeholder="Width" value="10" min="1" max="100" style="width: 80px;">
+        </div>
+      </div>
+
+      <div class="field bg-option" data-bg="pattern-checkerboard" hidden>
+        <label>Checkerboard</label>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="color" id="check-color1" value="#ff4fa3">
+          <input type="color" id="check-color2" value="#1a1a24">
+          <input type="number" id="check-size" placeholder="Size" value="20" min="5" max="100" style="width: 80px;">
+        </div>
+      </div>
+
+      <div class="field bg-option" data-bg="pattern-dots" hidden>
+        <label>Polka Dots</label>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="color" id="dot-color" value="#ff4fa3">
+          <input type="color" id="dot-bg" value="#1a1a24">
+          <input type="number" id="dot-size" placeholder="Dot Size" value="8" min="2" max="50" style="width: 80px;">
+          <input type="number" id="dot-spacing" placeholder="Spacing" value="24" min="10" max="100" style="width: 80px;">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="shape-border">Border</label>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <input type="number" id="shape-border" min="0" max="20" value="0" style="width: 70px;">
+          <span>px</span>
+          <input type="color" id="shape-border-color" value="#ffffff">
+          <select id="shape-border-style">
+            <option value="solid">Solid</option>
+            <option value="dashed">Dashed</option>
+            <option value="dotted">Dotted</option>
+            <option value="double">Double</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="shape-shadow">Box Shadow</label>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="number" id="shadow-x" placeholder="X" value="0" min="-50" max="50" style="width: 70px;">
+          <input type="number" id="shadow-y" placeholder="Y" value="10" min="-50" max="50" style="width: 70px;">
+          <input type="number" id="shadow-blur" placeholder="Blur" value="20" min="0" max="100" style="width: 70px;">
+          <input type="number" id="shadow-spread" placeholder="Spread" value="0" min="-20" max="20" style="width: 70px;">
+          <input type="color" id="shadow-color" value="#000000">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="shape-transform">Transform</label>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="number" id="transform-rotate" placeholder="Rotate °" value="0" min="-360" max="360" style="width: 90px;">
+          <input type="number" id="transform-scale-x" placeholder="Scale X" value="1" min="0.1" max="3" step="0.1" style="width: 90px;">
+          <input type="number" id="transform-scale-y" placeholder="Scale Y" value="1" min="0.1" max="3" step="0.1" style="width: 90px;">
+          <input type="number" id="transform-skew-x" placeholder="Skew X °" value="0" min="-45" max="45" style="width: 90px;">
+          <input type="number" id="transform-skew-y" placeholder="Skew Y °" value="0" min="-45" max="45" style="width: 90px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-generate">Generate CSS</button>
+      <button class="btn" id="btn-random-shape">Random Shape</button>
+      <button class="btn" id="btn-copy-css">Copy CSS</button>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="preview-heading">
+    <h2 id="preview-heading">Live Preview</h2>
+
+    <div class="preview-area">
+      <div id="shape-preview" class="shape-preview"></div>
+    </div>
+
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Generated CSS</label>
+      <pre id="css-output" class="css-output"><code id="css-code"></code></pre>
+    </div>
+
+    <div class="actions" style="margin-top: 1rem;">
+      <button class="btn" id="btn-download-css">Download .css</button>
+      <button class="btn" id="btn-download-html">Download Demo .html</button>
+      <button class="btn" id="btn-share-shape">Share Shape</button>
+    </div>
+
+    <!-- Quick Copy Sections -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Quick Copy</h2>
+      <div class="quick-copy-grid">
+        <button class="quick-copy-btn" data-copy="clip-path">clip-path</button>
+        <button class="quick-copy-btn" data-copy="background">background</button>
+        <button class="quick-copy-btn" data-copy="transform">transform</button>
+        <button class="quick-copy-btn" data-copy="border-radius">border-radius</button>
+        <button class="quick-copy-btn" data-copy="box-shadow">box-shadow</button>
+        <button class="quick-copy-btn" data-copy="full">Full Rule</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

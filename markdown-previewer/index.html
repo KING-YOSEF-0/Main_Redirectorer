@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markdown Previewer | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/styles/github-dark.min.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Markdown Previewer</h1>
+  <p class="tagline">Write Markdown and see live preview with GitHub-flavored syntax. Supports tables, task lists, math (KaTeX), mermaid diagrams, footnotes, and syntax highlighting for 180+ languages. Export as HTML, PDF, or raw Markdown.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="editor-heading">
+    <h2 id="editor-heading">Editor</h2>
+
+    <div class="toolbar" role="toolbar" aria-label="Markdown formatting">
+      <button type="button" class="tool-btn" data-action="bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
+      <button type="button" class="tool-btn" data-action="italic" title="Italic (Ctrl+I)"><em>I</em></button>
+      <button type="button" class="tool-btn" data-action="strike" title="Strikethrough">S</button>
+      <button type="button" class="tool-btn" data-action="code" title="Inline Code (Ctrl+`)"><code>{ }</code></button>
+      <div class="toolbar-sep"></div>
+      <button type="button" class="tool-btn" data-action="h1" title="Heading 1">H1</button>
+      <button type="button" class="tool-btn" data-action="h2" title="Heading 2">H2</button>
+      <button type="button" class="tool-btn" data-action="h3" title="Heading 3">H3</button>
+      <div class="toolbar-sep"></div>
+      <button type="button" class="tool-btn" data-action="ul" title="Bullet List">• List</button>
+      <button type="button" class="tool-btn" data-action="ol" title="Numbered List">1. List</button>
+      <button type="button" class="tool-btn" data-action="task" title="Task List">☐ Task</button>
+      <div class="toolbar-sep"></div>
+      <button type="button" class="tool-btn" data-action="quote" title="Blockquote">❝</button>
+      <button type="button" class="tool-btn" data-action="link" title="Link (Ctrl+K)">🔗</button>
+      <button type="button" class="tool-btn" data-action="image" title="Image">🖼</button>
+      <button type="button" class="tool-btn" data-action="table" title="Table">⊞</button>
+      <button type="button" class="tool-btn" data-action="hr" title="Horizontal Rule">—</button>
+      <div class="toolbar-sep"></div>
+      <button type="button" class="tool-btn" data-action="math" title="Math Block">∑</button>
+      <button type="button" class="tool-btn" data-action="mermaid" title="Mermaid Diagram">⎔</button>
+      <button type="button" class="tool-btn" data-action="footnote" title="Footnote">[1]</button>
+    </div>
+
+    <div class="field" style="margin-bottom: 0;">
+      <label for="md-editor">Markdown Source</label>
+      <textarea id="md-editor" spellcheck="false" placeholder="# Welcome to Markdown Previewer
+
+Start typing here to see live preview on the right.
+
+## Features
+- **GitHub Flavored Markdown** support
+- **Tables** with alignment
+- **Task lists** with checkboxes
+- **Math formulas** with KaTeX
+- **Mermaid diagrams** for flowcharts
+- **Syntax highlighting** for 180+ languages
+- **Footnotes** and definition lists
+
+## Quick Example
+
+| Feature | Status |
+|---------|--------|
+| Live Preview | ✅ |
+| Export HTML | ✅ |
+| Export PDF | ✅ |
+
+- [x] Write markdown
+- [ ] Export as PDF
+- [ ] Share with friends
+
+$$E = mc^2$$
+
+\`\`\`javascript
+console.log('Hello, World!');
+\`\`\`
+
+> \"The best way to predict the future is to invent it.\" — Alan Kay"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-load-file">Load .md File</button>
+      <button class="btn" id="btn-clear">Clear</button>
+      <button class="btn primary" id="btn-export-html">Export HTML</button>
+      <button class="btn" id="btn-export-pdf">Export PDF</button>
+      <button class="btn" id="btn-export-md">Export Markdown</button>
+    </div>
+
+    <div class="field">
+      <label>Editor Settings</label>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+          <input type="checkbox" id="setting-autosave" checked> Auto-save to localStorage
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+          <input type="checkbox" id="setting-wordwrap" checked> Word wrap
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+          <input type="checkbox" id="setting-linenums" checked> Line numbers
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+          <input type="checkbox" id="setting-tabs" checked> Tab key inserts spaces
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="md-theme">Preview Theme</label>
+      <select id="md-theme">
+        <option value="github">GitHub Light</option>
+        <option value="github-dark" selected>GitHub Dark</option>
+        <option value="academic">Academic</option>
+        <option value="minimal">Minimal</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="preview-heading">
+    <h2 id="preview-heading">Live Preview</h2>
+
+    <div id="md-preview" class="markdown-preview">
+      <div class="empty-results">
+        <div class="empty-icon">📝</div>
+        <p>Start typing in the editor to see preview</p>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top: 1.5rem;">
+      <button class="btn" id="btn-copy-html">Copy as HTML</button>
+      <button class="btn" id="btn-open-new-tab">Open in New Tab</button>
+      <button class="btn" id="btn-print">Print / Save as PDF</button>
+    </div>
+
+    <div id="word-count" style="margin-top: 1rem; font-size: 0.8rem; color: var(--muted); font-family: var(--font-mono);"></div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

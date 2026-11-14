@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR Code Generator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">QR Code Generator</h1>
+  <p class="tagline">Generate QR codes for URLs, text, WiFi, vCard, email, SMS, phone, location, and more. Customize colors, add logos, adjust error correction levels, and export as PNG, SVG, or PDF. Batch generate multiple codes at once.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">QR Code Settings</h2>
+
+    <div class="field">
+      <label for="qr-type">QR Code Type</label>
+      <select id="qr-type">
+        <option value="url">URL / Link</option>
+        <option value="text">Plain Text</option>
+        <option value="wifi">WiFi Network</option>
+        <option value="vcard">Contact (vCard)</option>
+        <option value="email">Email</option>
+        <option value="sms">SMS</option>
+        <option value="phone">Phone Number</option>
+        <option value="location">Location (Geo)</option>
+        <option value="event">Calendar Event</option>
+      </select>
+    </div>
+
+    <!-- URL -->
+    <div class="field type-field" data-type="url">
+      <label for="qr-url">URL</label>
+      <input type="url" id="qr-url" placeholder="https://example.com" spellcheck="false">
+    </div>
+
+    <!-- Text -->
+    <div class="field type-field" data-type="text" hidden>
+      <label for="qr-text">Text Content</label>
+      <textarea id="qr-text" placeholder="Any text content..." rows="4"></textarea>
+    </div>
+
+    <!-- WiFi -->
+    <div class="field type-field" data-type="wifi" hidden>
+      <label>WiFi Configuration</label>
+      <div class="field">
+        <label for="wifi-ssid">Network Name (SSID)</label>
+        <input type="text" id="wifi-ssid" placeholder="MyWiFi">
+      </div>
+      <div class="field">
+        <label for="wifi-password">Password</label>
+        <input type="text" id="wifi-password" placeholder="••••••••">
+      </div>
+      <div class="field">
+        <label for="wifi-encryption">Encryption</label>
+        <select id="wifi-encryption">
+          <option value="WPA">WPA/WPA2/WPA3</option>
+          <option value="WEP">WEP</option>
+          <option value="nopass">No Password</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="wifi-hidden">Hidden Network</label>
+        <input type="checkbox" id="wifi-hidden">
+      </div>
+    </div>
+
+    <!-- vCard -->
+    <div class="field type-field" data-type="vcard" hidden>
+      <label>Contact Information</label>
+      <div class="field">
+        <label for="vcard-name">Full Name</label>
+        <input type="text" id="vcard-name" placeholder="John Doe">
+      </div>
+      <div class="field">
+        <label for="vcard-org">Organization</label>
+        <input type="text" id="vcard-org" placeholder="Company Inc.">
+      </div>
+      <div class="field">
+        <label for="vcard-title">Job Title</label>
+        <input type="text" id="vcard-title" placeholder="Software Engineer">
+      </div>
+      <div class="field">
+        <label for="vcard-phone">Phone</label>
+        <input type="tel" id="vcard-phone" placeholder="+1 555 123 4567">
+      </div>
+      <div class="field">
+        <label for="vcard-email">Email</label>
+        <input type="email" id="vcard-email" placeholder="john@company.com">
+      </div>
+      <div class="field">
+        <label for="vcard-url">Website</label>
+        <input type="url" id="vcard-url" placeholder="https://company.com">
+      </div>
+      <div class="field">
+        <label for="vcard-address">Address</label>
+        <textarea id="vcard-address" placeholder="123 Main St, City, Country" rows="2"></textarea>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div class="field type-field" data-type="email" hidden>
+      <label for="email-to">To</label>
+      <input type="email" id="email-to" placeholder="recipient@example.com">
+      <div class="field">
+        <label for="email-subject">Subject</label>
+        <input type="text" id="email-subject" placeholder="Hello">
+      </div>
+      <div class="field">
+        <label for="email-body">Body</label>
+        <textarea id="email-body" placeholder="Message content..." rows="3"></textarea>
+      </div>
+    </div>
+
+    <!-- SMS -->
+    <div class="field type-field" data-type="sms" hidden>
+      <label for="sms-phone">Phone Number</label>
+      <input type="tel" id="sms-phone" placeholder="+1 555 123 4567">
+      <div class="field">
+        <label for="sms-body">Message</label>
+        <textarea id="sms-body" placeholder="Your message..." rows="2"></textarea>
+      </div>
+    </div>
+
+    <!-- Phone -->
+    <div class="field type-field" data-type="phone" hidden>
+      <label for="phone-number">Phone Number</label>
+      <input type="tel" id="phone-number" placeholder="+1 555 123 4567">
+    </div>
+
+    <!-- Location -->
+    <div class="field type-field" data-type="location" hidden>
+      <label for="geo-lat">Latitude</label>
+      <input type="number" id="geo-lat" step="any" placeholder="40.7128">
+      <div class="field">
+        <label for="geo-lng">Longitude</label>
+        <input type="number" id="geo-lng" step="any" placeholder="-74.0060">
+      </div>
+      <div class="field">
+        <label for="geo-query">Query (optional)</label>
+        <input type="text" id="geo-query" placeholder="New York, NY">
+      </div>
+    </div>
+
+    <!-- Event -->
+    <div class="field type-field" data-type="event" hidden>
+      <label for="event-title">Event Title</label>
+      <input type="text" id="event-title" placeholder="Meeting with Team">
+      <div class="field">
+        <label for="event-start">Start Date & Time</label>
+        <input type="datetime-local" id="event-start">
+      </div>
+      <div class="field">
+        <label for="event-end">End Date & Time</label>
+        <input type="datetime-local" id="event-end">
+      </div>
+      <div class="field">
+        <label for="event-location">Location</label>
+        <input type="text" id="event-location" placeholder="Conference Room A">
+      </div>
+      <div class="field">
+        <label for="event-description">Description</label>
+        <textarea id="event-description" placeholder="Event details..." rows="2"></textarea>
+      </div>
+    </div>
+
+    <!-- Customization -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Customization</h2>
+      <div class="field">
+        <label for="qr-size">Size (px)</label>
+        <input type="number" id="qr-size" min="100" max="2000" value="300" step="50">
+      </div>
+      <div class="field">
+        <label for="qr-ecc">Error Correction</label>
+        <select id="qr-ecc">
+          <option value="L">L - Low (7%)</option>
+          <option value="M" selected>M - Medium (15%)</option>
+          <option value="Q">Q - Quartile (25%)</option>
+          <option value="H">H - High (30%)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="qr-fg-color">Foreground Color</label>
+        <input type="color" id="qr-fg-color" value="#0f0f14">
+      </div>
+      <div class="field">
+        <label for="qr-bg-color">Background Color</label>
+        <input type="color" id="qr-bg-color" value="#ffffff">
+      </div>
+      <div class="field">
+        <label for="qr-margin">Margin (modules)</label>
+        <input type="number" id="qr-margin" min="0" max="10" value="4">
+      </div>
+      <div class="field">
+        <label for="qr-logo">Logo / Image (optional)</label>
+        <input type="file" id="qr-logo" accept="image/*">
+        <div class="field-hint">Logo will be centered. Max 30% of QR size for best scannability.</div>
+      </div>
+      <div class="field">
+        <label for="qr-logo-size">Logo Size %</label>
+        <input type="range" id="qr-logo-size" min="10" max="40" value="20">
+        <span id="qr-logo-size-value">20%</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-generate">Generate QR Code</button>
+      <button class="btn" id="btn-random">Random Demo</button>
+    </div>
+
+    <!-- Batch Generator -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Batch Generator</h2>
+      <div class="field">
+        <label for="batch-input">Multiple Values (one per line)</label>
+        <textarea id="batch-input" placeholder="https://site1.com
+https://site2.com
+https://site3.com" rows="6"></textarea>
+      </div>
+      <div class="field">
+        <label for="batch-prefix">Filename Prefix</label>
+        <input type="text" id="batch-prefix" placeholder="qr-code">
+      </div>
+      <button class="btn" id="btn-batch-generate">Generate Batch</button>
+      <div id="batch-progress" style="margin-top: 1rem; display: none;">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="batch-status" style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--muted);"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="results-heading">
+    <h2 id="results-heading">Preview</h2>
+
+    <div id="qr-preview" class="qr-preview">
+      <div class="empty-results">
+        <div class="empty-icon">📱</div>
+        <p>Configure settings and click <strong>Generate QR Code</strong></p>
+      </div>
+    </div>
+
+    <div id="batch-preview" style="margin-top: 2rem; display: none;">
+      <h3 style="margin-bottom: 1rem; color: var(--fg);">Batch Results</h3>
+      <div id="batch-grid" class="batch-grid"></div>
+    </div>
+
+    <div class="actions" style="margin-top: 1.5rem;" id="export-actions" hidden>
+      <button class="btn" id="btn-download-png">Download PNG</button>
+      <button class="btn" id="btn-download-svg">Download SVG</button>
+      <button class="btn" id="btn-download-pdf">Download PDF</button>
+      <button class="btn" id="btn-copy-image">Copy Image</button>
+      <button class="btn" id="btn-share">Share</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

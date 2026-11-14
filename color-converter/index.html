@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color Converter & Palette Tool | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Color Converter</h1>
+  <p class="tagline">Convert between HEX, RGB, HSL, HSV, CMYK, LAB, OKLCH, and named colors. Generate harmonious palettes (complementary, triadic, analogous, monochromatic). Check contrast ratios for WCAG compliance. Export as CSS, SCSS, Tailwind, JSON.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Color Input</h2>
+
+    <div class="field">
+      <label for="color-input">Color Value</label>
+      <div class="input-with-help">
+        <input type="text" id="color-input" placeholder="#ff4fa3 or rgb(255,79,163) or hsl(330,100%,65%)" spellcheck="false">
+        <button class="btn-help" id="btn-format-help" title="Supported formats">?</button>
+      </div>
+      <div class="field-hint">HEX, RGB, RGBA, HSL, HSLA, HSV, CMYK, LAB, OKLCH, or CSS named colors</div>
+    </div>
+
+    <div class="field">
+      <label>Live Preview</label>
+      <div id="color-preview" class="color-preview" style="--preview-color: #ff4fa3;"></div>
+    </div>
+
+    <div class="field">
+      <label for="color-format">Output Format</label>
+      <select id="color-format">
+        <option value="all">All Formats</option>
+        <option value="hex">HEX</option>
+        <option value="rgb">RGB / RGBA</option>
+        <option value="hsl">HSL / HSLA</option>
+        <option value="hsv">HSV</option>
+        <option value="cmyk">CMYK</option>
+        <option value="lab">CIE LAB</option>
+        <option value="oklch">OKLCH</option>
+        <option value="css">CSS Named</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-convert">Convert</button>
+      <button class="btn" id="btn-random-color">Random Color</button>
+      <button class="btn" id="btn-pick-color">Pick from Image</button>
+    </div>
+
+    <div class="validation-status" id="validation-status" hidden></div>
+
+    <!-- Palette Generator -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Palette Generator</h2>
+      <div class="field">
+        <label for="palette-type">Harmony Type</label>
+        <select id="palette-type">
+          <option value="complementary">Complementary (2)</option>
+          <option value="split-complementary">Split Complementary (3)</option>
+          <option value="triadic">Triadic (3)</option>
+          <option value="tetradic">Tetradic (4)</option>
+          <option value="analogous">Analogous (5)</option>
+          <option value="monochromatic">Monochromatic (5)</option>
+          <option value="square">Square (4)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="palette-count">Color Count</label>
+        <input type="number" id="palette-count" min="2" max="10" value="5">
+      </div>
+      <button class="btn" id="btn-generate-palette" style="margin-top: 0.5rem;">Generate Palette</button>
+    </div>
+
+    <!-- Contrast Checker -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Contrast Checker (WCAG)</h2>
+      <div class="field">
+        <label for="contrast-bg">Background Color</label>
+        <input type="text" id="contrast-bg" value="#0f0f14">
+      </div>
+      <div class="field">
+        <label for="contrast-fg">Foreground Color</label>
+        <input type="text" id="contrast-fg" value="#f5f5f7">
+      </div>
+      <button class="btn" id="btn-check-contrast" style="margin-top: 0.5rem;">Check Contrast</button>
+      <div id="contrast-result" style="margin-top: 1rem;"></div>
+    </div>
+
+    <!-- Export -->
+    <div class="panel" style="margin-top: 1.5rem;">
+      <h2>Export</h2>
+      <div class="actions" style="flex-wrap: wrap;">
+        <button class="btn" id="btn-export-css">CSS Variables</button>
+        <button class="btn" id="btn-export-scss">SCSS Map</button>
+        <button class="btn" id="btn-export-tailwind">Tailwind Config</button>
+        <button class="btn" id="btn-export-json">JSON</button>
+        <button class="btn" id="btn-export-ase">Adobe ASE</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="results-heading">
+    <h2 id="results-heading">Conversions</h2>
+
+    <div id="conversions-output">
+      <div class="empty-results">
+        <div class="empty-icon">🎨</div>
+        <p>Enter a color value and click <strong>Convert</strong></p>
+      </div>
+    </div>
+
+    <div id="palette-output" style="margin-top: 2rem;">
+      <!-- Palette will be rendered here -->
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<!-- Format Help Modal -->
+<div class="modal" id="format-modal" hidden>
+  <div class="modal-content">
+    <button class="modal-close" id="format-modal-close">✕</button>
+    <h3>Supported Color Formats</h3>
+    <div class="syntax-content">
+      <div class="syntax-section">
+        <h4>HEX</h4>
+        <div class="syntax-row"><span class="syntax-field">#ff4fa3</span><span class="syntax-desc">6-digit</span></div>
+        <div class="syntax-row"><span class="syntax-field">#f4a</span><span class="syntax-desc">3-digit shorthand</span></div>
+        <div class="syntax-row"><span class="syntax-field">#ff4fa3ff</span><span class="syntax-desc">8-digit with alpha</span></div>
+      </div>
+      <div class="syntax-section">
+        <h4>RGB / RGBA</h4>
+        <div class="syntax-row"><span class="syntax-field">rgb(255, 79, 163)</span><span class="syntax-desc">Integer 0-255</span></div>
+        <div class="syntax-row"><span class="syntax-field">rgba(255, 79, 163, 0.5)</span><span class="syntax-desc">With alpha 0-1</span></div>
+        <div class="syntax-row"><span class="syntax-field">rgb(100%, 31%, 64%)</span><span class="syntax-desc">Percentage</span></div>
+      </div>
+      <div class="syntax-section">
+        <h4>HSL / HSLA</h4>
+        <div class="syntax-row"><span class="syntax-field">hsl(330, 100%, 65%)</span><span class="syntax-desc">Hue 0-360, Sat/Light 0-100%</span></div>
+        <div class="syntax-row"><span class="syntax-field">hsla(330, 100%, 65%, 0.5)</span><span class="syntax-desc">With alpha</span></div>
+      </div>
+      <div class="syntax-section">
+        <h4>Other</h4>
+        <div class="syntax-row"><span class="syntax-field">hsv(330, 69%, 100%)</span><span class="syntax-desc">Hue, Saturation, Value</span></div>
+        <div class="syntax-row"><span class="syntax-field">cmyk(0, 69, 36, 0)</span><span class="syntax-desc">Cyan, Magenta, Yellow, Key</span></div>
+        <div class="syntax-row"><span class="syntax-field">lab(60, 70, -10)</span><span class="syntax-desc">CIE L*a*b*</span></div>
+        <div class="syntax-row"><span class="syntax-field">oklch(0.7 0.2 330)</span><span class="syntax-desc">OKLCH (perceptual)</span></div>
+        <div class="syntax-row"><span class="syntax-field">hotpink</span><span class="syntax-desc">CSS named colors</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
