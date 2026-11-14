@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color Palette Extractor | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
+  <p class="tagline">Extract color palettes from images and generate harmonious color schemes using advanced color theory.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Extractor Setup</h2>
+
+    <div class="field">
+      <label>Image Source</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-source="upload" aria-selected="true">Upload Image</button>
+        <button class="mode-tab" role="tab" data-source="url" aria-selected="false">URL</button>
+        <button class="mode-tab" role="tab" data-source="camera" aria-selected="false">Camera</button>
+      </div>
+    </div>
+
+    <div class="field" id="uploadOptions" hidden>
+      <label>Upload</label>
+      <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg,.gif,.webp" hidden>
+      <div class="file-drop-zone" id="dropZone">
+        <p>Drag & drop an image here or click to select</p>
+        <p class="file-info">Supports: PNG, JPG, JPEG, GIF, WebP</p>
+      </div>
+    </div>
+
+    <div class="field" id="urlOptions" hidden>
+      <label>Image URL</label>
+      <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg">
+    </div>
+
+    <div class="field" id="cameraOptions" hidden>
+      <label>Webcam</label>
+      <video id="webcam" width="320" height="240" autoplay muted playsinline hidden></video>
+      <div class="camera-controls">
+        <button class="btn primary" id="captureBtn">Capture</button>
+        <button class="btn secondary" id="switchCameraBtn">Switch Camera</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Sampling Method</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab sample-tab active" role="tab" data-sample="dominant" aria-selected="true">Dominant Colors</button>
+        <button class="mode-tab sample-tab" role="tab" data-sample="kmeans" aria-selected="false">K-Means</button>
+        <button class="mode-tab sample-tab" role="tab" data-sample="mediancut" aria-selected="false">Median Cut</button>
+        <button class="mode-tab sample-tab" role="tab" data-sample="histograms" aria-selected="false">Histogram</button>
+      </div>
+    rigs>
+      <div class="field">
+        <label>Number of Colors</label>
+        <select id="colorCount">
+          <option value="3">3 Colors</option>
+          <option value="5">5 Colors</option>
+          <option value="7">7 Colors</option>
+          <option value="10">10 Colors</option>
+          <option value="15">15 Colors</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Color Space</label>
+        <select id="colorSpace">
+          <option value="hsl">HSL</option>
+          <option value="rgb">RGB</option>
+          <option value="lab">Lab</option>
+          <option value="oklab">OKLab</option>
+        </select>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="extractBtn">Extract Palette</button>
+        <button class="btn secondary" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="stats-panel">
+        <h3>Statistics</h3>
+        <div class="stat-row">
+          <span class="stat-label">Images Processed</span>
+          <span class="stat-value" id="imagesProcessed">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Avg Colors per Image</span>
+          <span class="stat-value" id="avgColors">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Dominant Themes</span>
+          <span class="stat-value" id="dominantThemes">—</span>
+        </div>
+      </div>
+
+      <div class="leaderboard-section">
+        <h3>Recent Palettes</h3>
+        <div id="recentPalettes" class="leaderboard"></div>
+      </div>
+
+      <div class="theme-selector">
+        <label>Display Theme</label>
+        <select id="displayTheme">
+          <option value="default">Default</option>
+          <option value="compact">Compact</option>
+          <option value="detailed">Detailed</option>
+        </select>
+      </div>
+    </div>
+  </aside>
+
+  <section class="panel game-panel">
+    <div class="game-header">
+      <div class="puzzle-info">
+        <span class="puzzle-label" id="puzzleLabel">Palette Extractor</span>
+        <span class="puzzle-meta" id="puzzleMeta">Ready to extract</span>
+      </div>
+    </div>
+
+    <div class="view-container">
+      <div class="preview-area" id="previewArea">
+        <div class="preview-placeholder">
+          <h3>Image Preview Area</h3>
+          <p>Upload an image to generate color palettes</p>
+        </div>
+        <div class="palette-display" id="paletteDisplay" hidden>
+          <!-- Color palette boxes will be generated by JavaScript -->
+        </div>
+        <div class="color-info-panel" id="colorInfoPanel" hidden>
+          <!-- Detailed color information panels -->
+        </div>
+      </div>
+
+      <div class="palette-info" id="paletteInfo" hidden>
+        <h3>Generated Palette</h3>
+        <div class="palette-scheme-list" id="paletteSchemeList"></div>
+        <div class="palette-actions">
+          <button class="btn secondary" id="exportCssBtn">Export CSS</button>
+          <button class="btn secondary" id="exportJsonBtn">Export JSON</button>
+          <button class="btn secondary" id="shareBtn">Share Palette</button>
+        </div>
+
+        <div class="harmonic-section" id="harmonicSection" hidden>
+          <h3>Color Harmony Schemes</h3>
+          <div class="harmony-schemes" id="harmonySchemes"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-footer">
+      <button class="btn secondary" id="sampleMultipleBtn" hidden>Extract Multiple</button>
+      <button class="btn primary" id="playAgainBtn" hidden>Start Over</button>
+    </div>
+
+    <div id="resultsModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="modalTitle">Palette Generated!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Colors Extracted</span>
+            <span class="result-value" id="resultColorCount">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Image Size</span>
+            <span class="result-value" id="resultImageSize">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Dominant Theme</span>
+            <span class="result-value" id="resultTheme">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Similarity</span>
+            <span class="result-value" id="resultSimilarity">—</span>
+          </div>
+        </div>
+        <div class="daily-result" id="dailyResult" hidden>
+          <h3>Today's Dominant Color</h3>
+          <p id="dailyMessage"></p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareBtnModal">Share</button>
+          <button class="btn primary" id="playAgainBtnModal">New Image</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="gameCompleteModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="finalTitle">Palettes Generated!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Total Images</span>
+            <span class="result-value" id="finalTotalImages">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Avg Colors</span>
+            <span class="result-value" id="finalAvgColors">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Dominant Themes</span>
+            <span class="result-value" id="finalThemes">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Session</span>
+            <span class="result-value" id="finalSession">Active</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareFinalBtn">Share Results</button>
+          <button class="btn primary" id="playAgainFinalBtn">Start New Session</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
