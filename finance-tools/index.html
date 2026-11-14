@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personal Finance Micro-Tools | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Personal Finance Tools</h1>
+  <p class="tagline">Six essential financial calculators in one place. Compound interest, loan amortization, FIRE calculator, budget allocator, currency converter, and net worth tracker. All offline, no data leaves your browser.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Financial Calculators</h2>
+
+    <!-- Tool Selector -->
+    <div class="field">
+      <label>Select Tool</label>
+      <div class="tool-tabs" role="tablist" aria-label="Financial tools">
+        <button class="tool-tab active" role="tab" data-tool="compound" aria-selected="true">📈 Compound Interest</button>
+        <button class="tool-tab" role="tab" data-tool="loan" aria-selected="false">🏠 Loan Amortization</button>
+        <button class="tool-tab" role="tab" data-tool="fire" aria-selected="false">🔥 FIRE Calculator</button>
+        <button class="tool-tab" role="tab" data-tool="budget" aria-selected="false">💰 Budget Allocator</button>
+        <button class="tool-tab" role="tab" data-tool="currency" aria-selected="false">💱 Currency Converter</button>
+        <button class="tool-tab" role="tab" data-tool="networth" aria-selected="false">📊 Net Worth Tracker</button>
+      </div>
+    </div>
+
+    <!-- Compound Interest -->
+    <div class="tool-panel active" id="tool-compound" role="tabpanel" aria-labelledby="compound-tab">
+      <div class="field">
+        <label for="ci-principal">Initial Investment</label>
+        <div class="input-with-symbol"><span class="currency-symbol">$</span><input type="number" id="ci-principal" min="0" step="100" value="10000" placeholder="10000"></div>
+      </div>
+      <div class="field">
+        <label for="ci-rate">Annual Interest Rate (%)</label>
+        <div class="input-with-symbol"><input type="number" id="ci-rate" min="0" max="50" step="0.1" value="7" placeholder="7"><span class="currency-symbol">%</span></div>
+      </div>
+      <div class="field">
+        <label for="ci-frequency">Compound Frequency</label>
+        <select id="ci-frequency">
+          <option value="1">Annually</option>
+          <option value="2">Semi-annually</option>
+          <option value="4" selected>Quarterly</option>
+          <option value="12">Monthly</option>
+          <option value="52">Weekly</option>
+          <option value="365">Daily</option>
+          <option value="continuous">Continuous</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="ci-years">Time Period (Years)</label>
+        <input type="number" id="ci-years" min="0" max="100" step="1" value="20" placeholder="20">
+      </div>
+      <div class="field">
+        <label for="ci-contribution">Regular Contribution (per period)</label>
+        <div class="input-with-symbol"><span class="currency-symbol">$</span><input type="number" id="ci-contribution" min="0" step="50" value="200" placeholder="200"></div>
+        <span class="field-hint">Added at end of each compounding period</span>
+      </div>
+      <div class="field">
+        <label for="ci-contrib-frequency">Contribution Frequency</label>
+        <select id="ci-contrib-frequency">
+          <option value="1">Annually</option>
+          <option value="2">Semi-annually</option>
+          <option value="4" selected>Quarterly</option>
+          <option value="12">Monthly</option>
+          <option value="52">Weekly</option>
+        </select>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="ci-calculate">Calculate</button>
+        <button class="btn secondary" id="ci-reset">Reset</button>
+      </div>
+    </div>
+
+    <!-- Loan Amortization -->
+    <div class="tool-panel" id="tool-loan" role="tabpanel" aria-labelledby="loan-tab">
+      <div class="field">
+        <label for="loan-amount">Loan Amount</label>
+        <div class="input-with-symbol"><span class="currency-symbol">$</span><input type="number" id="loan-amount" min="0" step="1000" value="250000" placeholder="250000"></div>
+      </div>
+      <div class="field">
+        <label for="loan-rate">Annual Interest Rate (%)</label>
+        <div class="input-with-symbol"><input type="number" id="loan-rate" min="0" max="30" step="0.01" value="6.5" placeholder="6.5"><span class="currency-symbol">%</span></div>
+      </div>
+      <div class="field">
+        <label for="loan-term">Loan Term</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="number" id="loan-term" min="1" max="50" step="1" value="30" style="width: 80px;" placeholder="30">
+          <select id="loan-term-unit">
+            <option value="years">Years</option>
+            <option value="months">Months</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="loan-extra">Extra Payment (per month)</label>
+        <div class="input-with-symbol"><span class="currency-symbol">$</span><input type="number" id="loan-extra" min="0" step="50" value="0" placeholder="0"></div>
+      </div>
+      <div class="field">
+        <label for="loan-start">Start Date</label>
+        <input type="date" id="loan-start">
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="loan-calculate">Generate Schedule</button>
+        <button class="btn secondary" id="loan-reset">Reset</button>
+      </div>
+    </div>
+
+    <!-- FIRE Calculator -->
+    <div class="tool-panel" id="tool-fire" role="tabpanel" aria-labelledby="fire-tab">
+      <div class="field">
+        <label for="fire-expenses">Annual Expenses</label>
+        <div class="input-with-symbol"><span class="currency-symbol">$</span><input type="number" id="fire-expenses" min="0" step="1000" value="40000" placeholder="40000"></div>
+      </div>
+      <div class="field">
+        <label for="fire-swr">Safe Withdrawal Rate (%)</label>
+        <div class="input-with-symbol"><input type="number" id="fire-swr" min="1" max="10" step="0.1" value="4" placeholder="4"><span class="currency-symbol">%</span></div>
+        <span class="field-hint">Typically 3-4% (Trinity Study)</span>
+      </div>
+      <div class="field">
+        <label for="fire-savings">Current Savings</label>
+        <div class="input-with-symbol"><span class="currency-symbol">$</span><input type="number" id="fire-savings" min="0" step="1000" value="50000" placeholder="50000"></div>
+      </div>
+      <div class="field">
+        <label for="fire-annual-save">Annual Savings</label>
+        <div class="input-with-symbol"><span class="currency-symbol">$</span><input type="number" id="fire-annual-save" min="0" step="1000" value="20000" placeholder="20000"></div>
+      </div>
+      <div class="field">
+        <label for="fire-return">Expected Return (%)</label>
+        <div class="input-with-symbol"><input type="number" id="fire-return" min="0" max="20" step="0.1" value="7" placeholder="7"><span class="currency-symbol">%</span></div>
+      </div>
+      <div class="field">
+        <label for="fire-inflation">Inflation Rate (%)</label>
+        <div class="input-with-symbol"><input type="number" id="fire-inflation" min="0" max="15" step="0.1" value="3" placeholder="3"><span class="currency-symbol">%</span></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="fire-calculate">Calculate FIRE</button>
+        <button class="btn secondary" id="fire-reset">Reset</button>
+      </div>
+    </div>
+
+    <!-- Budget Allocator -->
+    <div class="tool-panel" id="tool-budget" role="tabpanel" aria-labelledby="budget-tab">
+      <div class="field">
+        <label for="budget-income">Monthly Income</label>
+        <div class="input-with-symbol"><span class="currency-symbol">$</span><input type="number" id="budget-income" min="0" step="100" value="5000" placeholder="5000"></div>
+      </div>
+      <div class="field">
+        <label>Allocation Method</label>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="radio" name="budget-method" value="50-30-20" checked> 50/30/20 (Needs/Wants/Savings)
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="radio" name="budget-method" value="custom"> Custom Buckets
+          </label>
+        </div>
+      </div>
+      <div class="field" id="budget-custom-buckets" hidden>
+        <label>Custom Buckets (name:percentage)</label>
+        <textarea id="budget-buckets" rows="5" placeholder="Rent: 30&#10;Food: 15&#10;Transport: 10&#10;Entertainment: 10&#10;Savings: 20&#10;Investing: 15"></textarea>
+        <span class="field-hint">Percentages should sum to 100%</span>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="budget-calculate">Allocate</button>
+        <button class="btn secondary" id="budget-reset">Reset</button>
+      </div>
+    </div>
+
+    <!-- Currency Converter -->
+    <div class="tool-panel" id="tool-currency" role="tabpanel" aria-labelledby="currency-tab">
+      <div class="field">
+        <label for="cur-amount">Amount</label>
+        <input type="number" id="cur-amount" min="0" step="0.01" value="100" placeholder="100">
+      </div>
+      <div class="field">
+        <label for="cur-from">From Currency</label>
+        <select id="cur-from"></select>
+      </div>
+      <div class="field">
+        <label for="cur-to">To Currency</label>
+        <select id="cur-to"></select>
+      </div>
+      <div class="field">
+        <label>Exchange Rate Source</label>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="radio" name="cur-source" value="embedded" checked> Embedded Rates (Offline)
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="radio" name="cur-source" value="api"> Live API (Requires Internet)
+          </label>
+        </div>
+      </div>
+      <div class="field" id="cur-date-field" hidden>
+        <label for="cur-date">Historical Date</label>
+        <input type="date" id="cur-date">
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="cur-convert">Convert</button>
+        <button class="btn secondary" id="cur-swap">Swap</button>
+        <button class="btn secondary" id="cur-reset">Reset</button>
+      </div>
+    </div>
+
+    <!-- Net Worth Tracker -->
+    <div class="tool-panel" id="tool-networth" role="tabpanel" aria-labelledby="networth-tab">
+      <div class="field">
+        <label>Assets</label>
+        <div id="nw-assets" class="track-list"></div>
+        <button class="btn secondary btn-sm" id="nw-add-asset" type="button">Add Asset</button>
+      </div>
+      <div class="field">
+        <label>Liabilities</label>
+        <div id="nw-liabilities" class="track-list"></div>
+        <button class="btn secondary btn-sm" id="nw-add-liability" type="button">Add Liability</button>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="nw-calculate">Calculate Net Worth</button>
+        <button class="btn secondary" id="nw-export">Export Data</button>
+        <button class="btn secondary" id="nw-reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top: 1.5rem;">
+      <button class="btn primary" id="btn-export-all">Export All Data (JSON)</button>
+      <button class="btn secondary" id="btn-import-data">Import Data</button>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="output-heading">
+    <h2 id="output-heading">Results</h2>
+
+    <!-- Compound Interest Results -->
+    <div class="result-panel active" id="result-compound">
+      <div class="summary-cards" id="ci-summary"></div>
+      <div class="field">
+        <label>Growth Chart</label>
+        <canvas id="ci-chart" height="200"></canvas>
+      </div>
+      <div class="field">
+        <label>Yearly Breakdown</label>
+        <div class="table-wrapper" id="ci-table"></div>
+      </div>
+    </div>
+
+    <!-- Loan Amortization Results -->
+    <div class="result-panel" id="result-loan">
+      <div class="summary-cards" id="loan-summary"></div>
+      <div class="field">
+        <label>Amortization Schedule</label>
+        <div class="table-wrapper" id="loan-table"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="loan-export-csv">Export CSV</button>
+        <button class="btn secondary" id="loan-export-json">Export JSON</button>
+      </div>
+    </div>
+
+    <!-- FIRE Results -->
+    <div class="result-panel" id="result-fire">
+      <div class="summary-cards" id="fire-summary"></div>
+      <div class="field">
+        <label>Progress to FIRE</label>
+        <div class="progress-container">
+          <div class="progress-bar" id="fire-progress"><div class="progress-fill" id="fire-progress-fill"></div></div>
+          <div class="progress-labels">
+            <span>0%</span>
+            <span id="fire-progress-pct">0%</span>
+            <span>100%</span>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Yearly Projection</label>
+        <canvas id="fire-chart" height="200"></canvas>
+      </div>
+      <div class="field">
+        <label>Milestones</label>
+        <div class="table-wrapper" id="fire-table"></div>
+      </div>
+    </div>
+
+    <!-- Budget Results -->
+    <div class="result-panel" id="result-budget">
+      <div class="summary-cards" id="budget-summary"></div>
+      <div class="field">
+        <label>Allocation Visualization</label>
+        <canvas id="budget-chart" height="250"></canvas>
+      </div>
+      <div class="field">
+        <label>Bucket Breakdown</label>
+        <div class="table-wrapper" id="budget-table"></div>
+      </div>
+    </div>
+
+    <!-- Currency Results -->
+    <div class="result-panel" id="result-currency">
+      <div class="summary-cards" id="cur-summary"></div>
+      <div class="field">
+        <label>Conversion History</label>
+        <div class="table-wrapper" id="cur-history"></div>
+      </div>
+    </div>
+
+    <!-- Net Worth Results -->
+    <div class="result-panel" id="result-networth">
+      <div class="summary-cards" id="nw-summary"></div>
+      <div class="field">
+        <label>Net Worth Over Time</label>
+        <canvas id="nw-chart" height="200"></canvas>
+      </div>
+      <div class="field">
+        <label>Asset / Liability Breakdown</label>
+        <div class="table-wrapper" id="nw-table"></div>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top: 1rem;">
+      <button class="btn" id="btn-copy-results">Copy Results</button>
+      <button class="btn secondary" id="btn-print">Print Report</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
