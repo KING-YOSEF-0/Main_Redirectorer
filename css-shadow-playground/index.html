@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS Shadow & Filter Playground | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">CSS Shadow & Filter Playground</h1>
+  <p class="tagline">Visual editors for box-shadow, text-shadow, filter, and backdrop-filter. Live preview on multiple elements. Export CSS, Tailwind, or CSS custom properties.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel" aria-labelledby="config-heading">
+    <h2 id="config-heading">Editor</h2>
+
+    <div class="field">
+      <label>Editor Mode</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-editor="box-shadow" aria-selected="true">Box Shadow</button>
+        <button class="mode-tab" role="tab" data-editor="text-shadow" aria-selected="false">Text Shadow</button>
+        <button class="mode-tab" role="tab" data-editor="filter" aria-selected="false">Filter</button>
+        <button class="mode-tab" role="tab" data-editor="backdrop-filter" aria-selected="false">Backdrop Filter</button>
+      </div>
+    </div>
+
+    <!-- Box Shadow Editor -->
+    <div class="editor-panel" id="editor-box-shadow">
+      <div class="field">
+        <label>Number of Layers</label>
+        <input type="range" id="shadowLayers" min="1" max="10" value="3">
+        <span id="shadowLayersValue">3</span> layers
+      </div>
+
+      <div id="shadowLayersContainer"></div>
+
+      <div class="actions">
+        <button class="btn primary" id="addShadowLayer">Add Layer</button>
+        <button class="btn" id="removeShadowLayer">Remove Last</button>
+      </div>
+
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="shadowInset" checked>
+          <span>Apply inset to all layers</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Text Shadow Editor -->
+    <div class="editor-panel" id="editor-text-shadow" hidden>
+      <div class="field">
+        <label>Number of Layers</label>
+        <input type="range" id="textShadowLayers" min="1" max="8" value="2">
+        <span id="textShadowLayersValue">2</span> layers
+      </div>
+
+      <div id="textShadowLayersContainer"></div>
+
+      <div class="actions">
+        <button class="btn primary" id="addTextShadowLayer">Add Layer</button>
+        <button class="btn" id="removeTextShadowLayer">Remove Last</button>
+      </div>
+    </div>
+
+    <!-- Filter Editor -->
+    <div class="editor-panel" id="editor-filter" hidden>
+      <div class="field">
+        <label>Filter Functions</label>
+        <div id="filterFunctionsContainer"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="addFilterFunction">Add Function</button>
+        <button class="btn" id="removeFilterFunction">Remove Last</button>
+      </div>
+
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="filterHueRotateAnim">
+          <span>Animate hue-rotate</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Backdrop Filter Editor -->
+    <div class="editor-panel" id="editor-backdrop-filter" hidden>
+      <div class="field">
+        <label>Backdrop Filter Functions</label>
+        <div id="backdropFilterContainer"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="addBackdropFilter">Add Function</button>
+        <button class="btn" id="removeBackdropFilter">Remove Last</button>
+      </div>
+
+      <div class="field">
+        <label>Preview Background</label>
+        <select id="backdropBg">
+          <option value="gradient">Gradient</option>
+          <option value="image">Image</option>
+          <option value="video">Animated Gradient</option>
+          <option value="noise">Noise Pattern</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Presets</label>
+      <div class="preset-buttons" id="presetButtons"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="randomizeBtn">Surprise Me!</button>
+      <button class="btn" id="resetBtn">Reset</button>
+    </div>
+
+    <!-- Export -->
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Export</label>
+      <div class="mode-tabs" role="tablist" style="flex-wrap: wrap; gap: 0.5rem;">
+        <button class="mode-tab export-tab active" role="tab" data-export="css" aria-selected="true">Raw CSS</button>
+        <button class="mode-tab export-tab" role="tab" data-export="tailwind" aria-selected="false">Tailwind</button>
+        <button class="mode-tab export-tab" role="tab" data-export="custom-props" aria-selected="false">CSS Props</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Export Output</label>
+      <textarea id="exportOutput" rows="6" readonly placeholder="Select an export format..."></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="copyExport">Copy</button>
+      <button class="btn" id="downloadExport">Download</button>
+    </div>
+  </aside>
+
+  <section class="panel preview-panel" aria-labelledby="preview-heading">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 id="preview-heading">Live Preview</h2>
+      <div class="preview-controls">
+        <label class="checkbox-label" style="font-size: 0.8rem;">
+          <input type="checkbox" id="previewSync" checked>
+          <span>Sync all previews</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="preview-grid" id="previewGrid">
+      <!-- Card Preview -->
+      <div class="preview-item">
+        <h3>Card</h3>
+        <div class="preview-card" id="previewCard">
+          <div class="card-content">
+            <h4>Preview Card</h4>
+            <p>This card shows box-shadow and backdrop-filter effects.</p>
+            <button class="preview-btn">Button</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Button Preview -->
+      <div class="preview-item">
+        <h3>Button</h3>
+        <div class="preview-btn-container">
+          <button class="preview-btn primary" id="previewBtnPrimary">Primary Button</button>
+          <button class="preview-btn secondary" id="previewBtnSecondary">Secondary</button>
+          <button class="preview-btn ghost" id="previewBtnGhost">Ghost</button>
+        </div>
+      </div>
+
+      <!-- Text Preview -->
+      <div class="preview-item">
+        <h3>Text</h3>
+        <div class="preview-text" id="previewText">
+          <h1 class="text-h1">Heading 1</h1>
+          <h2 class="text-h2">Heading 2</h2>
+          <p class="text-p">Paragraph text with text-shadow applied. The quick brown fox jumps over the lazy dog.</p>
+          <code class="text-code">code.example()</code>
+        </div>
+      </div>
+
+      <!-- Image Preview -->
+      <div class="preview-item">
+        <h3>Image / Media</h3>
+        <div class="preview-image" id="previewImage">
+          <div class="image-placeholder"></div>
+        </div>
+      </div>
+
+      <!-- Input Preview -->
+      <div class="preview-item">
+        <h3>Form Input</h3>
+        <div class="preview-input">
+          <input type="text" class="preview-input-field" placeholder="Text input">
+          <textarea class="preview-input-field" placeholder="Textarea"></textarea>
+          <select class="preview-input-field">
+            <option>Select option</option>
+            <option>Option 1</option>
+            <option>Option 2</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Badge/Chip Preview -->
+      <div class="preview-item">
+        <h3>Badges & Chips</h3>
+        <div class="preview-badges">
+          <span class="preview-badge default">Default</span>
+          <span class="preview-badge primary">Primary</span>
+          <span class="preview-badge success">Success</span>
+          <span class="preview-badge warning">Warning</span>
+          <span class="preview-badge danger">Danger</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated CSS -->
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Generated CSS (box-shadow)</label>
+      <textarea id="generatedCss" rows="4" readonly></textarea>
+    </div>
+    <div class="field">
+      <label>Generated CSS (text-shadow)</label>
+      <textarea id="generatedTextCss" rows="3" readonly></textarea>
+    </div>
+    <div class="field">
+      <label>Generated CSS (filter)</label>
+      <textarea id="generatedFilterCss" rows="3" readonly></textarea>
+    </div>
+    <div class="field">
+      <label>Generated CSS (backdrop-filter)</label>
+      <textarea id="generatedBackdropCss" rows="3" readonly></textarea>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
