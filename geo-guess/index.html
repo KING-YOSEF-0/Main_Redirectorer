@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Geo Guess Daily | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
+  <p class="tagline">Guess the location from Street View. Daily challenge with seeded locations worldwide.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Game Setup</h2>
+
+    <div class="field">
+      <label>Mode</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-mode="daily" aria-selected="true">Daily Challenge</button>
+        <button class="mode-tab" role="tab" data-mode="practice" aria-selected="false">Practice</button>
+        <button class="mode-tab" role="tab" data-mode="streak" aria-selected="false">Streak Mode</button>
+        <button class="mode-tab" role="tab" data-mode="world" aria-selected="false">World Tour</button>
+      </div>
+    </div>
+
+    <div class="field" id="practiceOptions" hidden>
+      <label>Region</label>
+      <select id="regionSelect">
+        <option value="world">Worldwide</option>
+        <option value="europe">Europe</option>
+        <option value="asia">Asia</option>
+        <option value="americas">Americas</option>
+        <option value="africa">Africa</option>
+        <option value="oceania">Oceania</option>
+        <option value="capitals">Capitals</option>
+        <option value="landmarks">Famous Landmarks</option>
+        <option value="cities">Major Cities</option>
+      </select>
+    </div>
+
+    <div class="field" id="streakOptions" hidden>
+      <label>Streak Target</label>
+      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
+        <button class="mode-tab streak-tab active" role="tab" data-target="5" aria-selected="true">5</button>
+        <button class="mode-tab streak-tab" role="tab" data-target="10" aria-selected="false">10</button>
+        <button class="mode-tab streak-tab" role="tab" data-target="25" aria-selected="false">25</button>
+        <button class="mode-tab streak-tab" role="tab" data-target="50" aria-selected="false">50</button>
+        <button class="mode-tab streak-tab" role="tab" data-target="100" aria-selected="false">100</button>
+      </div>
+    </div>
+
+    <div class="field" id="worldOptions" hidden>
+      <label>Continent</label>
+      <select id="continentSelect">
+        <option value="all">All Continents</option>
+        <option value="europe">Europe</option>
+        <option value="asia">Asia</option>
+        <option value="north-america">North America</option>
+        <option value="south-america">South America</option>
+        <option value="africa">Africa</option>
+        <option value="oceania">Oceania</option>
+      </select>
+    </div>
+
+    <div class="field" id="dailyFields">
+      <label>Today's Challenge</label>
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+        <button class="btn primary" id="dailyBtn" style="flex:1;">Play Today's Location</button>
+        <span id="dailyDate" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="newBtn" hidden>New Location</button>
+      <button class="btn secondary" id="hintBtn">Hint</button>
+    </div>
+
+    <div class="stats-panel">
+      <h3>Statistics</h3>
+      <div class="stat-row">
+        <span class="stat-label">Locations Guessed</span>
+        <span class="stat-value" id="locationsGuessed">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Avg Distance</span>
+        <span class="stat-value" id="avgDistance">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Best Distance</span>
+        <span class="stat-value" id="bestDistance">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Current Streak</span>
+        <span class="stat-value" id="currentStreak">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Best Streak</span>
+        <span class="stat-value" id="bestStreak">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Countries Found</span>
+        <span class="stat-value" id="countriesFound">0</span>
+      </div>
+    </div>
+
+    <div class="leaderboard-section">
+      <h3>Leaderboard (Local)</h3>
+      <div id="leaderboard" class="leaderboard"></div>
+    </div>
+
+    <div class="theme-selector">
+      <label>Map Style</label>
+      <select id="mapStyle">
+        <option value="standard">Standard</option>
+        <option value="satellite">Satellite</option>
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+  </aside>
+
+  <section class="panel game-panel">
+    <div class="game-header">
+      <div class="puzzle-info">
+        <span class="puzzle-label" id="puzzleLabel">Daily Challenge</span>
+        <span class="puzzle-meta" id="puzzleMeta">Round 1 of 5</span>
+      </div>
+      <div class="score-display">
+        <div class="score-box">
+          <span class="score-label">Total Score</span>
+          <span class="score-value" id="totalScore">0</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">Round Score</span>
+          <span class="score-value" id="roundScore">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-status" id="gameStatus">
+      Click "Play Today's Location" or "New Location" to start
+    </div>
+
+    <div class="view-container">
+      <div class="panorama-container" id="panoramaContainer" role="region" aria-label="Street View panorama">
+        <div class="panorama-placeholder">
+          <div class="compass" id="compass">
+            <div class="compass-needle" id="compassNeedle"></div>
+            <div class="compass-labels">
+              <span class="compass-n">N</span>
+              <span class="compass-e">E</span>
+              <span class="compass-s">S</span>
+              <span class="compass-w">W</span>
+            </div>
+          </div>
+          <div class="panorama-image" id="panoramaImage"></div>
+          <div class="panorama-controls">
+            <button class="pano-btn" id="zoomIn" aria-label="Zoom in">+</button>
+            <button class="pano-btn" id="zoomOut" aria-label="Zoom out">−</button>
+            <button class="pano-btn" id="fullscreenBtn" aria-label="Fullscreen">⛶</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-container" id="mapContainer" role="region" aria-label="Guess map">
+        <div class="map-placeholder">
+          <p>Click on the map to place your guess</p>
+          <div class="guess-marker" id="guessMarker" hidden>
+            <div class="marker-pin"></div>
+            <div class="marker-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="guess-info" id="guessInfo" hidden>
+      <div class="guess-coords" id="guessCoords"></div>
+      <button class="btn primary" id="submitGuess">Submit Guess</button>
+    </div>
+
+    <div class="controls-row">
+      <button class="btn secondary" id="resetViewBtn" hidden>Reset View</button>
+      <button class="btn secondary" id="clearGuessBtn" hidden>Clear Guess</button>
+    </div>
+
+    <div class="game-footer">
+      <button class="btn secondary" id="shareBtn" hidden>Share Result</button>
+      <button class="btn primary" id="nextRoundBtn" hidden>Next Round</button>
+      <button class="btn primary" id="playAgainBtn" hidden>Play Again</button>
+    </div>
+
+    <div id="resultsModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="modalTitle">Round Complete!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Distance</span>
+            <span class="result-value" id="resultDistance">0 km</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Points</span>
+            <span class="result-value" id="resultPoints">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Actual Location</span>
+            <span class="result-value" id="resultLocation">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Your Guess</span>
+            <span class="result-value" id="resultGuess">—</span>
+          </div>
+        </div>
+        <div class="daily-result" id="dailyResult" hidden>
+          <h3>Daily Challenge Result</h3>
+          <p id="dailyMessage"></p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareBtnModal">Share Result</button>
+          <button class="btn primary" id="nextRoundBtnModal">Next Round</button>
+          <button class="btn primary" id="playAgainBtnModal" hidden>Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="gameCompleteModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="finalTitle">Challenge Complete!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Total Score</span>
+            <span class="result-value" id="finalScore">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Avg Distance</span>
+            <span class="result-value" id="finalAvgDist">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Rounds</span>
+            <span class="result-value" id="finalRounds">5</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Countries</span>
+            <span class="result-value" id="finalCountries">0</span>
+          </div>
+        </div>
+        <div class="daily-result" id="finalDailyResult" hidden>
+          <h3>Daily Challenge Complete!</h3>
+          <p id="finalDailyMessage"></p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareFinalBtn">Share Result</button>
+          <button class="btn primary" id="playAgainFinalBtn">Play Again</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
