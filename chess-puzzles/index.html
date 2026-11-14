@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess Puzzles | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
+  <p class="tagline">Solve tactical puzzles: mate in 1/2/3, forks, pins, skewers. Daily challenge with Stockfish evaluation.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Puzzle Setup</h2>
+
+    <div class="field">
+      <label>Difficulty</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-difficulty="easy" aria-selected="true">Easy</button>
+        <button class="mode-tab" role="tab" data-difficulty="medium" aria-selected="false">Medium</button>
+        <button class="mode-tab" role="tab" data-difficulty="hard" aria-selected="false">Hard</button>
+        <button class="mode-tab" role="tab" data-difficulty="mixed" aria-selected="false">Mixed</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Theme</label>
+      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
+        <button class="mode-tab theme-tab active" role="tab" data-theme="all" aria-selected="true">All</button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="mate1" aria-selected="false">Mate in 1</button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="mate2" aria-selected="false">Mate in 2</button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="mate3" aria-selected="false">Mate in 3</button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="fork" aria-selected="false">Fork</button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="pin" aria-selected="false">Pin</button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="skewer" aria-selected="false">Skewer</button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="discovery" aria-selected="false">Discovery</button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="sacrifice" aria-selected="false">Sacrifice</button>
+      </div>
+    </div>
+
+    <div class="field" id="dailyFields">
+      <label>Daily Challenge</label>
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+        <button class="btn primary" id="dailyBtn" style="flex:1;">Play Today's Puzzle</button>
+        <span id="dailyDate" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="newBtn">New Puzzle</button>
+      <button class="btn secondary" id="hintBtn">Hint</button>
+    </div>
+
+    <div class="stats-panel">
+      <h3>Statistics</h3>
+      <div class="stat-row">
+        <span class="stat-label">Puzzles Solved</span>
+        <span class="stat-value" id="puzzlesSolved">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Accuracy</span>
+        <span class="stat-value" id="accuracy">0%</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Current Streak</span>
+        <span class="stat-value" id="currentStreak">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Best Streak</span>
+        <span class="stat-value" id="bestStreak">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Avg Time</span>
+        <span class="stat-value" id="avgTime">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Daily Solved</span>
+        <span class="stat-value" id="dailySolved">0</span>
+      </div>
+    </div>
+
+    <div class="leaderboard-section">
+      <h3>Leaderboard (Local)</h3>
+      <div id="leaderboard" class="leaderboard"></div>
+    </div>
+
+    <div class="theme-selector">
+      <label>Board Theme</label>
+      <select id="boardTheme">
+        <option value="classic">Classic</option>
+        <option value="dark">Dark</option>
+        <option value="green">Green</option>
+        <option value="blue">Blue</option>
+        <option value="wood">Wood</option>
+      </select>
+    </div>
+  </aside>
+
+  <section class="panel game-panel">
+    <div class="game-header">
+      <div class="puzzle-info">
+        <span class="puzzle-label" id="puzzleLabel">Practice Mode</span>
+        <span class="puzzle-meta" id="puzzleMeta">Easy • All Themes</span>
+      </div>
+      <div class="timer-display">
+        <span class="timer-label">Time</span>
+        <span class="timer-value" id="timer">0:00</span>
+      </div>
+    </div>
+
+    <div class="game-status" id="gameStatus">
+      Click "New Puzzle" or "Daily Challenge" to start
+    </div>
+
+    <div class="board-container" id="boardContainer" role="region" aria-label="Chess board">
+      <!-- Board generated by JS -->
+    </div>
+
+    <div class="move-list" id="moveList" hidden>
+      <h3>Solution</h3>
+      <div class="moves" id="moves"></div>
+    </div>
+
+    <div class="controls-row">
+      <button class="btn secondary" id="showSolutionBtn" hidden>Show Solution</button>
+      <button class="btn secondary" id="flipBoardBtn">Flip Board</button>
+      <button class="btn secondary" id="copyFenBtn">Copy FEN</button>
+      <button class="btn secondary" id="copyPgnBtn" hidden>Copy PGN</button>
+    </div>
+
+    <div class="game-footer">
+      <button class="btn secondary" id="shareBtn" hidden>Share Result</button>
+      <button class="btn primary" id="playAgainBtn" hidden>Next Puzzle</button>
+    </div>
+
+    <div id="resultsModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="modalTitle">Puzzle Complete!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Result</span>
+            <span class="result-value" id="resultStatus">Solved</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Time</span>
+            <span class="result-value" id="finalTime">0:00</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Moves</span>
+            <span class="result-value" id="finalMoves">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Hint Used</span>
+            <span class="result-value" id="hintUsed">No</span>
+          </div>
+        </div>
+        <div class="daily-result" id="dailyResult" hidden>
+          <h3>Daily Challenge Result</h3>
+          <p id="dailyMessage"></p>
+        </div>
+        <div class="solution-display" id="solutionDisplay" hidden>
+          <h3>Solution</h3>
+          <div class="solution-moves" id="solutionMoves"></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareBtnModal">Share Result</button>
+          <button class="btn primary" id="playAgainBtnModal">Next Puzzle</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
