@@ -1,23 +1,23 @@
-const display = document.getElementById('main-row');
-let currentInput = '';
+const display = document.getElementById('display');
+let expression = '';
 
-document.querySelectorAll('.btn').forEach(button => {
-    button.addEventListener('click', () => {
-        const value = button.innerText;
+document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const val = btn.innerText;
 
-        if (value === 'AC') {
-            currentInput = '';
-        } else if (value === 'DEL') {
-            currentInput = currentInput.slice(0, -1);
-        } else if (value === '=') {
+        if (val === 'AC') {
+            expression = '';
+        } else if (val === 'DEL') {
+            expression = expression.slice(0, -1);
+        } else if (val === '=') {
             try {
-                currentInput = eval(currentInput).toString();
+                expression = math.evaluate(expression).toString();
             } catch {
-                currentInput = 'Error';
+                expression = 'Syntax Error';
             }
         } else {
-            currentInput += value;
+            expression += val;
         }
-        display.innerText = currentInput || '0';
+        display.innerText = expression || '0';
     });
 });

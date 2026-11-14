@@ -1,8 +1,11 @@
-body { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #e0e0e0; }
-.calculator { width: 300px; padding: 20px; background-color: #b0b0b0; border-radius: 10px; box-shadow: 5px 5px 15px #888; }
-.display { background-color: #c4d1c4; height: 60px; padding: 10px; margin-bottom: 20px; border: 2px solid #555; text-align: right; font-family: monospace; }
-.buttons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.btn { padding: 15px; border: none; border-radius: 5px; background: #eee; cursor: pointer; }
-.btn:active { background: #ccc; }
-.del, .ac { background: #ff9900; color: white; }
-.equals { grid-column: span 3; background: #444; color: white; }
+body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #ddd; font-family: sans-serif; }
+.calculator { width: 350px; background: #c0c0c0; padding: 20px; border-radius: 20px; border: 5px solid #888; }
+.screen-area { background: #d0d8d0; padding: 15px; border-radius: 5px; border: 3px solid #666; margin-bottom: 20px; }
+.display { height: 60px; font-size: 24px; text-align: right; color: #333; }
+.button-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.btn { padding: 12px 5px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; background: #eee; }
+.btn:active { transform: translateY(1px); }
+.op-orange { background: #ff9900; color: white; }
+.op-equals { background: #444; color: white; grid-row: span 1; }
+.shift { background: #999; }
+.alpha { background: #999; }
