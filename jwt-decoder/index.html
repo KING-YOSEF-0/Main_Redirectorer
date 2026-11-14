@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JWT Decoder & Validator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">JWT Decoder & Validator</h1>
+  <p class="tagline">Decode, inspect, and verify JSON Web Tokens. Paste a JWT to see header, payload, signature details, and expiry status.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Input</h2>
+
+    <div class="field">
+      <label for="jwt-input">JWT Token <span class="req">*</span></label>
+      <textarea id="jwt-input" rows="4" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"></textarea>
+      <div class="field-hint">Paste a JWT (3 parts separated by dots). Supports JWS and JWE.</div>
+    </div>
+
+    <div class="field" id="secret-field">
+      <label for="secret-input">Secret / Public Key (for verification)</label>
+      <div class="input-with-select">
+        <input type="text" id="secret-input" placeholder="HS256 secret or PEM public key for RS256/ES256">
+        <select id="algo-select">
+          <option value="auto">Auto-detect</option>
+          <option value="HS256">HS256</option>
+          <option value="HS384">HS384</option>
+          <option value="HS512">HS512</option>
+          <option value="RS256">RS256</option>
+          <option value="RS384">RS384</option>
+          <option value="RS512">RS512</option>
+          <option value="ES256">ES256</option>
+          <option value="ES384">ES384</option>
+          <option value="ES512">ES512</option>
+          <option value="PS256">PS256</option>
+          <option value="PS384">PS384</option>
+          <option value="PS512">PS512</option>
+          <option value="none">None (unsecured)</option>
+        </select>
+      </div>
+      <div class="field-hint">For HS*: enter secret. For RS*/ES*/PS*: paste PEM public key. Leave empty to skip verification.</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-decode">Decode & Verify</button>
+      <button class="btn" id="btn-clear">Clear</button>
+      <button class="btn" id="btn-sample">Load Sample</button>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="results-heading">
+    <h2 id="results-heading">Decoded Token</h2>
+
+    <div class="status-bar" id="status-bar" hidden>
+      <span class="status-badge" id="status-badge"></span>
+      <span class="status-text" id="status-text"></span>
+    </div>
+
+    <div class="token-parts" id="token-parts" hidden>
+      <div class="part-card">
+        <div class="part-header">
+          <h3>Header</h3>
+          <span class="part-badge">Base64URL decoded</span>
+        </div>
+        <pre class="json-view" id="header-view"></pre>
+        <div class="part-actions">
+          <button class="btn-icon" data-copy="header" title="Copy Header JSON">📋</button>
+        </div>
+      </div>
+
+      <div class="part-card">
+        <div class="part-header">
+          <h3>Payload</h3>
+          <span class="part-badge">Base64URL decoded</span>
+        </div>
+        <pre class="json-view" id="payload-view"></pre>
+        <div class="part-actions">
+          <button class="btn-icon" data-copy="payload" title="Copy Payload JSON">📋</button>
+        </div>
+      </div>
+
+      <div class="part-card">
+        <div class="part-header">
+          <h3>Signature</h3>
+          <span class="part-badge">Raw bytes (hex)</span>
+        </div>
+        <pre class="hex-view" id="signature-view"></pre>
+        <div class="part-actions">
+          <button class="btn-icon" data-copy="signature" title="Copy Signature Hex">📋</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="claims-panel" id="claims-panel" hidden>
+      <h3>Registered Claims</h3>
+      <div class="claims-grid" id="claims-grid"></div>
+    </div>
+
+    <div class="verification-panel" id="verification-panel" hidden>
+      <h3>Signature Verification</h3>
+      <div class="verification-result" id="verification-result"></div>
+    </div>
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">🔐</div>
+      <p>Paste a JWT above and click <strong>Decode & Verify</strong></p>
+      <p class="empty-hint">Try the sample button for a demo token</p>
+    </div>
+
+    <div class="error-state" id="error-state" hidden>
+      <div class="error-icon">⚠️</div>
+      <p id="error-message"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UUID / ULID / NanoID Generator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">ID Generator</h1>
+  <p class="tagline">Generate UUIDs (v1, v4, v7), ULIDs, NanoIDs, KSUIDs, and MongoDB ObjectIds. Bulk generate up to 10,000, customize formats, copy or export.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Generator</h2>
+
+    <div class="tabs" role="tablist" id="type-tabs">
+      <button class="tab-btn active" role="tab" data-type="uuid4" aria-selected="true">UUID v4</button>
+      <button class="tab-btn" role="tab" data-type="uuid7" aria-selected="false">UUID v7</button>
+      <button class="tab-btn" role="tab" data-type="uuid1" aria-selected="false">UUID v1</button>
+      <button class="tab-btn" role="tab" data-type="ulid" aria-selected="false">ULID</button>
+      <button class="tab-btn" role="tab" data-type="nanoid" aria-selected="false">NanoID</button>
+      <button class="tab-btn" role="tab" data-type="ksuid" aria-selected="false">KSUID</button>
+      <button class="tab-btn" role="tab" data-type="objectid" aria-selected="false">ObjectId</button>
+    </div>
+
+    <!-- UUID v4 -->
+    <div class="tab-panel active" id="panel-uuid4" role="tabpanel">
+      <div class="field">
+        <label for="uuid4-count">Quantity</label>
+        <input type="number" id="uuid4-count" min="1" max="10000" value="10">
+      </div>
+      <div class="field">
+        <label for="uuid4-format">Format</label>
+        <select id="uuid4-format">
+          <option value="standard">Standard (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)</option>
+          <option value="compact">Compact (xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)</option>
+          <option value="urn">URN (urn:uuid:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)</option>
+          <option value="braced">Braced ({xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx})</option>
+          <option value="sql">SQL VALUES (('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),...)</option>
+        </select>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="uuid4-uppercase">
+          <span>Uppercase</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- UUID v7 -->
+    <div class="tab-panel" id="panel-uuid7" role="tabpanel" hidden>
+      <div class="field">
+        <label for="uuid7-count">Quantity</label>
+        <input type="number" id="uuid7-count" min="1" max="10000" value="10">
+      </div>
+      <div class="field">
+        <label for="uuid7-timestamp">Timestamp (optional)</label>
+        <input type="datetime-local" id="uuid7-timestamp">
+        <div class="field-hint">Leave empty for current time. UUID v7 encodes timestamp in first 48 bits.</div>
+      </div>
+      <div class="field">
+        <label for="uuid7-format">Format</label>
+        <select id="uuid7-format">
+          <option value="standard">Standard</option>
+          <option value="compact">Compact</option>
+          <option value="urn">URN</option>
+          <option value="braced">Braced</option>
+        </select>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="uuid7-uppercase">
+          <span>Uppercase</span>
+        </label>
+      </div>
+      <div class="field" id="uuid7-decode" hidden>
+        <label>Decoded Timestamp</label>
+        <div class="decode-display" id="uuid7-decoded"></div>
+      </div>
+    </div>
+
+    <!-- UUID v1 -->
+    <div class="tab-panel" id="panel-uuid1" role="tabpanel" hidden>
+      <div class="field">
+        <label for="uuid1-count">Quantity</label>
+        <input type="number" id="uuid1-count" min="1" max="10000" value="10">
+      </div>
+      <div class="field">
+        <label for="uuid1-format">Format</label>
+        <select id="uuid1-format">
+          <option value="standard">Standard</option>
+          <option value="compact">Compact</option>
+          <option value="urn">URN</option>
+          <option value="braced">Braced</option>
+        </select>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="uuid1-uppercase">
+          <span>Uppercase</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ULID -->
+    <div class="tab-panel" id="panel-ulid" role="tabpanel" hidden>
+      <div class="field">
+        <label for="ulid-count">Quantity</label>
+        <input type="number" id="ulid-count" min="1" max="10000" value="10">
+      </div>
+      <div class="field">
+        <label for="ulid-timestamp">Timestamp (optional)</label>
+        <input type="datetime-local" id="ulid-timestamp">
+        <div class="field-hint">ULID = 48-bit timestamp + 80-bit randomness. Monotonic within same millisecond.</div>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="ulid-monotonic">
+          <span>Monotonic (increment random part for same ms)</span>
+        </label>
+      </div>
+      <div class="field" id="ulid-decode" hidden>
+        <label>Decoded</label>
+        <div class="decode-display" id="ulid-decoded"></div>
+      </div>
+    </div>
+
+    <!-- NanoID -->
+    <div class="tab-panel" id="panel-nanoid" role="tabpanel" hidden>
+      <div class="field">
+        <label for="nanoid-count">Quantity</label>
+        <input type="number" id="nanoid-count" min="1" max="10000" value="10">
+      </div>
+      <div class="field">
+        <label for="nanoid-length">Length</label>
+        <input type="number" id="nanoid-length" min="1" max="100" value="21">
+        <div class="field-hint">Default 21 chars ≈ 130 bits entropy. URL-safe by default.</div>
+      </div>
+      <div class="field">
+        <label for="nanoid-alphabet">Custom Alphabet (optional)</label>
+        <input type="text" id="nanoid-alphabet" placeholder="Leave empty for default URL-safe alphabet">
+        <div class="field-hint">Must be 2+ unique characters. Default: _-0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</div>
+      </div>
+      <div class="field" id="nanoid-collision" hidden>
+        <label>Collision Probability</label>
+        <div class="collision-display" id="nanoid-collision-display"></div>
+      </div>
+    </div>
+
+    <!-- KSUID -->
+    <div class="tab-panel" id="panel-ksuid" role="tabpanel" hidden>
+      <div class="field">
+        <label for="ksuid-count">Quantity</label>
+        <input type="number" id="ksuid-count" min="1" max="10000" value="10">
+      </div>
+      <div class="field">
+        <label for="ksuid-timestamp">Timestamp (optional)</label>
+        <input type="datetime-local" id="ksuid-timestamp">
+        <div class="field-hint">KSUID = 32-bit timestamp (seconds from 2014-05-13) + 128-bit random. Base62 encoded.</div>
+      </div>
+      <div class="field" id="ksuid-decode" hidden>
+        <label>Decoded</label>
+        <div class="decode-display" id="ksuid-decoded"></div>
+      </div>
+    </div>
+
+    <!-- ObjectId -->
+    <div class="tab-panel" id="panel-objectid" role="tabpanel" hidden>
+      <div class="field">
+        <label for="objectid-count">Quantity</label>
+        <input type="number" id="objectid-count" min="1" max="10000" value="10">
+      </div>
+      <div class="field">
+        <label for="objectid-timestamp">Timestamp (optional)</label>
+        <input type="datetime-local" id="objectid-timestamp">
+        <div class="field-hint">ObjectId = 4-byte timestamp + 5-byte random + 3-byte counter. 24 hex chars.</div>
+      </div>
+      <div class="field" id="objectid-decode" hidden>
+        <label>Decoded</label>
+        <div class="decode-display" id="objectid-decoded"></div>
+      </div>
+    </div>
+
+    <!-- Common Format Options -->
+    <div class="field format-options" id="format-options">
+      <label>Output Format</label>
+      <div class="format-grid" id="format-grid"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-generate">Generate</button>
+      <button class="btn" id="btn-clear">Clear</button>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="results-heading">
+    <div class="results-header">
+      <h2 id="results-heading">Generated IDs</h2>
+      <div class="results-stats" id="results-stats"></div>
+    </div>
+    <div class="results-actions">
+      <button class="btn" id="btn-copy-all">Copy All</button>
+      <button class="btn" id="btn-download-txt">Download .txt</button>
+      <button class="btn" id="btn-download-json">Download .json</button>
+      <button class="btn" id="btn-download-csv">Download .csv</button>
+    </div>
+    <div class="results-content" id="results-content">
+      <div class="empty-results">
+        <div class="empty-icon">🆔</div>
+        <p>Click Generate to create IDs</p>
+      </div>
+    </div>
+    <div class="filter-bar" id="filter-bar" hidden>
+      <input type="text" id="filter-input" placeholder="Filter IDs...">
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-select-all">
+        <span>Select All</span>
+      </label>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

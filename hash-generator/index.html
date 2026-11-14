@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hash Generator & Verifier | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Hash Generator & Verifier</h1>
+  <p class="tagline">Generate cryptographic hashes (MD5, SHA-1, SHA-256, SHA-512, SHA-3, BLAKE2, RIPEMD) from text or files. Verify checksums with instant match detection.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Input</h2>
+
+    <div class="tabs" role="tablist" id="input-tabs">
+      <button class="tab-btn active" role="tab" data-tab="text" aria-selected="true">Text</button>
+      <button class="tab-btn" role="tab" data-tab="file" aria-selected="false">File</button>
+      <button class="tab-btn" role="tab" data-tab="hmac" aria-selected="false">HMAC</button>
+      <button class="tab-btn" role="tab" data-tab="batch" aria-selected="false">Batch</button>
+      <button class="tab-btn" role="tab" data-tab="verify" aria-selected="false">Verify</button>
+    </div>
+
+    <!-- Text Input -->
+    <div class="tab-panel active" id="panel-text" role="tabpanel">
+      <div class="field">
+        <label for="text-input">Text Input</label>
+        <textarea id="text-input" rows="6" placeholder="Enter text to hash..."></textarea>
+        <div class="field-hint">Hashes update live as you type. Supports Unicode.</div>
+      </div>
+      <div class="field">
+        <label for="text-encoding">Text Encoding</label>
+        <select id="text-encoding">
+          <option value="utf-8">UTF-8 (default)</option>
+          <option value="utf-16le">UTF-16LE</option>
+          <option value="latin1">Latin-1</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- File Input -->
+    <div class="tab-panel" id="panel-file" role="tabpanel" hidden>
+      <div class="field">
+        <label>File Input</label>
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-icon">📁</div>
+          <p>Drag & drop a file here, or click to browse</p>
+          <p class="drop-hint">Max 100MB • Hashes computed in browser (streaming)</p>
+          <input type="file" id="file-input" hidden>
+        </div>
+        <div class="file-info" id="file-info" hidden>
+          <span id="file-name"></span>
+          <span id="file-size"></span>
+          <button class="btn-icon" id="btn-remove-file" title="Remove file">✕</button>
+        </div>
+        <div class="progress-bar" id="file-progress" hidden>
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text" hidden></div>
+      </div>
+    </div>
+
+    <!-- HMAC Input -->
+    <div class="tab-panel" id="panel-hmac" role="tabpanel" hidden>
+      <div class="field">
+        <label for="hmac-message">Message</label>
+        <textarea id="hmac-message" rows="4" placeholder="Enter message..."></textarea>
+      </div>
+      <div class="field">
+        <label for="hmac-key">Secret Key</label>
+        <div class="input-with-toggle">
+          <input type="text" id="hmac-key" placeholder="Enter secret key">
+          <button class="btn-toggle" id="btn-toggle-hmac-key" type="button">👁</button>
+        </div>
+        <div class="field-hint">Key encoding: UTF-8. For binary keys, use Base64 and decode in code.</div>
+      </div>
+      <div class="field">
+        <label for="hmac-encoding">Key Encoding</label>
+        <select id="hmac-encoding">
+          <option value="utf-8">UTF-8 (text)</option>
+          <option value="base64">Base64</option>
+          <option value="hex">Hex</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Batch Input -->
+    <div class="tab-panel" id="panel-batch" role="tabpanel" hidden>
+      <div class="field">
+        <label for="batch-input">Multiple Lines (one per line)</label>
+        <textarea id="batch-input" rows="8" placeholder="line 1
+line 2
+line 3"></textarea>
+        <div class="field-hint">Each line hashed separately. Empty lines skipped.</div>
+      </div>
+      <div class="field">
+        <label for="batch-delimiter">Delimiter</label>
+        <select id="batch-delimiter">
+          <option value="newline">Newline (each line)</option>
+          <option value="comma">Comma</option>
+          <option value="semicolon">Semicolon</option>
+          <option value="tab">Tab</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Verify Input -->
+    <div class="tab-panel" id="panel-verify" role="tabpanel" hidden>
+      <div class="field">
+        <label for="verify-input">Text / File to Verify</label>
+        <textarea id="verify-input" rows="3" placeholder="Enter text or drop file..."></textarea>
+        <div class="drop-zone small" id="verify-drop-zone">
+          <input type="file" id="verify-file-input" hidden>
+          <p>Or drop file here</p>
+        </div>
+      </div>
+      <div class="field">
+        <label for="expected-hash">Expected Hash</label>
+        <input type="text" id="expected-hash" placeholder="Paste expected hash (auto-detects algorithm)">
+      </div>
+      <div class="field">
+        <label for="verify-algo">Algorithm (optional)</label>
+        <select id="verify-algo">
+          <option value="auto">Auto-detect by length</option>
+          <option value="md5">MD5 (32 hex)</option>
+          <option value="sha1">SHA-1 (40 hex)</option>
+          <option value="sha256">SHA-256 (64 hex)</option>
+          <option value="sha512">SHA-512 (128 hex)</option>
+          <option value="sha3-256">SHA3-256 (64 hex)</option>
+          <option value="sha3-512">SHA3-512 (128 hex)</option>
+          <option value="blake2b">BLAKE2b (128 hex)</option>
+          <option value="blake2s">BLAKE2s (64 hex)</option>
+          <option value="ripemd160">RIPEMD-160 (40 hex)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Algorithm Selection (common) -->
+    <div class="field algo-selector">
+      <label>Algorithms</label>
+      <div class="algo-grid" id="algo-grid"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-generate">Generate Hashes</button>
+      <button class="btn" id="btn-clear">Clear All</button>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="results-heading">
+    <div class="results-header">
+      <h2 id="results-heading">Results</h2>
+      <div class="results-actions">
+        <button class="btn-icon" id="btn-copy-all" title="Copy All Hashes">📋</button>
+        <button class="btn-icon" id="btn-download" title="Download Results">⬇</button>
+        <button class="btn-icon" id="btn-share" title="Shareable Link">🔗</button>
+      </div>
+    </div>
+
+    <div class="results-content" id="results-content">
+      <div class="empty-results">
+        <div class="empty-icon">#️⃣</div>
+        <p>Generate hashes to see results</p>
+      </div>
+    </div>
+
+    <div class="verify-result" id="verify-result" hidden>
+      <div class="verify-badge" id="verify-badge"></div>
+      <p id="verify-message"></p>
+      <div class="verify-details" id="verify-details"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

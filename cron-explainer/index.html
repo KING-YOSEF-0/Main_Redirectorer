@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cron Expression Explainer & Visualizer | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Cron Expression Explainer</h1>
+  <p class="tagline">Paste a cron expression → get human-readable explanation, next/previous run times, calendar heatmap, and timezone support. Supports standard 5/6-field and Quartz syntax.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Input</h2>
+
+    <div class="field">
+      <label for="cron-input">Cron Expression <span class="req">*</span></label>
+      <div class="input-with-help">
+        <input type="text" id="cron-input" placeholder="0 9 * * 1-5  (or 0 9 ? * MON-FRI for Quartz)" spellcheck="false">
+        <button class="btn-help" id="btn-syntax-help" title="Syntax reference">?</button>
+      </div>
+      <div class="field-hint">Supports: Standard 5-field, 6-field (with seconds), Quartz (with ? and #L), Spring (@annotations)</div>
+    </div>
+
+    <div class="field">
+      <label for="timezone-select">Timezone</label>
+      <select id="timezone-select"></select>
+      <div class="field-hint">Default: your browser's timezone. All times shown in selected zone.</div>
+    </div>
+
+    <div class="field">
+      <label for="reference-time">Reference Time (for next/previous runs)</label>
+      <input type="datetime-local" id="reference-time">
+      <div class="field-hint">Default: now. Use to calculate runs from a specific point in time.</div>
+    </div>
+
+    <div class="field">
+      <label for="run-count">Number of Runs to Show</label>
+      <input type="number" id="run-count" min="1" max="100" value="10">
+    </div>
+
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-previous" checked>
+        <span>Show previous runs (before reference time)</span>
+      </label>
+    </div>
+
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-next" checked>
+        <span>Show next runs (after reference time)</span>
+      </label>
+    </div>
+
+    <div class="presets-bar">
+      <label>Presets:</label>
+      <div class="preset-buttons" id="preset-buttons"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-explain">Explain & Visualize</button>
+      <button class="btn" id="btn-clear">Clear</button>
+      <button class="btn" id="btn-random">Random Valid</button>
+    </div>
+
+    <div class="validation-status" id="validation-status" hidden></div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="results-heading">
+    <h2 id="results-heading">Analysis</h2>
+
+    <div class="explanation-card" id="explanation-card" hidden>
+      <h3>Human Explanation</h3>
+      <p class="explanation-text" id="explanation-text"></p>
+      <div class="explanation-fields" id="explanation-fields"></div>
+    </div>
+
+    <div class="runs-card" id="runs-card" hidden>
+      <div class="runs-header">
+        <h3>Run Times</h3>
+        <div class="runs-toggle">
+          <button class="btn-toggle active" data-view="next">Next Runs</button>
+          <button class="btn-toggle" data-view="previous">Previous Runs</button>
+        </div>
+      </div>
+      <div class="runs-list" id="next-runs"></div>
+      <div class="runs-list" id="previous-runs" hidden></div>
+    </div>
+
+    <div class="calendar-card" id="calendar-card" hidden>
+      <h3>Calendar Heatmap</h3>
+      <div class="calendar-controls">
+        <select id="calendar-months">
+          <option value="1">1 Month</option>
+          <option value="3" selected>3 Months</option>
+          <option value="6">6 Months</option>
+          <option value="12">12 Months</option>
+        </select>
+        <input type="month" id="calendar-start">
+      </div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="calendar-legend">
+        <span><em class="legend-dot" style="background: var(--accent-3)"></em> Runs</span>
+        <span><em class="legend-dot" style="background: var(--accent)"></em> Today</span>
+        <span><em class="legend-dot" style="background: var(--muted); opacity: 0.2"></em> No runs</span>
+      </div>
+    </div>
+
+    <div class="export-card" id="export-card" hidden>
+      <h3>Export</h3>
+      <div class="export-options">
+        <button class="btn" id="btn-export-text">📄 Human Text</button>
+        <button class="btn" id="btn-export-json">📋 JSON</button>
+        <button class="btn" id="btn-export-ical">📅 iCal (.ics)</button>
+        <button class="btn" id="btn-export-csv">📊 CSV</button>
+        <button class="btn" id="btn-export-link">🔗 Shareable Link</button>
+      </div>
+    </div>
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">⏰</div>
+      <p>Enter a cron expression and click <strong>Explain & Visualize</strong></p>
+      <p class="empty-hint">Try a preset or the random button for examples</p>
+    </div>
+
+    <div class="error-state" id="error-state" hidden>
+      <div class="error-icon">⚠️</div>
+      <p id="error-message"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<!-- Syntax Help Modal -->
+<div class="modal" id="syntax-modal" hidden>
+  <div class="modal-content">
+    <button class="modal-close" id="modal-close">✕</button>
+    <h3>Cron Syntax Reference</h3>
+    <div class="syntax-tabs">
+      <button class="syntax-tab active" data-syntax="standard">Standard 5/6-Field</button>
+      <button class="syntax-tab" data-syntax="quartz">Quartz</button>
+      <button class="syntax-tab" data-syntax="spring">Spring @Annotations</button>
+    </div>
+    <div class="syntax-content" id="syntax-content"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
