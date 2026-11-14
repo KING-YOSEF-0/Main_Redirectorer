@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base64 Encoder / Decoder | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Base64 Encoder / Decoder</h1>
+  <p class="tagline">Encode text or files to Base64, Base64URL, Base32, Base58, or Hex. Decode back with automatic format detection. Handle large files with streaming, batch process multiple inputs, and export results.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Input</h2>
+
+    <!-- Mode Tabs -->
+    <div class="tabs" role="tablist" id="mode-tabs">
+      <button class="tab-btn active" role="tab" data-mode="encode" aria-selected="true">Encode</button>
+      <button class="tab-btn" role="tab" data-mode="decode" aria-selected="false">Decode</button>
+      <button class="tab-btn" role="tab" data-mode="batch" aria-selected="false">Batch</button>
+    </div>
+
+    <!-- Encode Panel -->
+    <div class="tab-panel active" id="panel-encode" role="tabpanel">
+      <div class="field">
+        <label for="encode-input">Text to Encode</label>
+        <textarea id="encode-input" rows="6" placeholder="Type or paste text to encode..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="encode-file">Or Upload File</label>
+        <input type="file" id="encode-file" multiple>
+        <div class="field-hint">Large files processed in chunks (streaming). Max 100MB per file.</div>
+      </div>
+
+      <div class="field">
+        <label for="encode-format">Output Format</label>
+        <select id="encode-format">
+          <option value="base64">Base64 (Standard RFC 4648)</option>
+          <option value="base64url">Base64URL (URL-safe, no padding)</option>
+          <option value="base32">Base32 (RFC 4648)</option>
+          <option value="base32hex">Base32Hex (Extended Hex)</option>
+          <option value="base58">Base58 (Bitcoin/IPFS)</option>
+          <option value="hex">Hexadecimal</option>
+        </select>
+      </div>
+
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="encode-chunked" checked>
+          <span>Chunk output (76 chars per line for Base64)</span>
+        </label>
+      </div>
+
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="encode-padding">
+          <span>Keep padding (=)</span>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btn-encode">Encode</button>
+        <button class="btn" id="btn-clear-encode">Clear</button>
+      </div>
+    </div>
+
+    <!-- Decode Panel -->
+    <div class="tab-panel" id="panel-decode" role="tabpanel" hidden>
+      <div class="field">
+        <label for="decode-input">Encoded Data</label>
+        <textarea id="decode-input" rows="6" placeholder="Paste Base64, Base64URL, Base32, Base58, or Hex..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="decode-file">Or Upload File</label>
+        <input type="file" id="decode-file" multiple>
+        <div class="field-hint">Auto-detects format. Large files streamed.</div>
+      </div>
+
+      <div class="field">
+        <label for="decode-format">Force Format (optional)</label>
+        <select id="decode-format">
+          <option value="auto">Auto-detect</option>
+          <option value="base64">Base64</option>
+          <option value="base64url">Base64URL</option>
+          <option value="base32">Base32</option>
+          <option value="base32hex">Base32Hex</option>
+          <option value="base58">Base58</option>
+          <option value="hex">Hexadecimal</option>
+        </select>
+      </div>
+
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="decode-utf8" checked>
+          <span>Output as UTF-8 text (uncheck for binary download)</span>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btn-decode">Decode</button>
+        <button class="btn" id="btn-clear-decode">Clear</button>
+      </div>
+    </div>
+
+    <!-- Batch Panel -->
+    <div class="tab-panel" id="panel-batch" role="tabpanel" hidden>
+      <div class="field">
+        <label for="batch-input">Multiple Inputs (one per line)</label>
+        <textarea id="batch-input" rows="8" placeholder="line 1
+line 2
+line 3"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="batch-operation">Operation</label>
+        <select id="batch-operation">
+          <option value="encode">Encode all lines</option>
+          <option value="decode">Decode all lines (auto-detect)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="batch-format">Format</label>
+        <select id="batch-format">
+          <option value="base64">Base64</option>
+          <option value="base64url">Base64URL</option>
+          <option value="base32">Base32</option>
+          <option value="base58">Base58</option>
+          <option value="hex">Hexadecimal</option>
+        </select>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btn-batch">Process Batch</button>
+        <button class="btn" id="btn-clear-batch">Clear</button>
+      </div>
+    </div>
+
+    <!-- Presets -->
+    <div class="presets-bar">
+      <label>Quick Presets:</label>
+      <div class="preset-buttons" id="preset-buttons"></div>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="results-heading">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 id="results-heading">Output</h2>
+      <div class="results-stats" id="output-stats"></div>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn" id="btn-copy-output">Copy</button>
+      <button class="btn" id="btn-download-txt">Download .txt</button>
+      <button class="btn" id="btn-download-bin">Download Binary</button>
+      <button class="btn" id="btn-swap">Swap ↔</button>
+    </div>
+
+    <div class="field">
+      <label>Result</label>
+      <textarea id="output-result" rows="12" readonly></textarea>
+    </div>
+
+    <div class="field" id="file-info" hidden>
+      <label>File Info</label>
+      <div class="decode-display" id="file-info-content"></div>
+    </div>
+
+    <div class="empty-results" id="empty-results">
+      <div class="empty-icon">📦</div>
+      <p>Enter input and click <strong>Encode</strong> or <strong>Decode</strong></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
