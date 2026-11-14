@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ASCII Art Generator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
+  <p class="tagline">Convert images to ASCII art, generate text banners, and create ASCII animations. Multiple character sets, color modes, and export options.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>ASCII Generator</h2>
+
+    <div class="field">
+      <label>Mode</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-mode="image" aria-selected="true">Image to ASCII</button>
+        <button class="mode-tab" role="tab" data-mode="text" aria-selected="false">Text Banner</button>
+        <button class="mode-tab" role="tab" data-mode="animation" aria-selected="false">ASCII Animation</button>
+      </div>
+    </div>
+
+    <div class="field" id="imageOptions">
+      <label>Source Image</label>
+      <input type="file" id="imageUpload" accept="image/*" hidden>
+      <div class="file-drop-zone" id="dropZone">
+        <p>Drag & drop an image or click to select</p>
+        <p class="file-info">Supports: PNG, JPG, JPEG, GIF, WebP</p>
+      </div>
+      <div class="camera-controls" style="display:none;">
+        <button class="btn secondary" id="cameraBtn">Use Camera</button>
+      </div>
+    </div>
+
+    <div class="field" id="textOptions" hidden>
+      <label>Text Input</label>
+      <input type="text" id="textInput" placeholder="Enter text for banner..." value="KING_YOSEF_">
+      <label style="margin-top:0.5rem;">Font Style</label>
+      <select id="bannerFont">
+        <option value="standard">Standard</option>
+        <option value="big">Big</option>
+        <option value="block">Block</option>
+        <option value="lean">Lean</option>
+        <option value="shadow">Shadow</option>
+        <option value="slant">Slant</option>
+        <option value="bubble">Bubble</option>
+        <option value="digital">Digital</option>
+      </select>
+    </div>
+
+    <div class="field" id="animationOptions" hidden>
+      <label>Animation Type</label>
+      <select id="animationType">
+        <option value="spinner">Spinner</option>
+        <option value="bouncing">Bouncing Ball</option>
+        <option value="wave">Wave</option>
+        <option value="loading">Loading Bar</option>
+        <option value="pulse">Pulse</option>
+        <option value="rotate">Rotating Cube</option>
+        <option value="matrix">Matrix Rain</option>
+        <option value="fire">Fire</option>
+      </select>
+      <label style="margin-top:0.5rem;">Frames</label>
+      <input type="range" id="animFrames" min="8" max="60" value="16">
+      <span id="framesValue">16</span>
+    </div>
+
+    <div class="field">
+      <label>Character Set</label>
+      <select id="charset">
+        <option value="standard">Standard (@%#*+=-:. )</option>
+        <option value="blocks">Blocks (█▓▒░ )</option>
+        <option value="braille">Braille (⣿⣷⣦⣤⣀ )</option>
+        <option value="minimal">Minimal (#+-:. )</option>
+        <option value="extended">Extended ($@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,"^`'. )</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+
+    <div class="field" id="customCharsetOptions" hidden>
+      <label>Custom Characters (darkest to lightest)</label>
+      <input type="text" id="customCharset" placeholder="e.g. @#$%*+=-:." value="@#$%*+=-:.">
+    </div>
+
+    <div class="field">
+      <label>Color Mode</label>
+      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
+        <button class="mode-tab color-tab active" role="tab" data-color="mono" aria-selected="true">Monochrome</button>
+        <button class="mode-tab color-tab" role="tab" data-color="ansi" aria-selected="false">ANSI 16-color</button>
+        <button class="mode-tab color-tab" role="tab" data-color="truecolor" aria-selected="false">True Color</button>
+        <button class="mode-tab color-tab" role="tab" data-color="custom" aria-selected="false">Custom Palette</button>
+      </div>
+    </div>
+
+    <div class="field" id="customPaletteOptions" hidden>
+      <label>Palette Colors (comma-separated hex)</label>
+      <input type="text" id="customPalette" placeholder="#ff0000,#00ff00,#0000ff,#ffffff" value="#ff4fa3,#ff9f1c,#2ee6a6,#35c3ff,#9b5cff,#f5f5f7">
+    </div>
+
+    <div class="field">
+      <label>Output Width</label>
+      <input type="range" id="outputWidth" min="40" max="300" value="120">
+      <span id="widthValue">120</span> chars
+    </div>
+
+    <div class="field">
+      <label>Aspect Ratio Correction</label>
+      <input type="range" id="aspectRatio" min="0.3" max="1.0" step="0.05" value="0.5">
+      <span id="aspectValue">0.5</span> (char height/width)
+    </div>
+
+    <div class="field">
+      <label>Invert</label>
+      <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="invertToggle"> Invert brightness</label>
+    </div>
+
+    <div class="field">
+      <label>Dithering</label>
+      <select id="dithering">
+        <option value="none">None</option>
+        <option value="floydsteinberg">Floyd-Steinberg</option>
+        <option value="ordered">Ordered (Bayer)</option>
+        <option value="atkinson">Atkinson</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="generateBtn">Generate ASCII</button>
+      <button class="btn secondary" id="randomBtn">Random Image</button>
+    </div>
+
+    <div class="stats-panel">
+      <h3>Statistics</h3>
+      <div class="stat-row">
+        <span class="stat-label">Images Converted</span>
+        <span class="stat-value" id="imagesConverted">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Banners Created</span>
+        <span class="stat-value" id="bannersCreated">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Animations Made</span>
+        <span class="stat-value" id="animationsMade">0</span>
+      </div>
+    </div>
+
+    <div class="theme-selector">
+      <label>UI Theme</label>
+      <select id="uiTheme">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+  </aside>
+
+  <section class="panel game-panel">
+    <div class="game-header">
+      <div class="puzzle-info">
+        <span class="puzzle-label" id="puzzleLabel">ASCII Art Generator</span>
+        <span class="puzzle-meta" id="puzzleMeta">Ready to generate</span>
+      </div>
+    </div>
+
+    <div class="game-status" id="gameStatus">
+      Select a mode and configure options, then click "Generate ASCII"
+    </div>
+
+    <div class="preview-area" id="previewArea">
+      <pre id="asciiOutput" class="ascii-output"></pre>
+    </div>
+
+    <div class="controls-row">
+      <button class="btn secondary" id="copyBtn" hidden>Copy ASCII</button>
+      <button class="btn secondary" id="downloadTxtBtn" hidden>Download .txt</button>
+      <button class="btn secondary" id="downloadHtmlBtn" hidden>Download .html</button>
+      <button class="btn secondary" id="downloadGifBtn" hidden>Download .gif</button>
+    </div>
+
+    <div class="game-footer">
+      <button class="btn secondary" id="shareBtn" hidden>Share</button>
+      <button class="btn primary" id="newAsciiBtn" hidden>New ASCII</button>
+    </div>
+
+    <div id="resultsModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="modalTitle">ASCII Generated!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Width</span>
+            <span class="result-value" id="resultWidth">120</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Height</span>
+            <span class="result-value" id="resultHeight">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Charset</span>
+            <span class="result-value" id="resultCharset">Standard</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Color Mode</span>
+            <span class="result-value" id="resultColorMode">Monochrome</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareBtnModal">Share</button>
+          <button class="btn primary" id="downloadBtnModal">Download</button>
+          <button class="btn primary" id="newAsciiBtnModal">Create Another</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
