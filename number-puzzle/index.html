@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Number Puzzle | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
+  <p class="tagline">Slide, merge, and reach the target! 2048, Threes, Fibonacci, and more. Daily challenge included.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Game Setup</h2>
+
+    <div class="field">
+      <label>Variant</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-variant="2048" aria-selected="true">2048</button>
+        <button class="mode-tab" role="tab" data-variant="threes" aria-selected="false">Threes</button>
+        <button class="mode-tab" role="tab" data-variant="fibonacci" aria-selected="false">Fibonacci</button>
+        <button class="mode-tab" role="tab" data-variant="custom" aria-selected="false">Custom</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Grid Size</label>
+      <div class="size-tabs" role="tablist">
+        <button class="size-tab" role="tab" data-size="3" aria-selected="false">3×3</button>
+        <button class="size-tab active" role="tab" data-size="4" aria-selected="true">4×4</button>
+        <button class="size-tab" role="tab" data-size="5" aria-selected="false">5×5</button>
+        <button class="size-tab" role="tab" data-size="6" aria-selected="false">6×6</button>
+      </div>
+    </div>
+
+    <div class="field" id="customMergeField" hidden>
+      <label>Custom Merge Rule</label>
+      <select id="customMerge">
+        <option value="powers2">Powers of 2 (2048)</option>
+        <option value="threes">1+2=3, then ×2 (Threes)</option>
+        <option value="fibonacci">Fibonacci sequence</option>
+        <option value="powers3">Powers of 3</option>
+        <option value="powers5">Powers of 5</option>
+        <option value="primes">Prime numbers</option>
+      </select>
+    </div>
+
+    <div class="field" id="dailyFields">
+      <label>Daily Challenge</label>
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+        <button class="btn primary" id="dailyBtn" style="flex:1;">Play Today's Board</button>
+        <span id="dailyDate" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="newBtn">New Game</button>
+      <button class="btn secondary" id="undoBtn">Undo</button>
+    </div>
+
+    <div class="stats-panel">
+      <h3>Statistics</h3>
+      <div class="stat-row">
+        <span class="stat-label">Best Tile</span>
+        <span class="stat-value" id="bestTile">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Best Score</span>
+        <span class="stat-value" id="bestScore">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Games Played</span>
+        <span class="stat-value" id="gamesPlayed">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Win Rate</span>
+        <span class="stat-value" id="winRate">0%</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Daily Wins</span>
+        <span class="stat-value" id="dailyWins">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Current Streak</span>
+        <span class="stat-value" id="currentStreak">0</span>
+      </div>
+    </div>
+
+    <div class="leaderboard-section">
+      <h3>Leaderboard (Local)</h3>
+      <div id="leaderboard" class="leaderboard"></div>
+    </div>
+
+    <div class="theme-selector">
+      <label>Theme</label>
+      <select id="themeSelect">
+        <option value="classic">Classic</option>
+        <option value="dark">Dark</option>
+        <option value="pastel">Pastel</option>
+        <option value="high-contrast">High Contrast</option>
+        <option value="retro">Retro</option>
+      </select>
+    </div>
+  </aside>
+
+  <section class="panel game-panel">
+    <div class="game-header">
+      <div class="score-display">
+        <div class="score-box">
+          <span class="score-label">Score</span>
+          <span class="score-value" id="currentScore">0</span>
+        </div>
+        <div class="score-box best">
+          <span class="score-label">Best</span>
+          <span class="score-value" id="bestScoreDisplay">0</span>
+        </div>
+      </div>
+      <div class="variant-badge" id="variantBadge">2048</div>
+      <div class="daily-badge" id="dailyBadge" hidden>Daily Challenge</div>
+    </div>
+
+    <div class="game-status" id="gameStatus">
+      Use arrow keys or swipe to move tiles. Merge same numbers!
+    </div>
+
+    <div class="grid-container" id="gridContainer" role="region" aria-label="Game grid" tabindex="0">
+      <!-- Grid generated by JS -->
+    </div>
+
+    <div class="game-footer">
+      <button class="btn secondary" id="shareBtn" hidden>Share Result</button>
+      <button class="btn primary" id="playAgainBtn" hidden>Play Again</button>
+    </div>
+
+    <div id="resultsModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="modalTitle">Game Over!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Final Score</span>
+            <span class="result-value" id="finalScore">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Best Tile</span>
+            <span class="result-value" id="finalBestTile">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Moves</span>
+            <span class="result-value" id="finalMoves">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Time</span>
+            <span class="result-value" id="finalTime">0s</span>
+          </div>
+        </div>
+        <div class="daily-result" id="dailyResult" hidden>
+          <h3>Daily Challenge Result</h3>
+          <p id="dailyMessage"></p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareBtnModal">Share Result</button>
+          <button class="btn primary" id="playAgainBtnModal">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="winModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 style="color:var(--accent-3);">You Win! 🎉</h2>
+        <p>You reached the target tile! Keep playing for a higher score.</p>
+        <div class="modal-actions">
+          <button class="btn secondary" id="continueBtn">Continue Playing</button>
+          <button class="btn primary" id="newGameBtn">New Game</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
