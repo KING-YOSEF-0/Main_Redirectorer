@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blob Generator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
+  <p class="tagline">Generate organic blob shapes with adjustable complexity, smoothness, and color schemes. Perfect for backgrounds, illustrations, and design elements. Export as SVG, PNG, or CSS.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Blob Generator</h2>
+
+    <div class="field">
+      <label>Generation Mode</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-mode="single" aria-selected="true">Single Blob</button>
+        <button class="mode-tab" role="tab" data-mode="multiple" aria-selected="false">Multiple Blobs</button>
+        <button class="mode-tab" role="tab" data-mode="animated" aria-selected="false">Animated Blob</button>
+      </div>
+    </div>
+
+    <div class="field" id="singleOptions">
+      <label>Complexity (Points)</label>
+      <input type="range" id="complexity" min="3" max="20" value="8">
+      <span id="complexityValue">8</span> points
+
+      <label style="margin-top:1rem;">Smoothness</label>
+      <input type="range" id="smoothness" min="0" max="1" step="0.05" value="0.5">
+      <span id="smoothnessValue">0.50</span>
+
+      <label style="margin-top:1rem;">Variation</label>
+      <input type="range" id="variation" min="0" max="1" step="0.05" value="0.3">
+      <span id="variationValue">0.30</span>
+
+      <label style="margin-top:1rem;">Rotation</label>
+      <input type="range" id="rotation" min="0" max="360" value="0">
+      <span id="rotationValue">0</span>°
+    </div>
+
+    <div class="field" id="multipleOptions" hidden>
+      <label>Blob Count</label>
+      <input type="range" id="blobCount" min="1" max="20" value="5">
+      <span id="blobCountValue">5</span> blobs
+
+      <label style="margin-top:1rem;">Min Size</label>
+      <input type="range" id="minSize" min="10" max="100" value="30">
+      <span id="minSizeValue">30</span>%
+
+      <label style="margin-top:1rem;">Max Size</label>
+      <input type="range" id="maxSize" min="20" max="200" value="80">
+      <span id="maxSizeValue">80</span>%
+
+      <label style="margin-top:1rem;">Overlap</label>
+      <input type="range" id="overlap" min="0" max="1" step="0.1" value="0.3">
+      <span id="overlapValue">0.3</span>
+    </div>
+
+    <div class="field" id="animatedOptions" hidden>
+      <label>Animation Speed</label>
+      <input type="range" id="animSpeed" min="0.1" max="3" step="0.1" value="1">
+      <span id="animSpeedValue">1.0</span>x
+
+      <label style="margin-top:1rem;">Morph Intensity</label>
+      <input type="range" id="morphIntensity" min="0" max="1" step="0.05" value="0.4">
+      <span id="morphIntensityValue">0.40</span>
+
+      <label style="margin-top:1rem;">Auto Rotate</label>
+      <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="autoRotate" checked> Enable</label>
+    </div>
+
+    <div class="field">
+      <label>Color Scheme</label>
+      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
+        <button class="mode-tab color-tab active" role="tab" data-color="solid" aria-selected="true">Solid</button>
+        <button class="mode-tab color-tab" role="tab" data-color="gradient" aria-selected="false">Gradient</button>
+        <button class="mode-tab color-tab" role="tab" data-color="multi" aria-selected="false">Multi-color</button>
+        <button class="mode-tab color-tab" role="tab" data-color="palette" aria-selected="false">Palette</button>
+      </div>
+    </div>
+
+    <div class="field" id="solidColorOptions">
+      <label>Color</label>
+      <input type="color" id="solidColor" value="#ff4fa3">
+    </div>
+
+    <div class="field" id="gradientColorOptions" hidden>
+      <label>Gradient Type</label>
+      <select id="gradientType">
+        <option value="linear">Linear</option>
+        <option value="radial">Radial</option>
+        <option value="conic">Conic</option>
+      </select>
+      <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+        <input type="color" id="gradColor1" value="#ff4fa3">
+        <input type="color" id="gradColor2" value="#35c3ff">
+      </div>
+      <label style="margin-top:0.5rem;">Angle</label>
+      <input type="range" id="gradAngle" min="0" max="360" value="45">
+      <span id="gradAngleValue">45</span>°
+    </div>
+
+    <div class="field" id="multiColorOptions" hidden>
+      <label>Colors (comma-separated hex)</label>
+      <input type="text" id="multiColors" value="#ff4fa3,#ff9f1c,#2ee6a6,#35c3ff,#9b5cff">
+    </div>
+
+    <div class="field" id="paletteColorOptions" hidden>
+      <label>Preset Palette</label>
+      <select id="presetPalette">
+        <option value="sunset">Sunset</option>
+        <option value="ocean">Ocean</option>
+        <option value="forest">Forest</option>
+        <option value="candy">Candy</option>
+        <option value="neon">Neon</option>
+        <option value="pastel">Pastel</option>
+        <option value="mono">Monochrome</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Canvas Size</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab size-tab active" role="tab" data-size="square" aria-selected="true">Square (500×500)</button>
+        <button class="mode-tab size-tab" role="tab" data-size="wide" aria-selected="false">Wide (800×400)</button>
+        <button class="mode-tab size-tab" role="tab" data-size="tall" aria-selected="false">Tall (400×800)</button>
+        <button class="mode-tab size-tab" role="tab" data-size="custom" aria-selected="false">Custom</button>
+      </div>
+    </div>
+
+    <div class="field" id="customSizeOptions" hidden>
+      <label style="display:flex;gap:1rem;">
+        <div><label>Width</label><input type="number" id="customWidth" value="500" min="100" max="2000"></div>
+        <div><label>Height</label><input type="number" id="customHeight" value="500" min="100" max="2000"></div>
+      </label>
+    </div>
+
+    <div class="field">
+      <label>Background</label>
+      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
+        <button class="mode-tab bg-tab active" role="tab" data-bg="transparent" aria-selected="true">Transparent</button>
+        <button class="mode-tab bg-tab" role="tab" data-bg="color" aria-selected="false">Solid Color</button>
+        <button class="mode-tab bg-tab" role="tab" data-bg="checker" aria-selected="false">Checkerboard</button>
+      </div>
+    </div>
+
+    <div class="field" id="bgColorOptions" hidden>
+      <label>Background Color</label>
+      <input type="color" id="bgColor" value="#0f0f14">
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="generateBtn">Generate Blob</button>
+      <button class="btn secondary" id="randomizeBtn">Randomize</button>
+    </div>
+
+    <div class="stats-panel">
+      <h3>Statistics</h3>
+      <div class="stat-row">
+        <span class="stat-label">Blobs Generated</span>
+        <span class="stat-value" id="blobsGenerated">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">SVG Exports</span>
+        <span class="stat-value" id="svgExports">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">PNG Exports</span>
+        <span class="stat-value" id="pngExports">0</span>
+      </div>
+    </div>
+
+    <div class="theme-selector">
+      <label>UI Theme</label>
+      <select id="uiTheme">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+  </aside>
+
+  <section class="panel game-panel">
+    <div class="game-header">
+      <div class="puzzle-info">
+        <span class="puzzle-label" id="puzzleLabel">Blob Generator</span>
+        <span class="puzzle-meta" id="puzzleMeta">Ready to generate</span>
+      </div>
+    </div>
+
+    <div class="game-status" id="gameStatus">
+      Configure options and click "Generate Blob"
+    </div>
+
+    <div class="preview-area" id="previewArea">
+      <svg id="blobSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="controls-row">
+      <button class="btn secondary" id="copySvgBtn" hidden>Copy SVG</button>
+      <button class="btn secondary" id="downloadSvgBtn" hidden>Download SVG</button>
+      <button class="btn secondary" id="downloadPngBtn" hidden>Download PNG</button>
+      <button class="btn secondary" id="downloadCssBtn" hidden>Download CSS</button>
+    </div>
+
+    <div class="game-footer">
+      <button class="btn secondary" id="shareBtn" hidden>Share</button>
+      <button class="btn primary" id="newBlobBtn" hidden>New Blob</button>
+    </div>
+
+    <div id="resultsModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="modalTitle">Blob Generated!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Mode</span>
+            <span class="result-value" id="resultMode">Single</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Points</span>
+            <span class="result-value" id="resultPoints">8</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Color Scheme</span>
+            <span class="result-value" id="resultColorScheme">Solid</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Size</span>
+            <span class="result-value" id="resultSize">500×500</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareBtnModal">Share</button>
+          <button class="btn primary" id="downloadBtnModal">Download SVG</button>
+          <button class="btn primary" id="newBlobBtnModal">Create Another</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
