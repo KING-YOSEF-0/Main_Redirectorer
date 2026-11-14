@@ -1,0 +1,8 @@
+body { display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #e0e0e0; }
+.calculator { width: 300px; padding: 20px; background-color: #b0b0b0; border-radius: 10px; box-shadow: 5px 5px 15px #888; }
+.display { background-color: #c4d1c4; height: 60px; padding: 10px; margin-bottom: 20px; border: 2px solid #555; text-align: right; font-family: monospace; }
+.buttons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.btn { padding: 15px; border: none; border-radius: 5px; background: #eee; cursor: pointer; }
+.btn:active { background: #ccc; }
+.del, .ac { background: #ff9900; color: white; }
+.equals { grid-column: span 3; background: #444; color: white; }

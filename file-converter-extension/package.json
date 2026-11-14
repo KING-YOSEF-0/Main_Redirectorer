@@ -1,0 +1,150 @@
+{
+  "name": "file-converter-pro",
+  "displayName": "File Converter Pro",
+  "description": "Ultimate file converter - Images, Video to Audio, Volume Boost, Batch processing",
+  "version": "1.0.0",
+  "publisher": "king-yosef",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:fileConverterPro.convertImage",
+    "onCommand:fileConverterPro.extractAudio",
+    "onCommand:fileConverterPro.boostVolume",
+    "onCommand:fileConverterPro.openPanel",
+    "onCommand:fileConverterPro.batchConvert"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "fileConverterPro.openPanel",
+        "title": "File Converter Pro: Open Panel",
+        "category": "File Converter"
+      },
+      {
+        "command": "fileConverterPro.convertImage",
+        "title": "File Converter Pro: Convert Image",
+        "category": "File Converter"
+      },
+      {
+        "command": "fileConverterPro.extractAudio",
+        "title": "File Converter Pro: Extract Audio (Video → MP3)",
+        "category": "File Converter"
+      },
+      {
+        "command": "fileConverterPro.boostVolume",
+        "title": "File Converter Pro: Boost Volume",
+        "category": "File Converter"
+      },
+      {
+        "command": "fileConverterPro.batchConvert",
+        "title": "File Converter Pro: Batch Convert",
+        "category": "File Converter"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "fileConverterPro.convertImage",
+          "when": "resourceExtname =~ /\\.(png|jpg|jpeg|webp|bmp|tiff|gif|avif)$/i",
+          "group": "fileConverter@1"
+        },
+        {
+          "command": "fileConverterPro.extractAudio",
+          "when": "resourceExtname =~ /\\.(mp4|mov|avi|mkv|webm|flv|wmv|m4v)$/i",
+          "group": "fileConverter@2"
+        },
+        {
+          "command": "fileConverterPro.boostVolume",
+          "when": "resourceExtname =~ /\\.(mp3|wav|flac|ogg|m4a|aac)$/i",
+          "group": "fileConverter@3"
+        },
+        {
+          "command": "fileConverterPro.batchConvert",
+          "when": "explorerResourceIsFolder",
+          "group": "fileConverter@4"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "fileConverterPro.openPanel"
+        },
+        {
+          "command": "fileConverterPro.convertImage"
+        },
+        {
+          "command": "fileConverterPro.extractAudio"
+        },
+        {
+          "command": "fileConverterPro.boostVolume"
+        },
+        {
+          "command": "fileConverterPro.batchConvert"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "fileConverterPro.openPanel",
+        "key": "ctrl+alt+c",
+        "mac": "cmd+alt+c"
+      }
+    ],
+    "configuration": {
+      "title": "File Converter Pro",
+      "properties": {
+        "fileConverterPro.outputFolder": {
+          "type": "string",
+          "default": "",
+          "description": "Default output folder (empty = same as source)"
+        },
+        "fileConverterPro.imageQuality": {
+          "type": "number",
+          "default": 90,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Default image quality (1-100)"
+        },
+        "fileConverterPro.audioBitrate": {
+          "type": "string",
+          "default": "192k",
+          "description": "Default audio bitrate for extraction"
+        },
+        "fileConverterPro.volumeBoostDb": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 50,
+          "description": "Default volume boost in dB"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.28",
+    "@types/node": "^26.6.6",
+    "@types/sharp": "^0.31.1",
+    "@types/vscode": "^1.146.0",
+    "@vscode/test-electron": "^2.3.0",
+    "@vscode/vsce": "^4.1.1",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "sharp": "^0.35.5"
+  }
+}

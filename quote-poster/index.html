@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quote Poster Generator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
+  <p class="tagline">Create beautiful quote posters with customizable typography, backgrounds, and layouts. Export as high-resolution images.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Poster Setup</h2>
+
+    <div class="field">
+      <label>Quote Source</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-source="custom" aria-selected="true">Custom Quote</button>
+        <button class="mode-tab" role="tab" data-source="daily" aria-selected="false">Daily Quote</button>
+        <button class="mode-tab" role="tab" data-source="random" aria-selected="false">Random Quote</button>
+        <button class="mode-tab" role="tab" data-source="library" aria-selected="false">Library</button>
+      </div>
+    </div>
+
+    <div class="field" id="customOptions">
+      <label>Quote Text</label>
+      <textarea id="quoteText" rows="3" placeholder="Enter your quote here..."></textarea>
+      <label style="margin-top:0.5rem;">Author</label>
+      <input type="text" id="quoteAuthor" placeholder="Author name">
+    </div>
+
+    <div class="field" id="dailyOptions" hidden>
+      <label>Today's Quote</label>
+      <div id="dailyQuoteDisplay"></div>
+      <button class="btn primary" id="loadDailyBtn">Load Today's Quote</button>
+    </div>
+
+    <div class="field" id="randomOptions" hidden>
+      <label>Random Quote</label>
+      <button class="btn primary" id="randomBtn">Generate Random Quote</button>
+      <div id="randomQuoteDisplay"></div>
+    </div>
+
+    <div class="field" id="libraryOptions" hidden>
+      <label>Quote Library</label>
+      <select id="quoteCategory">
+        <option value="all">All Categories</option>
+        <option value="motivation">Motivation</option>
+        <option value="wisdom">Wisdom</option>
+        <option value="humor">Humor</option>
+        <option value="technology">Technology</option>
+        <option value="life">Life</option>
+        <option value="creativity">Creativity</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Font Pairing</label>
+      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
+        <button class="mode-tab font-tab active" role="tab" data-font="playfair" aria-selected="true">Playfair + Mono</button>
+        <button class="mode-tab font-tab" role="tab" data-font="georgia" aria-selected="false">Georgia + Helvetica</button>
+        <button class="mode-tab font-tab" role="tab" data-font="merriweather" aria-selected="false">Merriweather + Sans</button>
+        <button class="mode-tab font-tab" role="tab" data-font="custom" aria-selected="false">Custom</button>
+      </div>
+    </div>
+
+    <div class="field" id="customFontOptions" hidden>
+      <label>Quote Font</label>
+      <select id="quoteFontSelect">
+        <option value="'Playfair Display', serif">Playfair Display</option>
+        <option value="'Georgia', serif">Georgia</option>
+        <option value="'Merriweather', serif">Merriweather</option>
+        <option value="'Times New Roman', serif">Times New Roman</option>
+      </select>
+      <label style="margin-top:0.5rem;">Author Font</label>
+      <select id="authorFontSelect">
+        <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+        <option value="'Arial', sans-serif">Arial</option>
+        <option value="'Helvetica', sans-serif">Helvetica</option>
+        <option value="'Roboto', sans-serif">Roboto</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Background</label>
+      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
+        <button class="mode-tab bg-tab active" role="tab" data-bg="solid" aria-selected="true">Solid Color</button>
+        <button class="mode-tab bg-tab" role="tab" data-bg="gradient" aria-selected="false">Gradient</button>
+        <button class="mode-tab bg-tab" role="tab" data-bg="image" aria-selected="false">Image</button>
+        <button class="mode-tab bg-tab" role="tab" data-bg="pattern" aria-selected="false">Pattern</button>
+      </div>
+    </div>
+
+    <div class="field" id="solidOptions">
+      <label>Background Color</label>
+      <input type="color" id="bgColor" value="#1a1a2e">
+    </div>
+
+    <div class="field" id="gradientOptions" hidden>
+      <label>Gradient Type</label>
+      <select id="gradientType">
+        <option value="linear">Linear</option>
+        <option value="radial">Radial</option>
+        <option value="conic">Conic</option>
+      </select>
+      <label style="margin-top:0.5rem;">Colors</label>
+      <div style="display:flex;gap:0.5rem;">
+        <input type="color" id="gradientColor1" value="#ff4fa3">
+        <input type="color" id="gradientColor2" value="#35c3ff">
+      </div>
+    </div>
+
+    <div class="field" id="imageOptions" hidden>
+      <label>Background Image</label>
+      <input type="file" id="bgImageUpload" accept="image/*" hidden>
+      <div class="file-drop-zone" id="bgDropZone">
+        <p>Click to upload background image</p>
+      </div>
+      <label style="margin-top:0.5rem;">Opacity</label>
+      <input type="range" id="bgOpacity" min="0" max="1" step="0.1" value="0.3">
+    </div>
+
+    <div class="field" id="patternOptions" hidden>
+      <label>Pattern Type</label>
+      <select id="patternType">
+        <option value="dots">Dots</option>
+        <option value="lines">Lines</option>
+        <option value="grid">Grid</option>
+        <option value="waves">Waves</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Dimensions</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab size-tab active" role="tab" data-size="instagram" aria-selected="true">Instagram (1080×1080)</button>
+        <button class="mode-tab size-tab" role="tab" data-size="story" aria-selected="false">Story (1080×1920)</button>
+        <button class="mode-tab size-tab" role="tab" data-size="twitter" aria-selected="false">Twitter (1200×675)</button>
+        <button class="mode-tab size-tab" role="tab" data-size="linkedin" aria-selected="false">LinkedIn (1200×627)</button>
+        <button class="mode-tab size-tab" role="tab" data-size="custom" aria-selected="false">Custom</button>
+      </div>
+    </div>
+
+    <div class="field" id="customSizeOptions" hidden>
+      <label style="display:flex;gap:1rem;">
+        <div><label>Width</label><input type="number" id="customWidth" value="1080" min="400" max="4000"></div>
+        <div><label>Height</label><input type="number" id="customHeight" value="1080" min="400" max="4000"></div>
+      </label>
+    </div>
+
+    <div class="field">
+      <label>Text Alignment</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab align-tab active" role="tab" data-align="center" aria-selected="true">Center</button>
+        <button class="mode-tab align-tab" role="tab" data-align="left" aria-selected="false">Left</button>
+        <button class="mode-tab align-tab" role="tab" data-align="right" aria-selected="false">Right</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Text Effects</label>
+      <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="shadowToggle"> Shadow</label>
+      <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="outlineToggle"> Outline</label>
+      <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="glowToggle"> Glow</label>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="generateBtn">Generate Poster</button>
+      <button class="btn secondary" id="randomizeBtn">Randomize</button>
+    </div>
+
+    <div class="stats-panel">
+      <h3>Statistics</h3>
+      <div class="stat-row">
+        <span class="stat-label">Posters Created</span>
+        <span class="stat-value" id="postersCreated">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Unique Quotes</span>
+        <span class="stat-value" id="uniqueQuotes">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Favorite Font</span>
+        <span class="stat-value" id="favoriteFont">—</span>
+      </div>
+    </div>
+
+    <div class="theme-selector">
+      <label>UI Theme</label>
+      <select id="uiTheme">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+  </aside>
+
+  <section class="panel game-panel">
+    <div class="game-header">
+      <div class="puzzle-info">
+        <span class="puzzle-label" id="puzzleLabel">Quote Poster Generator</span>
+        <span class="puzzle-meta" id="puzzleMeta">Ready to create</span>
+      </div>
+    </div>
+
+    <div class="game-status" id="gameStatus">
+      Configure your quote and click "Generate Poster"
+    </div>
+
+    <div class="poster-container" id="posterContainer">
+      <canvas id="posterCanvas"></canvas>
+    </div>
+
+    <div class="controls-row">
+      <button class="btn secondary" id="downloadPngBtn" hidden>Download PNG</button>
+      <button class="btn secondary" id="downloadJpgBtn" hidden>Download JPG</button>
+      <button class="btn secondary" id="copyBtn" hidden>Copy to Clipboard</button>
+    </div>
+
+    <div class="game-footer">
+      <button class="btn secondary" id="shareBtn" hidden>Share Poster</button>
+      <button class="btn primary" id="newPosterBtn" hidden>New Poster</button>
+    </div>
+
+    <div id="resultsModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="modalTitle">Poster Generated!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Dimensions</span>
+            <span class="result-value" id="resultDimensions">1080×1080</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Quote Length</span>
+            <span class="result-value" id="resultQuoteLength">0 chars</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Font Pair</span>
+            <span class="result-value" id="resultFontPair">Playfair + Mono</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">BG Type</span>
+            <span class="result-value" id="resultBgType">Solid</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareBtnModal">Share Poster</button>
+          <button class="btn primary" id="downloadBtnModal">Download</button>
+          <button class="btn primary" id="newPosterBtnModal">Create Another</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"version":3,"file":"panel.d.ts","sourceRoot":"","sources":["../../src/webview/panel.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,MAAM,QAAQ,CAAC;AAMjC,qBAAa,cAAe,YAAW,MAAM,CAAC,UAAU;IACtD,OAAO,CAAC,KAAK,CAAkC;IAC/C,OAAO,CAAC,QAAQ,CAAC,gBAAgB,CAA0B;IAE3D,YAAY,OAAO,EAAE,MAAM,CAAC,gBAAgB,EAE3C;IAEM,IAAI,SAuDV;IAEM,OAAO,SAIb;IAED,OAAO,CAAC,cAAc;CA2JvB"}
