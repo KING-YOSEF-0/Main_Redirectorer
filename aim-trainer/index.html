@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aim Trainer | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
+  <p class="tagline">Train your aim — reflex, tracking, flicking. Click targets, beat your best.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Configuration</h2>
+
+    <div class="field">
+      <label>Mode</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-mode="static" aria-selected="true">Static</button>
+        <button class="mode-tab" role="tab" data-mode="moving" aria-selected="false">Moving</button>
+        <button class="mode-tab" role="tab" data-mode="strafing" aria-selected="false">Strafing</button>
+        <button class="mode-tab" role="tab" data-mode="grid" aria-selected="false">Grid</button>
+        <button class="mode-tab" role="tab" data-mode="reaction" aria-selected="false">Reaction</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Duration <span id="durationValue">30</span>s</label>
+      <input type="range" id="duration" min="10" max="120" value="30" step="5">
+    </div>
+
+    <div class="field">
+      <label>Target Size <span id="sizeValue">40</span>px</label>
+      <input type="range" id="targetSize" min="20" max="100" value="40" step="5">
+    </div>
+
+    <div class="field" id="spawnRateField">
+      <label>Spawn Rate <span id="spawnRateValue">1.0</span>/s</label>
+      <input type="range" id="spawnRate" min="0.3" max="3" value="1" step="0.1">
+    </div>
+
+    <div class="field" id="livesField">
+      <label>Lives <span id="livesValue">3</span></label>
+      <input type="range" id="lives" min="1" max="10" value="3" step="1">
+    </div>
+
+    <div class="field" id="penaltyField">
+      <label>Miss Penalty <span id="penaltyValue">0.5</span>s</label>
+      <input type="range" id="penalty" min="0" max="3" value="0.5" step="0.1">
+    </div>
+
+    <div class="field" id="reactionDelayField" hidden>
+      <label>Signal Delay <span id="reactionDelayValue">2.0</span>s</label>
+      <input type="range" id="reactionDelay" min="0.5" max="5" value="2" step="0.5">
+    </div>
+
+    <div class="field">
+      <label>Crosshair</label>
+      <div class="crosshair-select">
+        <button class="crosshair-option active" data-crosshair="dot" title="Dot">●</button>
+        <button class="crosshair-option" data-crosshair="cross" title="Cross">✚</button>
+        <button class="crosshair-option" data-crosshair="circle" title="Circle">○</button>
+        <button class="crosshair-option" data-crosshair="gap" title="Gap">⊙</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="startBtn">Start Training</button>
+      <button class="btn secondary" id="warmupBtn">Warm-up</button>
+    </div>
+
+    <div class="field">
+      <label>High Scores</label>
+      <div id="leaderboard" class="leaderboard"></div>
+    </div>
+  </aside>
+
+  <section class="panel game-panel">
+    <div class="game-header">
+      <div class="game-stats">
+        <div class="stat">
+          <span class="stat-label">Time</span>
+          <span class="stat-value" id="timeLeft">30.0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="score">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Accuracy</span>
+          <span class="stat-value" id="accuracy">100%</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Hits/s</span>
+          <span class="stat-value" id="hps">0.0</span>
+        </div>
+        <div class="stat" id="livesStat">
+          <span class="stat-label">Lives</span>
+          <span class="stat-value" id="livesLeft">3</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="canvas-wrapper" id="canvasWrapper">
+      <canvas id="gameCanvas" aria-label="Aim training area"></canvas>
+      <div id="crosshair" class="crosshair" aria-hidden="true"></div>
+      <div id="reactionOverlay" class="reaction-overlay" hidden>
+        <div class="reaction-circle" id="reactionCircle"></div>
+        <span class="reaction-text" id="reactionText">WAIT...</span>
+      </div>
+    </div>
+
+    <div class="game-footer">
+      <button class="btn secondary" id="pauseBtn" hidden>Pause</button>
+      <button class="btn primary" id="restartBtn" hidden>Restart</button>
+    </div>
+
+    <div id="resultsModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2>Session Complete!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Final Score</span>
+            <span class="result-value" id="finalScore">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Accuracy</span>
+            <span class="result-value" id="finalAccuracy">0%</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Avg Reaction</span>
+            <span class="result-value" id="finalAvgReaction">0ms</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Hits / Sec</span>
+            <span class="result-value" id="finalHps">0.0</span>
+          </div>
+        </div>
+        <div class="result-chart">
+          <canvas id="reactionChart" width="400" height="150"></canvas>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareBtn">Share Result</button>
+          <button class="btn primary" id="playAgainBtn">Play Again</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
