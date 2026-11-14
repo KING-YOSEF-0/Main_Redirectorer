@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Image Converter | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Image Converter</h1>
+  <p class="tagline">Convert images to Base64, WebP, AVIF. Resize, compress, strip EXIF. Batch processing with ZIP download.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel" aria-labelledby="config-heading">
+    <h2 id="config-heading">Converter</h2>
+
+    <div class="field">
+      <label>Output Format</label>
+      <div class="format-tabs" role="tablist">
+        <button class="format-tab active" role="tab" data-format="base64" aria-selected="true">Base64</button>
+        <button class="format-tab" role="tab" data-format="webp" aria-selected="false">WebP</button>
+        <button class="format-tab" role="tab" data-format="avif" aria-selected="false">AVIF</button>
+        <button class="format-tab" role="tab" data-format="jpeg" aria-selected="false">JPEG</button>
+        <button class="format-tab" role="tab" data-format="png" aria-selected="false">PNG</button>
+      </div>
+    </div>
+
+    <!-- Base64 Options -->
+    <div class="options-panel" id="options-base64">
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="base64DataUri" checked>
+          <span>Data URI prefix (data:image/...;base64,)</span>
+        </label>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="base64CssBg">
+          <span>CSS background-image format</span>
+        </label>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="base64Markdown">
+          <span>Markdown image format</span>
+        </label>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="base64HtmlImg">
+          <span>HTML <img> tag format</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- WebP Options -->
+    <div class="options-panel" id="options-webp" hidden>
+      <div class="field">
+        <label>Quality: <span id="webpQualityValue">80</span>%</label>
+        <input type="range" id="webpQuality" min="1" max="100" value="80">
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="webpLossless">
+          <span>Lossless compression</span>
+        </label>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="webpNearLossless">
+          <span>Near lossless (WebP 2)</span>
+        </label>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="webpAlphaQuality">
+          <span>Alpha quality (separate)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- AVIF Options -->
+    <div class="options-panel" id="options-avif" hidden>
+      <div class="field">
+        <label>Quality: <span id="avifQualityValue">50</span>%</label>
+        <input type="range" id="avifQuality" min="1" max="100" value="50">
+      </div>
+      <div class="field">
+        <label>Speed (1=slow/best, 10=fast): <span id="avifSpeedValue">5</span></label>
+        <input type="range" id="avifSpeed" min="1" max="10" value="5">
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="avifLossless">
+          <span>Lossless</span>
+        </label>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="avifChromaSubsampling">
+          <span>4:2:0 chroma subsampling</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- JPEG Options -->
+    <div class="options-panel" id="options-jpeg" hidden>
+      <div class="field">
+        <label>Quality: <span id="jpegQualityValue">85</span>%</label>
+        <input type="range" id="jpegQuality" min="1" max="100" value="85">
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="jpegProgressive">
+          <span>Progressive</span>
+        </label>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="jpegMozjpeg">
+          <span>MozJPEG optimization (if available)</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- PNG Options -->
+    <div class="options-panel" id="options-png" hidden>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="pngLossless" checked>
+          <span>Lossless (always)</span>
+        </label>
+      </div>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="pngCompression">
+          <span>Maximum compression</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Common Options -->
+    <div class="field">
+      <label>Resize</label>
+      <div class="resize-options">
+        <select id="resizeMode">
+          <option value="none">No resize</option>
+          <option value="max">Max dimension</option>
+          <option value="width">Fixed width</option>
+          <option value="height">Fixed height</option>
+          <option value="exact">Exact dimensions</option>
+          <option value="percentage">Percentage</option>
+        </select>
+        <div class="resize-inputs" id="resizeInputs" hidden>
+          <input type="number" id="resizeWidth" placeholder="Width" min="1" max="10000">
+          <span>×</span>
+          <input type="number" id="resizeHeight" placeholder="Height" min="1" max="10000">
+        </div>
+        <div class="resize-inputs" id="resizePercentage" hidden>
+          <input type="number" id="resizePercent" placeholder="%" min="1" max="500" value="100">
+          <span>%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="stripExif" checked>
+        <span>Strip EXIF/metadata</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="fixOrientation">
+        <span>Auto-rotate from EXIF orientation</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="maintainAspect">
+        <span>Maintain aspect ratio</span>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="convertBtn">Convert All</button>
+      <button class="btn" id="clearBtn">Clear Queue</button>
+    </div>
+
+    <div class="field">
+      <label>Queue (<span id="queueCount">0</span> files)</label>
+      <div id="fileQueue" class="file-queue" role="list"></div>
+    </div>
+  </aside>
+
+  <section class="panel preview-panel" aria-labelledby="preview-heading">
+    <h2 id="preview-heading">Preview & Results</h2>
+
+    <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Drop images here or click to select">
+      <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+      </svg>
+      <p>Drag & drop images here, or <span class="clickable">click to select</span></p>
+      <p class="hint">Supports: JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, SVG • Multiple files • Paste from clipboard (Ctrl+V)</p>
+      <input type="file" id="fileInput" multiple accept="image/*" hidden>
+    </div>
+
+    <div class="results" id="results" hidden>
+      <div class="results-header">
+        <h3>Converted (<span id="resultCount">0</span>)</h3>
+        <div class="results-actions">
+          <button class="btn" id="downloadAllBtn">Download ZIP</button>
+          <button class="btn" id="copyAllBtn">Copy All Base64</button>
+          <button class="btn" id="clearResultsBtn">Clear Results</button>
+        </div>
+      </div>
+      <div class="results-grid" id="resultsGrid" role="list"></div>
+    </div>
+
+    <div class="comparison" id="comparison" hidden>
+      <h3>Compare: Original vs Converted</h3>
+      <div class="compare-grid">
+        <div class="compare-pane">
+          <h4>Original</h4>
+          <div class="compare-info" id="originalInfo"></div>
+          <img id="originalImg" alt="Original">
+        </div>
+        <div class="compare-pane">
+          <h4>Converted</h4>
+          <div class="compare-info" id="convertedInfo"></div>
+          <img id="convertedImg" alt="Converted">
+        </div>
+      </div>
+      <div class="compare-stats" id="compareStats"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
