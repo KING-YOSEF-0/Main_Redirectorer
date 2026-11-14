@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interstitial Gate Generator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Interstitial Gate Generator</h1>
+  <p class="tagline">Build ready-to-copy redirect/interstitial pages — leaving notices, age gates, maintenance screens, countdown redirects, password gates, and more.</p>
+</header>
+
+<main class="container">
+  <section class="panel" aria-labelledby="builder-heading">
+    <h2 id="builder-heading">Builder</h2>
+
+    <div class="field">
+      <label for="gate-type">Gate Type</label>
+      <select id="gate-type">
+        <option value="leaving">🌐 You Are Leaving</option>
+        <option value="age">🔞 Age Gate</option>
+        <option value="maintenance">🛠️ Maintenance</option>
+        <option value="warning">⚠️ Warning / Confirmation</option>
+        <option value="countdown">⏱️ Countdown Redirect</option>
+        <option value="password">🔐 Password Gate</option>
+        <option value="cookie">🍪 Cookie Consent</option>
+      </select>
+    </div>
+
+    <div class="field" id="f-target">
+      <label for="target-url">Target URL <span class="req">*</span></label>
+      <input type="url" id="target-url" placeholder="https://example.com" required>
+    </div>
+
+    <div class="field" id="f-title">
+      <label for="gate-title">Page Title</label>
+      <input type="text" id="gate-title" placeholder="Leaving Example.com">
+    </div>
+
+    <div class="field" id="f-message">
+      <label for="gate-message">Message</label>
+      <textarea id="gate-message" rows="3" placeholder="You are about to leave this site..."></textarea>
+    </div>
+
+    <div class="field" id="f-countdown" hidden>
+      <label for="countdown-seconds">Countdown (seconds)</label>
+      <input type="number" id="countdown-seconds" min="1" max="60" value="5">
+    </div>
+
+    <div class="field" id="f-password" hidden>
+      <label for="gate-password">Password</label>
+      <input type="password" id="gate-password" placeholder="Enter password to proceed">
+    </div>
+
+    <div class="field" id="f-age" hidden>
+      <label for="min-age">Minimum Age</label>
+      <input type="number" id="min-age" min="13" max="21" value="18">
+    </div>
+
+    <div class="field" id="f-maintenance" hidden>
+      <label for="retry-after">Retry After (minutes)</label>
+      <input type="number" id="retry-after" min="1" max="1440" value="30">
+    </div>
+
+    <div class="field" id="f-custom-css" hidden>
+      <label for="custom-css">Custom CSS (optional)</label>
+      <textarea id="custom-css" rows="4" placeholder="/* Your custom styles */"></textarea>
+    </div>
+
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-branding" checked>
+        <span>Show "Powered by Interstitial Gate Generator" badge</span>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-preview">Preview Gate</button>
+      <button class="btn" id="btn-copy">Copy HTML</button>
+      <button class="btn" id="btn-download">Download .html</button>
+    </div>
+  </section>
+
+  <section class="panel preview-panel" aria-labelledby="preview-heading">
+    <div class="preview-header">
+      <h2 id="preview-heading">Live Preview</h2>
+      <span class="preview-badge" id="preview-badge">Leaving Gate</span>
+    </div>
+    <div class="preview-frame" id="preview-frame">
+      <iframe id="preview-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-modals" title="Gate preview"></iframe>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
