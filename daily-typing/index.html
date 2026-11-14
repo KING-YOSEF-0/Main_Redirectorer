@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily Typing Quote | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Daily Typing Quote</h1>
+  <p class="tagline">A new quote every day — same for everyone. Practice typing with curated quotes from literature, philosophy, and tech. Track WPM, accuracy, and consistency. Share your daily result!</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Typing Test</h2>
+
+    <div class="field">
+      <label>Mode</label>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="mode" value="daily" checked> 📅 Daily Quote
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="mode" value="practice"> 🎲 Practice (Random)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="mode" value="custom"> ✏️ Custom Text
+        </label>
+      </div>
+    </div>
+
+    <div class="field custom-field" id="custom-field" hidden>
+      <label for="custom-text">Custom Text</label>
+      <textarea id="custom-text" rows="4" placeholder="Paste or type your own text here..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Options</label>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-punctuation" checked> Punctuation
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-numbers" checked> Numbers
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-case" checked> Case Sensitive
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Test Duration</label>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="btn secondary duration-btn active" data-time="30">30s</button>
+        <button class="btn secondary duration-btn" data-time="60">60s</button>
+        <button class="btn secondary duration-btn" data-time="120">2min</button>
+        <button class="btn secondary duration-btn" data-time="300">5min</button>
+        <button class="btn secondary duration-btn" data-time="0">∞ (No Limit)</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Today's Quote</label>
+      <div id="daily-quote-info" class="daily-quote-info"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-start">▶ Start Test</button>
+      <button class="btn secondary" id="btn-reset" disabled>⟲ Reset</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Current Streak</div>
+        <div class="stat-value" id="stat-streak">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Best Streak</div>
+        <div class="stat-value" id="stat-best-streak">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg WPM</div>
+        <div class="stat-value" id="stat-avg-wpm">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Best WPM</div>
+        <div class="stat-value" id="stat-best-wpm">0</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="test-heading">
+    <h2 id="test-heading">Type Here</h2>
+
+    <div class="live-stats">
+      <div class="live-stat">
+        <span class="live-label">WPM</span>
+        <span class="live-value" id="live-wpm">0</span>
+      </div>
+      <div class="live-stat">
+        <span class="live-label">Raw WPM</span>
+        <span class="live-value" id="live-raw">0</span>
+      </div>
+      <div class="live-stat">
+        <span class="live-label">Accuracy</span>
+        <span class="live-value" id="live-acc">100%</span>
+      </div>
+      <div class="live-stat">
+        <span class="live-label">Time</span>
+        <span class="live-value" id="live-time">30s</span>
+      </div>
+      <div class="live-stat">
+        <span class="live-label">Consistency</span>
+        <span class="live-value" id="live-consistency">—</span>
+      </div>
+    </div>
+
+    <div class="quote-display" id="quote-display" aria-live="polite">
+      <div class="quote-text" id="quote-text"></div>
+      <div class="quote-input-wrapper">
+        <textarea id="quote-input" class="quote-input" placeholder="Click Start Test, then type here..." disabled aria-label="Typing input"></textarea>
+      </div>
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-labels">
+        <span>0%</span>
+        <span id="progress-pct">0%</span>
+        <span>100%</span>
+      </div>
+    </div>
+
+    <div class="game-status" id="game-status" aria-live="assertive">Click "Start Test" to begin</div>
+
+    <div class="results-panel" id="results-panel" hidden>
+      <h3>Results</h3>
+      <div class="summary-cards" id="results-summary"></div>
+      <div class="field">
+        <label>Error Heatmap</label>
+        <div class="heatmap" id="error-heatmap"></div>
+      </div>
+      <div class="field">
+        <label>WPM Over Time</label>
+        <canvas id="wpm-chart" height="120"></canvas>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-share">📋 Share Result</button>
+        <button class="btn secondary" id="btn-retry">🔄 Retry</button>
+      </div>
+    </div>
+
+    <div class="history-section" id="history-section">
+      <h3>Recent Sessions</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
