@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Daily Minesweeper | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Daily Minesweeper</h1>
+  <p class="tagline">New board every day, same for everyone. Classic gameplay with daily challenge mode, streak tracking, and local leaderboards. Can you clear today's board?</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Game Controls</h2>
+
+    <div class="field">
+      <label>Difficulty</label>
+      <div class="difficulty-tabs" role="tablist">
+        <button class="diff-tab active" role="tab" data-diff="beginner" aria-selected="true">🟢 Beginner (9×9, 10)</button>
+        <button class="diff-tab" role="tab" data-diff="intermediate" aria-selected="false">🟡 Intermediate (16×16, 40)</button>
+        <button class="diff-tab" role="tab" data-diff="expert" aria-selected="false">🔴 Expert (30×16, 99)</button>
+        <button class="diff-tab" role="tab" data-diff="custom" aria-selected="false">⚙️ Custom</button>
+      </div>
+    </div>
+
+    <div class="field custom-fields" id="custom-fields" hidden>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+        <div>
+          <label for="custom-width">Width (5-50)</label>
+          <input type="number" id="custom-width" min="5" max="50" value="16">
+        </div>
+        <div>
+          <label for="custom-height">Height (5-30)</label>
+          <input type="number" id="custom-height" min="5" max="30" value="16">
+        </div>
+        <div>
+          <label for="custom-mines">Mines (1-500)</label>
+          <input type="number" id="custom-mines" min="1" max="500" value="40">
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Mode</label>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="mode" value="daily" checked> 📅 Daily Challenge
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="mode" value="classic"> 🎲 Classic (Random)
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Today's Date</label>
+      <div id="daily-date" class="daily-date"></div>
+      <span class="field-hint" id="daily-hint">Same board for everyone worldwide</span>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-new-game">🎮 New Game</button>
+      <button class="btn secondary" id="btn-give-up">🏳️ Give Up</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Current Streak</div>
+        <div class="stat-value" id="stat-streak">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Best Streak</div>
+        <div class="stat-value" id="stat-best-streak">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Games Won</div>
+        <div class="stat-value" id="stat-wins">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-value" id="stat-winrate">0%</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="game-heading">
+    <h2 id="game-heading">Minesweeper</h2>
+
+    <div class="game-header">
+      <div class="game-timer" id="game-timer">000</div>
+      <button class="face-btn" id="face-btn" aria-label="Restart game">😊</button>
+      <div class="game-mines" id="game-mines">010</div>
+    </div>
+
+    <div class="board-container">
+      <div id="board" class="board" role="grid" aria-label="Minesweeper board"></div>
+    </div>
+
+    <div class="game-status" id="game-status" aria-live="polite"></div>
+
+    <div class="leaderboard-section">
+      <h3>🏆 Local Leaderboard (Best Times)</h3>
+      <div class="leaderboard-tabs" role="tablist">
+        <button class="lb-tab active" role="tab" data-lb="beginner" aria-selected="true">Beginner</button>
+        <button class="lb-tab" role="tab" data-lb="intermediate" aria-selected="false">Intermediate</button>
+        <button class="lb-tab" role="tab" data-lb="expert" aria-selected="false">Expert</button>
+        <button class="lb-tab" role="tab" data-lb="daily" aria-selected="false">Daily</button>
+      </div>
+      <div class="leaderboard" id="leaderboard"></div>
+    </div>
+
+    <div class="share-section">
+      <button class="btn" id="btn-share">📋 Share Result</button>
+      <div id="share-preview" class="share-preview" hidden></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
