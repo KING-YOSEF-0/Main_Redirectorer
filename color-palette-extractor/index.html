@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color Palette Extractor | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Color Palette Extractor</h1>
+  <p class="tagline">Extract dominant colors from any image using k-means clustering. Generate harmonious palettes, export as CSS variables, SCSS maps, Tailwind config, JSON, Adobe ASE, or PNG swatches. Adjust color count, sort by frequency/luminance/hue, and copy individual colors.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Image Input</h2>
+
+    <div class="field">
+      <label for="image-input">Drop Image Here or Click to Upload</label>
+      <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Drop zone for image upload">
+        <div class="drop-icon">🎨</div>
+        <p>Drag & drop an image, or click to browse</p>
+        <p class="drop-hint">Supports: PNG, JPG, WebP, GIF, SVG, BMP (max 10MB)</p>
+      </div>
+      <input type="file" id="image-file" accept="image/*" hidden>
+      <div id="image-preview" class="image-preview" hidden>
+        <img id="preview-img" src="" alt="Preview">
+        <button class="btn secondary" id="btn-remove-image" type="button">Remove</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="color-count">Number of Colors</label>
+      <input type="range" id="color-count" min="2" max="20" value="8">
+      <span id="color-count-value">8</span>
+    </div>
+
+    <div class="field">
+      <label for="sort-mode">Sort By</label>
+      <select id="sort-mode">
+        <option value="frequency">Frequency (most used first)</option>
+        <option value="luminance">Luminance (light to dark)</option>
+        <option value="hue">Hue (color wheel order)</option>
+        <option value="saturation">Saturation (vibrant to muted)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="quality">Quality / Speed</label>
+      <select id="quality">
+        <option value="high">High Quality (slower, more accurate)</option>
+        <option value="balanced" selected>Balanced</option>
+        <option value="fast">Fast (lower quality)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Options</label>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="option-include-transparent" checked> Include Transparent
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="option-show-hex"> Show Hex Values
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="option-show-rgb"> Show RGB Values
+        </label>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-extract" disabled>Extract Palette</button>
+      <button class="btn secondary" id="btn-generate-harmony" disabled>Generate Harmony</button>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="output-heading">
+    <h2 id="output-heading">Extracted Palette</h2>
+
+    <div id="palette-container" class="palette-container" hidden>
+      <div class="palette-header">
+        <div class="palette-stats">
+          <span id="palette-count">0 colors extracted</span>
+          <span id="palette-time" class="palette-time"></span>
+        </div>
+        <div class="palette-actions">
+          <button class="btn secondary" id="btn-copy-all">Copy All Hex</button>
+          <button class="btn secondary" id="btn-export-css">Export CSS</button>
+          <button class="btn secondary" id="btn-export-scss">Export SCSS</button>
+          <button class="btn secondary" id="btn-export-tailwind">Export Tailwind</button>
+          <button class="btn secondary" id="btn-export-json">Export JSON</button>
+          <button class="btn secondary" id="btn-export-ase">Export ASE</button>
+          <button class="btn secondary" id="btn-export-png">Export PNG Swatches</button>
+        </div>
+      </div>
+
+      <div id="palette-swatches" class="palette-swatches"></div>
+
+      <div class="field" style="margin-top: 1.5rem;">
+        <label>Harmony Variations</label>
+        <div id="harmony-container" class="harmony-container"></div>
+      </div>
+    </div>
+
+    <div id="empty-state" class="empty-state">
+      <div class="empty-icon">🎨</div>
+      <p>Upload an image and click "Extract Palette" to get started</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

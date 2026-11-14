@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVG Optimizer | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">SVG Optimizer</h1>
+  <p class="tagline">Minify and optimize SVG files. Remove unnecessary metadata, comments, whitespace, and redundant attributes. Merge paths, convert shapes to paths, optimize colors, and apply precision reduction. Preview before/after with live diff and size comparison.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">SVG Input</h2>
+
+    <div class="field">
+      <label for="svg-input">Paste SVG Code or Upload File</label>
+      <textarea id="svg-input" rows="15" placeholder='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#ff4fa3"/></svg>'></textarea>
+    </div>
+
+    <div class="field">
+      <input type="file" id="svg-file" accept=".svg" style="display: none;">
+      <button class="btn secondary" id="btn-load-file" type="button">Load File</button>
+      <button class="btn secondary" id="btn-load-sample" type="button">Load Sample</button>
+      <button class="btn secondary" id="btn-clear" type="button">Clear</button>
+    </div>
+
+    <div class="field">
+      <label>Optimization Options</label>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-remove-comments" checked> Remove Comments
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-remove-metadata" checked> Remove Metadata (<metadata>, <title>, <desc>)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-remove-hidden" checked> Remove Hidden Elements (display:none, opacity:0)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-remove-unused-ns" checked> Remove Unused Namespaces
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-cleanup-attrs" checked> Cleanup Attributes (merge, dedup)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-merge-paths" checked> Merge Paths (where possible)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-convert-shapes" checked> Convert Shapes to Paths
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-optimize-colors" checked> Optimize Colors (shorten hex, rgb to named)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-round-coords" checked> Round Coordinates
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-remove-dimensions" checked> Remove width/height (keep viewBox)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" id="opt-minify" checked> Minify Output (single line)
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="precision">Coordinate Precision (decimal places)</label>
+      <input type="range" id="precision" min="0" max="5" value="3">
+      <span id="precision-value">3</span>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-optimize">Optimize SVG</button>
+      <button class="btn" id="btn-optimize-aggressive">Aggressive Optimize</button>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="output-heading">
+    <h2 id="output-heading">Optimized Output</h2>
+
+    <div class="field" id="stats-container" hidden>
+      <label>Optimization Stats</label>
+      <div id="stats-grid" class="stats-grid"></div>
+    </div>
+
+    <div class="field">
+      <label>View Mode</label>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="view-mode" value="code" checked> Code
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="view-mode" value="preview"> Preview
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="view-mode" value="diff"> Diff
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="view-mode" value="side-by-side"> Side by Side
+        </label>
+      </div>
+    </div>
+
+    <div id="code-view" class="output-view">
+      <label for="svg-output">Optimized SVG</label>
+      <pre id="svg-output" class="json-output"><code id="svg-code"></code></pre>
+    </div>
+
+    <div id="preview-view" class="output-view" hidden>
+      <label>Preview</label>
+      <div class="preview-area" style="min-height: 300px;">
+        <div id="svg-preview" class="svg-preview"></div>
+      </div>
+    </div>
+
+    <div id="diff-view" class="output-view" hidden>
+      <label>Diff (Original → Optimized)</label>
+      <pre id="svg-diff" class="json-output" style="max-height: 500px;"></pre>
+    </div>
+
+    <div id="side-by-side-view" class="output-view" hidden>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <label>Original</label>
+          <pre id="svg-original" class="json-output" style="max-height: 500px;"></pre>
+        </div>
+        <div>
+          <label>Optimized</label>
+          <pre id="svg-optimized-side" class="json-output" style="max-height: 500px;"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top: 1rem;">
+      <button class="btn" id="btn-copy-output">Copy Optimized</button>
+      <button class="btn" id="btn-download-output">Download .svg</button>
+      <button class="btn secondary" id="btn-download-original" type="button">Download Original</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

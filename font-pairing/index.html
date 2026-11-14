@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Font Pairing Tool | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Font Pairing Tool</h1>
+  <p class="tagline">Discover beautiful font combinations from Google Fonts. Preview heading + body pairs, adjust sizes, weights, line heights, and letter spacing. Filter by category, popularity, and language support. Export CSS with @import or self-host, and copy Tailwind config.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Font Selection</h2>
+
+    <div class="field">
+      <label>Heading Font</label>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <select id="heading-font" style="flex: 1; min-width: 200px;">
+          <option value="">Select a font...</option>
+        </select>
+        <select id="heading-weight" style="width: 120px;">
+          <option value="400">Regular (400)</option>
+          <option value="500">Medium (500)</option>
+          <option value="600" selected>Semibold (600)</option>
+          <option value="700">Bold (700)</option>
+          <option value="800">Extrabold (800)</option>
+          <option value="900">Black (900)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Body Font</label>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <select id="body-font" style="flex: 1; min-width: 200px;">
+          <option value="">Select a font...</option>
+        </select>
+        <select id="body-weight" style="width: 120px;">
+          <option value="300">Light (300)</option>
+          <option value="400" selected>Regular (400)</option>
+          <option value="500">Medium (500)</option>
+          <option value="600">Semibold (600)</option>
+          <option value="700">Bold (700)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Pairing Strategy</label>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="strategy" value="contrast" checked> Contrast (Serif + Sans)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="strategy" value="harmony"> Harmony (Same Family)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="strategy" value="complementary"> Complementary (Different Weights)
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="strategy" value="random"> Surprise Me
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Filters</label>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem;">
+        <select id="filter-category">
+          <option value="">All Categories</option>
+          <option value="sans-serif">Sans Serif</option>
+          <option value="serif">Serif</option>
+          <option value="monospace">Monospace</option>
+          <option value="display">Display</option>
+          <option value="handwriting">Handwriting</option>
+        </select>
+        <select id="filter-popularity">
+          <option value="">All Popularity</option>
+          <option value="trending">Trending</option>
+          <option value="popular">Popular</option>
+          <option value="new">New</option>
+        </select>
+        <select id="filter-language">
+          <option value="">All Languages</option>
+          <option value="latin">Latin</option>
+          <option value="cyrillic">Cyrillic</option>
+          <option value="greek">Greek</option>
+          <option value="arabic">Arabic</option>
+          <option value="hebrew">Hebrew</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-generate-pair">Generate Pair</button>
+      <button class="btn" id="btn-random-pair">Random Pair</button>
+      <button class="btn secondary" id="btn-swap-fonts" type="button">Swap</button>
+    </div>
+
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Custom Preview Text</label>
+      <textarea id="preview-text" rows="3" placeholder="Enter custom text to preview..."></textarea>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="output-heading">
+    <h2 id="output-heading">Live Preview</h2>
+
+    <div id="font-preview" class="font-preview">
+      <div class="preview-heading" id="preview-heading">The quick brown fox jumps</div>
+      <div class="preview-body" id="preview-body">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
+      <div class="preview-ui" id="preview-ui">
+        <button class="ui-button primary">Primary Action</button>
+        <button class="ui-button secondary">Secondary</button>
+        <div class="ui-input-wrapper">
+          <input type="text" class="ui-input" placeholder="Enter text...">
+        </div>
+        <label class="ui-checkbox"><input type="checkbox" checked> Remember me</label>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Typography Controls</label>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+        <div>
+          <label for="heading-size">Heading Size</label>
+          <input type="range" id="heading-size" min="24" max="96" value="48">
+          <span id="heading-size-value">48px</span>
+        </div>
+        <div>
+          <label for="body-size">Body Size</label>
+          <input type="range" id="body-size" min="12" max="24" value="16">
+          <span id="body-size-value">16px</span>
+        </div>
+        <div>
+          <label for="line-height">Line Height</label>
+          <input type="range" id="line-height" min="1" max="2.5" step="0.1" value="1.6">
+          <span id="line-height-value">1.6</span>
+        </div>
+        <div>
+          <label for="letter-spacing">Letter Spacing</label>
+          <input type="range" id="letter-spacing" min="-0.05" max="0.1" step="0.01" value="0">
+          <span id="letter-spacing-value">0em</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Color Theme</label>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="theme-btn" data-theme="dark" style="background: #0f0f14; color: #f5f5f7;">Dark</button>
+        <button class="theme-btn" data-theme="light" style="background: #f5f5f7; color: #0f0f14;">Light</button>
+        <button class="theme-btn" data-theme="sepia" style="background: #f4ecd8; color: #3c2e2e;">Sepia</button>
+        <button class="theme-btn" data-theme="high-contrast" style="background: #000; color: #ff0;">High Contrast</button>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top: 1rem;">
+      <button class="btn" id="btn-copy-css">Copy CSS</button>
+      <button class="btn" id="btn-copy-tailwind">Copy Tailwind Config</button>
+      <button class="btn secondary" id="btn-export-fonts" type="button">Export @font-face</button>
+    </div>
+
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Suggested Alternatives</label>
+      <div id="alternatives" class="alternatives-grid"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

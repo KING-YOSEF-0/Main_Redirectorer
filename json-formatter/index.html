@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JSON Formatter & Validator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">JSON Formatter & Validator</h1>
+  <p class="tagline">Format, validate, minify, and analyze JSON. Features syntax highlighting, error detection with line numbers, JSONPath queries, schema validation, tree view with collapsible nodes, and diff comparison. Export as formatted JSON, minified, CSV, or TypeScript interfaces.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">JSON Input</h2>
+
+    <div class="field">
+      <label for="json-input">Paste JSON or Upload File</label>
+      <textarea id="json-input" rows="15" placeholder='{"name": "KING_YOSEF_", "sites": 30, "active": true}'></textarea>
+    </div>
+
+    <div class="field">
+      <input type="file" id="json-file" accept=".json,.txt" style="display: none;">
+      <button class="btn secondary" id="btn-load-file" type="button">Load from File</button>
+      <button class="btn secondary" id="btn-load-sample" type="button">Load Sample</button>
+      <button class="btn secondary" id="btn-clear" type="button">Clear</button>
+    </div>
+
+    <div class="field">
+      <label>Actions</label>
+      <div class="actions">
+        <button class="btn primary" id="btn-format">Format / Beautify</button>
+        <button class="btn" id="btn-minify">Minify</button>
+        <button class="btn" id="btn-validate">Validate Only</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="indent-size">Indentation</label>
+      <select id="indent-size">
+        <option value="2">2 spaces</option>
+        <option value="4" selected>4 spaces</option>
+        <option value="\t">Tab</option>
+        <option value="compact">Compact (no whitespace)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="jsonpath-query">JSONPath Query</label>
+      <input type="text" id="jsonpath-query" placeholder="$.store.book[0].author" title="Use JSONPath syntax">
+      <button class="btn secondary" id="btn-jsonpath" type="button">Query</button>
+      <span class="field-hint">JSONPath syntax: $ (root), .key, [index], [*], [?(@.price>10)], ..key (recursive)</span>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="output-heading">
+    <h2 id="output-heading">Output & Analysis</h2>
+
+    <div class="field">
+      <label>Output Format</label>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="output-format" value="formatted" checked> Formatted
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="output-format" value="minified"> Minified
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="output-format" value="tree"> Tree View
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="output-format" value="ts"> TypeScript
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="output-format" value="csv"> CSV
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="json-output">Result</label>
+      <pre id="json-output" class="json-output"><code id="json-code"></code></pre>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-copy-output">Copy Output</button>
+      <button class="btn" id="btn-download-output">Download</button>
+      <button class="btn secondary" id="btn-diff" type="button">Compare with Original</button>
+    </div>
+
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Validation & Stats</label>
+      <pre id="validation-output" class="json-output" style="max-height: 200px;"></pre>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

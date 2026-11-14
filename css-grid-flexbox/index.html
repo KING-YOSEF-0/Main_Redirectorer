@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS Grid & Flexbox Generator | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">CSS Grid & Flexbox Generator</h1>
+  <p class="tagline">Build responsive layouts visually with CSS Grid and Flexbox. Drag to resize tracks, add/remove rows and columns, set gaps, alignment, and auto-placement. Live preview with device toolbars. Export clean CSS with fallbacks and copy individual properties.</p>
+</header>
+
+<main class="container">
+  <section class="panel input-panel" aria-labelledby="input-heading">
+    <h2 id="input-heading">Layout Builder</h2>
+
+    <div class="field">
+      <label>Layout Mode</label>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="layout-mode" value="grid" checked> CSS Grid
+        </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="radio" name="layout-mode" value="flexbox"> Flexbox
+        </label>
+      </div>
+    </div>
+
+    <!-- Grid Controls -->
+    <div id="grid-controls" class="layout-controls">
+      <div class="field">
+        <label>Grid Template Columns</label>
+        <div id="grid-columns" class="track-list"></div>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+          <button class="btn secondary" id="btn-add-column" type="button">Add Column</button>
+          <button class="btn secondary" id="btn-add-row" type="button">Add Row</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Grid Template Rows</label>
+        <div id="grid-rows" class="track-list"></div>
+      </div>
+
+      <div class="field">
+        <label>Gap</label>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 120px;">
+            <label for="grid-gap-row" style="font-size: 0.8rem;">Row Gap</label>
+            <input type="number" id="grid-gap-row" min="0" max="100" value="16" step="1">
+            <span class="field-hint">px</span>
+          </div>
+          <div style="flex: 1; min-width: 120px;">
+            <label for="grid-gap-col" style="font-size: 0.8rem;">Column Gap</label>
+            <input type="number" id="grid-gap-col" min="0" max="100" value="16" step="1">
+            <span class="field-hint">px</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Alignment</label>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+          <div>
+            <label for="grid-align-items" style="font-size: 0.8rem;">align-items</label>
+            <select id="grid-align-items">
+              <option value="stretch">stretch</option>
+              <option value="start">start</option>
+              <option value="center">center</option>
+              <option value="end">end</option>
+              <option value="baseline">baseline</option>
+            </select>
+          </div>
+          <div>
+            <label for="grid-justify-items" style="font-size: 0.8rem;">justify-items</label>
+            <select id="grid-justify-items">
+              <option value="stretch">stretch</option>
+              <option value="start">start</option>
+              <option value="center">center</option>
+              <option value="end">end</option>
+            </select>
+          </div>
+          <div>
+            <label for="grid-align-content" style="font-size: 0.8rem;">align-content</label>
+            <select id="grid-align-content">
+              <option value="start">start</option>
+              <option value="center">center</option>
+              <option value="end">end</option>
+              <option value="space-between">space-between</option>
+              <option value="space-around">space-around</option>
+              <option value="space-evenly">space-evenly</option>
+              <option value="stretch">stretch</option>
+            </select>
+          </div>
+          <div>
+            <label for="grid-justify-content" style="font-size: 0.8rem;">justify-content</label>
+            <select id="grid-justify-content">
+              <option value="start">start</option>
+              <option value="center">center</option>
+              <option value="end">end</option>
+              <option value="space-between">space-between</option>
+              <option value="space-around">space-around</option>
+              <option value="space-evenly">space-evenly</option>
+              <option value="stretch">stretch</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Auto Placement</label>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="grid-auto-flow-dense" checked> Dense Packing
+          </label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="grid-auto-flow-column"> Column Flow
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Grid Areas (Named Areas)</label>
+        <textarea id="grid-areas" rows="6" placeholder="header header header
+sidebar main main
+footer footer footer"></textarea>
+        <span class="field-hint">Define named areas for grid-template-areas</span>
+      </div>
+    </div>
+
+    <!-- Flexbox Controls -->
+    <div id="flex-controls" class="layout-controls" hidden>
+      <div class="field">
+        <label for="flex-direction">Flex Direction</label>
+        <select id="flex-direction">
+          <option value="row">Row (→)</option>
+          <option value="row-reverse">Row Reverse (←)</option>
+          <option value="column">Column (↓)</option>
+          <option value="column-reverse">Column Reverse (↑)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="flex-wrap">Flex Wrap</label>
+        <select id="flex-wrap">
+          <option value="nowrap">No Wrap</option>
+          <option value="wrap">Wrap</option>
+          <option value="wrap-reverse">Wrap Reverse</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Gap</label>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 120px;">
+            <label for="flex-gap" style="font-size: 0.8rem;">Gap</label>
+            <input type="number" id="flex-gap" min="0" max="100" value="16" step="1">
+            <span class="field-hint">px</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Alignment</label>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+          <div>
+            <label for="flex-align-items" style="font-size: 0.8rem;">align-items</label>
+            <select id="flex-align-items">
+              <option value="stretch">stretch</option>
+              <option value="flex-start">flex-start</option>
+              <option value="center">center</option>
+              <option value="flex-end">flex-end</option>
+              <option value="baseline">baseline</option>
+            </select>
+          </div>
+          <div>
+            <label for="flex-justify-content" style="font-size: 0.8rem;">justify-content</label>
+            <select id="flex-justify-content">
+              <option value="flex-start">flex-start</option>
+              <option value="center">center</option>
+              <option value="flex-end">flex-end</option>
+              <option value="space-between">space-between</option>
+              <option value="space-around">space-around</option>
+              <option value="space-evenly">space-evenly</option>
+            </select>
+          </div>
+          <div>
+            <label for="flex-align-content" style="font-size: 0.8rem;">align-content</label>
+            <select id="flex-align-content">
+              <option value="stretch">stretch</option>
+              <option value="flex-start">flex-start</option>
+              <option value="center">center</option>
+              <option value="flex-end">flex-end</option>
+              <option value="space-between">space-between</option>
+              <option value="space-around">space-around</option>
+              <option value="space-evenly">space-evenly</option>
+            </select>
+          </div>
+          <div>
+            <label for="flex-align-self" style="font-size: 0.8rem;">align-self (selected)</label>
+            <select id="flex-align-self">
+              <option value="auto">auto</option>
+              <option value="stretch">stretch</option>
+              <option value="flex-start">flex-start</option>
+              <option value="center">center</option>
+              <option value="flex-end">flex-end</option>
+              <option value="baseline">baseline</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Flex Items</label>
+        <div id="flex-items" class="track-list"></div>
+        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+          <button class="btn secondary" id="btn-add-flex-item" type="button">Add Item</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Responsive Breakpoints -->
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Responsive Breakpoints</label>
+      <div id="breakpoints" class="breakpoints-list">
+        <div class="breakpoint-row">
+          <select class="bp-condition">
+            <option value="min-width">min-width</option>
+            <option value="max-width">max-width</option>
+          </select>
+          <input type="number" class="bp-value" placeholder="768" min="0" max="2000" step="1">
+          <span>px</span>
+          <button class="btn secondary btn-sm" type="button">Remove</button>
+        </div>
+      </div>
+      <button class="btn secondary" id="btn-add-breakpoint" type="button" style="margin-top: 0.5rem;">Add Breakpoint</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btn-generate">Generate CSS</button>
+      <button class="btn" id="btn-preset-layout">Preset Layouts</button>
+      <button class="btn secondary" id="btn-reset" type="button">Reset</button>
+    </div>
+  </section>
+
+  <section class="panel results-panel" aria-labelledby="output-heading">
+    <h2 id="output-heading">Live Preview</h2>
+
+    <div class="field">
+      <label>Device Preview</label>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="device-btn active" data-device="desktop">Desktop</button>
+        <button class="device-btn" data-device="tablet">Tablet</button>
+        <button class="device-btn" data-device="mobile">Mobile</button>
+      </div>
+    </div>
+
+    <div class="preview-area" style="position: relative;">
+      <div id="layout-preview" class="layout-preview">
+        <!-- Grid items will be inserted here -->
+      </div>
+    </div>
+
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Generated CSS</label>
+      <pre id="css-output" class="json-output"><code id="css-code"></code></pre>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btn-copy-css">Copy CSS</button>
+      <button class="btn" id="btn-download-css">Download .css</button>
+      <button class="btn secondary" id="btn-copy-html" type="button">Copy HTML</button>
+    </div>
+
+    <div class="field" style="margin-top: 1.5rem;">
+      <label>Quick Copy Properties</label>
+      <div id="quick-copy" class="quick-copy-grid"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
