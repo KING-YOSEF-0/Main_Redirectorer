@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reaction Timer | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
+  <p class="tagline">Test your reflexes — simple, choice, go/no-go. How fast are you?</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Test Setup</h2>
+
+    <div class="field">
+      <label>Test Type</label>
+      <div class="mode-tabs" role="tablist">
+        <button class="mode-tab active" role="tab" data-mode="simple" aria-selected="true">Simple</button>
+        <button class="mode-tab" role="tab" data-mode="choice" aria-selected="false">Choice</button>
+        <button class="mode-tab" role="tab" data-mode="gonogo" aria-selected="false">Go/No-Go</button>
+      </div>
+    </div>
+
+    <div class="field" id="trialsField">
+      <label>Trials <span id="trialsValue">10</span></label>
+      <input type="range" id="trials" min="5" max="50" value="10" step="5">
+    </div>
+
+    <div class="field" id="choiceCountField" hidden>
+      <label>Choices <span id="choiceCountValue">4</span></label>
+      <input type="range" id="choiceCount" min="2" max="8" value="4" step="1">
+    </div>
+
+    <div class="field" id="goProbabilityField" hidden>
+      <label>Go Probability <span id="goProbValue">70</span>%</label>
+      <input type="range" id="goProbability" min="50" max="90" value="70" step="5">
+    </div>
+
+    <div class="field" id="delayRangeField">
+      <label>Delay Range <span id="delayRangeValue">1–4s</span></label>
+      <div class="range-inputs">
+        <input type="number" id="minDelay" min="500" max="5000" value="1000" step="100" placeholder="Min (ms)">
+        <span>to</span>
+        <input type="number" id="maxDelay" min="500" max="10000" value="4000" step="100" placeholder="Max (ms)">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Sound</label>
+      <select id="soundSelect">
+        <option value="beep">Beep</option>
+        <option value="click">Click</option>
+        <option value="tone">Tone</option>
+        <option value="none">None</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="startBtn">Start Test</button>
+      <button class="btn secondary" id="dailyBtn">Daily Challenge</button>
+    </div>
+
+    <div class="stats-panel">
+      <h3>Your Stats</h3>
+      <div class="stat-row">
+        <span class="stat-label">Best (Simple)</span>
+        <span class="stat-value" id="bestSimple">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Avg (Simple)</span>
+        <span class="stat-value" id="avgSimple">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Best (Choice)</span>
+        <span class="stat-value" id="bestChoice">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Avg (Choice)</span>
+        <span class="stat-value" id="avgChoice">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Best (Go/No-Go)</span>
+        <span class="stat-value" id="bestGoNoGo">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Daily Streak</span>
+        <span class="stat-value" id="dailyStreak">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Tests Taken</span>
+        <span class="stat-value" id="testsTaken">0</span>
+      </div>
+    </div>
+
+    <div class="leaderboard-section">
+      <h3>Leaderboard (Local)</h3>
+      <div id="leaderboard" class="leaderboard"></div>
+    </div>
+  </aside>
+
+  <section class="panel game-panel">
+    <div class="game-header">
+      <div class="trial-display">
+        <span class="trial-label">Trial</span>
+        <span class="trial-value" id="currentTrial">1</span>
+        <span class="trial-sep">/</span>
+        <span class="trial-value" id="totalTrials">10</span>
+      </div>
+      <div class="mode-badge" id="modeBadge">Simple</div>
+      <div class="daily-badge" id="dailyBadge" hidden>Daily Challenge</div>
+    </div>
+
+    <div class="game-area" id="gameArea">
+      <div class="instruction" id="instruction">
+        Press Start to begin
+      </div>
+      <div class="target-zone" id="targetZone" tabindex="0" role="button" aria-label="Reaction target">
+        <div class="target-circle" id="targetCircle"></div>
+        <div class="target-text" id="targetText">WAIT</div>
+      </div>
+      <div class="choice-grid" id="choiceGrid" hidden></div>
+      <div class="gonogo-display" id="gonogoDisplay" hidden>
+        <div class="gonogo-shape" id="gonogoShape"></div>
+        <div class="gonogo-label" id="gonogoLabel"></div>
+      </div>
+    </div>
+
+    <div class="live-stats" id="liveStats" hidden>
+      <div class="live-stat">
+        <span class="live-label">Last</span>
+        <span class="live-value" id="lastReaction">—</span>
+      </div>
+      <div class="live-stat">
+        <span class="live-label">Best</span>
+        <span class="live-value" id="bestReaction">—</span>
+      </div>
+      <div class="live-stat">
+        <span class="live-label">Avg</span>
+        <span class="live-value" id="avgReaction">—</span>
+      </div>
+      <div class="live-stat">
+        <span class="live-label">Worst</span>
+        <span class="live-value" id="worstReaction">—</span>
+      </div>
+      <div class="live-stat">
+        <span class="live-label">Errors</span>
+        <span class="live-value" id="errorCount">0</span>
+      </div>
+    </div>
+
+    <div class="game-footer">
+      <button class="btn secondary" id="retryBtn" hidden>Retry Trial</button>
+      <button class="btn primary" id="restartBtn" hidden>Restart Test</button>
+    </div>
+
+    <div id="resultsModal" class="modal" hidden>
+      <div class="modal-content">
+        <h2 id="modalTitle">Test Complete!</h2>
+        <div class="results-grid">
+          <div class="result-card">
+            <span class="result-label">Average</span>
+            <span class="result-value" id="finalAvg">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Best</span>
+            <span class="result-value" id="finalBest">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Worst</span>
+            <span class="result-value" id="finalWorst">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Std Dev</span>
+            <span class="result-value" id="finalStdDev">—</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Errors</span>
+            <span class="result-value" id="finalErrors">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">Consistency</span>
+            <span class="result-value" id="finalConsistency">—</span>
+          </div>
+        </div>
+        <div class="result-chart">
+          <canvas id="reactionChart" width="500" height="200"></canvas>
+        </div>
+        <div class="daily-result" id="dailyResult" hidden>
+          <h3>Daily Challenge</h3>
+          <p id="dailyMessage"></p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="shareBtn">Share Result</button>
+          <button class="btn primary" id="playAgainBtn">Test Again</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="historyModal" class="modal" hidden>
+      <div class="modal-content history-content">
+        <h2>Reaction History</h2>
+        <div class="history-tabs">
+          <button class="history-tab active" data-history="all">All</button>
+          <button class="history-tab" data-history="simple">Simple</button>
+          <button class="history-tab" data-history="choice">Choice</button>
+          <button class="history-tab" data-history="gonogo">Go/No-Go</button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="clearHistoryBtn">Clear History</button>
+          <button class="btn primary" id="closeHistoryBtn">Close</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
