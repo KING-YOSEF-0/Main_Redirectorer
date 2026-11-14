@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time Zone Meeting Planner | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Time Zone Meeting Planner</h1>
+  <p class="tagline">Find the perfect meeting time across time zones. Visual timeline, overlap detection, shareable links, calendar exports.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel" aria-labelledby="config-heading">
+    <h2 id="config-heading">Planner</h2>
+
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="meetingDate" value="">
+    </div>
+
+    <div class="field">
+      <label>Meeting Duration</label>
+      <div class="duration-control">
+        <input type="range" id="duration" min="15" max="240" step="15" value="60">
+        <span id="durationValue">60 min</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Recurrence</label>
+      <select id="recurrence">
+        <option value="none">One-time meeting</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="biweekly">Bi-weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Time Zones / Cities</label>
+      <div class="tz-search">
+        <input type="text" id="tzSearch" placeholder="Search city or timezone (e.g., New York, London, UTC+5)..." autocomplete="off">
+        <div id="tzSuggestions" class="suggestions" hidden></div>
+      </div>
+      <div id="selectedTimezones" class="selected-timezones" role="list"></div>
+      <div class="field-hint">Click a suggestion to add. Drag to reorder. Max 8 zones.</div>
+    </div>
+
+    <div class="field">
+      <label>Working Hours (default 9-17)</label>
+      <div class="working-hours">
+        <div class="wh-preset">
+          <label><input type="radio" name="whPreset" value="default" checked> 9:00–17:00</label>
+          <label><input type="radio" name="whPreset" value="extended"> 8:00–18:00</label>
+          <label><input type="radio" name="whPreset" value="custom"> Custom</label>
+        </div>
+        <div class="wh-custom" hidden>
+          <div class="wh-row">
+            <label>Start</label>
+            <input type="time" id="whStart" value="09:00">
+          </div>
+          <div class="wh-row">
+            <label>End</label>
+            <input type="time" id="whEnd" value="17:00">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="showWeekend" checked>
+        <span>Show weekends</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="highlightOverlaps" checked>
+        <span>Highlight best overlaps</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="compactMode">
+        <span>Compact mode (for embedding)</span>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="findBestBtn">Find Best Slots</button>
+      <button class="btn" id="shareBtn">Share Link</button>
+    </div>
+
+    <div class="field">
+      <label>Export</label>
+      <div class="export-buttons">
+        <button class="btn" id="exportIcsBtn">.ics Calendar</button>
+        <button class="btn" id="exportSlackBtn">Slack Message</button>
+        <button class="btn" id="exportTextBtn">Plain Text</button>
+      </div>
+    </div>
+  </aside>
+
+  <section class="panel preview-panel" aria-labelledby="preview-heading">
+    <h2 id="preview-heading">Timeline</h2>
+
+    <div id="timelineContainer">
+      <div class="empty-state" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <p>Add time zones to see the timeline</p>
+        <p class="hint">Search for cities like "New York", "London", "Tokyo" or timezones like "UTC+5"</p>
+      </div>
+
+      <div id="timeline" hidden>
+        <div class="timeline-header">
+          <div class="timeline-date" id="timelineDate"></div>
+          <div class="timeline-legend">
+            <span class="legend-item"><span class="legend-color work"></span> Working hours</span>
+            <span class="legend-item"><span class="legend-color overlap"></span> Best overlap</span>
+            <span class="legend-item"><span class="legend-color meeting"></span> Meeting</span>
+          </div>
+        </div>
+        <div class="timeline-grid" id="timelineGrid" role="grid"></div>
+        <div class="best-slots" id="bestSlots" hidden>
+          <h3>🎯 Best Meeting Slots</h3>
+          <div class="slots-list" id="slotsList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>
