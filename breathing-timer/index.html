@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breathing Timer & Ambient Mixer | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Breathing Timer & Ambient Mixer</h1>
+  <p class="tagline">Guided breathing exercises with ambient soundscapes, binaural beats, and color-pulse synced to your breath.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Breathing Pattern</h2>
+    <div class="pattern-presets" id="patternPresets">
+      <button class="preset-btn active" data-pattern="box">Box Breathing</button>
+      <button class="preset-btn" data-pattern="relax">4-7-8 Relax</button>
+      <button class="preset-btn" data-pattern="deep">Deep Calm</button>
+      <button class="preset-btn" data-pattern="coherent">Coherent</button>
+      <button class="preset-btn" data-pattern="power">Power</button>
+      <button class="preset-btn" data-pattern="wimhof">Wim Hof</button>
+    </div>
+
+    <div class="pattern-sliders">
+      <div class="field">
+        <label>Inhale <span id="inhaleVal">4</span>s</label>
+        <input type="range" id="inhale" min="1" max="12" value="4">
+      </div>
+      <div class="field">
+        <label>Hold <span id="holdVal">4</span>s</label>
+        <input type="range" id="hold" min="0" max="12" value="4">
+      </div>
+      <div class="field">
+        <label>Exhale <span id="exhaleVal">4</span>s</label>
+        <input type="range" id="exhale" min="1" max="12" value="4">
+      </div>
+      <div class="field">
+        <label>Hold Out <span id="holdOutVal">4</span>s</label>
+        <input type="range" id="holdOut" min="0" max="12" value="4">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Session Duration</label>
+      <div class="duration-presets">
+        <button class="preset-btn" data-min="3">3 min</button>
+        <button class="preset-btn" data-min="5">5 min</button>
+        <button class="preset-btn" data-min="10">10 min</button>
+        <button class="preset-btn" data-min="15">15 min</button>
+        <button class="preset-btn" data-min="20">20 min</button>
+        <button class="preset-btn" data-min="30">30 min</button>
+      </div>
+      <span class="field-hint">Total: <span id="durationDisplay">10</span> min</span>
+    </div>
+
+    <div class="field">
+      <label>Loop Mode</label>
+      <select id="loopMode">
+        <option value="once">Play once</option>
+        <option value="loop" selected>Loop until stopped</option>
+        <option value="auto-stop">Auto-stop after duration</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="startBtn">Start Session</button>
+      <button class="btn" id="pauseBtn" disabled>Pause</button>
+      <button class="btn" id="stopBtn" disabled>Stop</button>
+    </div>
+
+    <div class="field">
+      <label>Soundscapes</label>
+      <div class="soundscape-presets">
+        <button class="preset-btn active" data-soundscape="rain">🌧️ Rain</button>
+        <button class="preset-btn" data-soundscape="ocean">🌊 Ocean</button>
+        <button class="preset-btn" data-soundscape="forest">🌲 Forest</button>
+        <button class="preset-btn" data-soundscape="space">🌌 Space</button>
+        <button class="preset-btn" data-soundscape="campfire">🔥 Campfire</button>
+        <button class="preset-btn" data-soundscape="none">🔇 None</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Binaural Beats</label>
+      <select id="binaural">
+        <option value="none">Off</option>
+        <option value="theta">Theta (4-7.5 Hz) - Deep Relax</option>
+        <option value="alpha">Alpha (8-12 Hz) - Focus</option>
+        <option value="beta">Beta (12-30 Hz) - Alert</option>
+        <option value="gamma">Gamma (40 Hz) - Insight</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Mood Tracking</label>
+      <div class="mood-buttons">
+        <button class="mood-btn" data-mood="terrible">😢 Terrible</button>
+        <button class="mood-btn" data-mood="bad">😐 Bad</button>
+        <button class="mood-btn" data-mood="ok">🙂 OK</button>
+        <button class="mood-btn" data-mood="good">😊 Good</button>
+        <button class="mood-btn" data-mood="great">😍 Great</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Session Log</label>
+      <div class="session-log" id="sessionLog"></div>
+    </div>
+
+    <div class="data-actions">
+      <button class="btn" id="exportLogBtn">Export Log (CSV)</button>
+      <button class="btn" id="sharePresetBtn">Share Preset</button>
+    </div>
+  </aside>
+
+  <section class="panel main-panel">
+    <div class="breathing-display">
+      <div class="ring-container">
+        <div class="ring ring-outer" id="ringOuter"></div>
+        <div class="ring ring-inner" id="ringInner"></div>
+        <div class="ring-center" id="ringCenter">
+          <div class="phase-text" id="phaseText">Ready</div>
+          <div class="phase-countdown" id="phaseCountdown">--</div>
+        </div>
+      </div>
+      <div class="session-info">
+        <span id="sessionTimer">00:00</span>
+        <span id="cycleCounter">Cycle 0/0</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
