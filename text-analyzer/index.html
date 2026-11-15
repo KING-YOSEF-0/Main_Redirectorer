@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text Analyzer & Readability Toolkit | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Text Analyzer & Readability Toolkit</h1>
+  <p class="tagline">Analyze text statistics, readability scores, sentiment, keyword density, and generate summaries instantly.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>Input</h2>
+    <div class="field">
+      <label for="textInput">Paste or type your text</label>
+      <textarea id="textInput" placeholder="Enter text to analyze..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Actions</label>
+      <div class="actions">
+        <button class="btn primary" id="analyzeBtn">Analyze</button>
+        <button class="btn" id="clearBtn">Clear</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Sample Texts</label>
+      <div class="sample-buttons">
+        <button class="preset-btn" data-sample="lorem">Lorem Ipsum</button>
+        <button class="preset-btn" data-sample="speech">MLK Speech</button>
+        <button class="preset-btn" data-sample="code">Code Comment</button>
+        <button class="preset-btn" data-sample="email">Business Email</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Options</label>
+      <div class="checkbox-row">
+        <label class="checkbox-label"><input type="checkbox" id="optSentiment" checked> Sentiment Analysis</label>
+      </div>
+      <div class="checkbox-row">
+        <label class="checkbox-label"><input type="checkbox" id="optKeywords" checked> Keyword Extraction</label>
+      </div>
+      <div class="checkbox-row">
+        <label class="checkbox-label"><input type="checkbox" id="optSummary" checked> Auto Summary</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Language</label>
+      <select id="language">
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+      </select>
+    </div>
+
+    <div class="data-actions">
+      <button class="btn" id="exportReportBtn">Export Report (JSON)</button>
+      <button class="btn" id="copyStatsBtn">Copy Stats</button>
+    </div>
+  </aside>
+
+  <section class="panel main-panel">
+    <div class="results-tabs">
+      <button class="tab-btn active" data-tab="overview">Overview</button>
+      <button class="tab-btn" data-tab="readability">Readability</button>
+      <button class="tab-btn" data-tab="sentiment">Sentiment</button>
+      <button class="tab-btn" data-tab="keywords">Keywords</button>
+      <button class="tab-btn" data-tab="summary">Summary</button>
+    </div>
+
+    <div class="tab-content" id="tabOverview">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="charts-row">
+        <div class="chart-box">
+          <h4>Character Distribution</h4>
+          <canvas id="charChart" width="300" height="200"></canvas>
+        </div>
+        <div class="chart-box">
+          <h4>Word Length Distribution</h4>
+          <canvas id="wordLenChart" width="300" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tabReadability" hidden>
+      <div class="readability-grid" id="readabilityGrid"></div>
+      <div class="explanation" id="readabilityExplanation"></div>
+    </div>
+
+    <div class="tab-content" id="tabSentiment" hidden>
+      <div class="sentiment-display" id="sentimentDisplay"></div>
+      <div class="chart-box">
+        <h4>Sentence-Level Sentiment</h4>
+        <canvas id="sentimentChart" width="500" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tabKeywords" hidden>
+      <div class="keyword-list" id="keywordList"></div>
+      <div class="chart-box">
+        <h4>Top Keywords</h4>
+        <canvas id="keywordChart" width="500" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tabSummary" hidden>
+      <div class="summary-box" id="summaryBox"></div>
+      <div class="actions" style="margin-top:1rem;">
+        <button class="btn" id="copySummaryBtn">Copy Summary</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
