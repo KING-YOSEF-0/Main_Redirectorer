@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Query Builder Pro</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #f59e0b;
+            --text: #f1f5f9;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: var(--text); padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+        h1 { color: var(--accent); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        input, select, textarea { width: 100%; padding: 12px; background: #334155; border: 1px solid #475569; color: white; border-radius: 8px; margin-top: 5px; box-sizing: border-box; }
+        button { background: var(--accent); color: #0f172a; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        pre { background: #000; padding: 15px; border-radius: 8px; overflow-x: auto; color: #10b981; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SQL Query Builder Pro</h1>
+        <div class="grid">
+            <div>
+                <label>Table Name</label>
+                <input type="text" id="table" placeholder="users">
+                <label>Columns (comma separated)</label>
+                <input type="text" id="columns" placeholder="id, name, email">
+                <label>Condition (WHERE clause)</label>
+                <input type="text" id="condition" placeholder="status = 'active'">
+            </div>
+            <div>
+                <label>Operation</label>
+                <select id="operation">
+                    <option value="SELECT">SELECT</option>
+                    <option value="UPDATE">UPDATE</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+                <button onclick="buildQuery()">Generate SQL</button>
+            </div>
+        </div>
+        <h3>Generated Query:</h3>
+        <pre id="output">-- Your SQL will appear here</pre>
+    </div>
+    <script>
+        function buildQuery() {
+            const op = document.getElementById('operation').value;
+            const table = document.getElementById('table').value || 'table_name';
+            const cols = document.getElementById('columns').value || '*';
+            const cond = document.getElementById('condition').value;
+            let sql = "";
+            if (op === "SELECT") sql = `SELECT ${cols} FROM ${table}${cond ? ' WHERE ' + cond : ''};`;
+            else if (op === "UPDATE") sql = `UPDATE ${table} SET ${cols}${cond ? ' WHERE ' + cond : ''};`;
+            else sql = `DELETE FROM ${table}${cond ? ' WHERE ' + cond : ''};`;
+            document.getElementById('output').textContent = sql;
+        }
+    </script>
+</body>
+</html>

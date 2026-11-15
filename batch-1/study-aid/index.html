@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards & Quiz Maker Pro</title>
+    <style>
+        :root {
+            --bg-color: #1a1230;
+            --card-bg: #2d1b4d;
+            --accent: #f0abfc;
+            --text: #f3e8ff;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: var(--text); padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4); }
+        h1 { color: var(--accent); margin-top: 0; }
+        input, select, textarea { width: 100%; padding: 10px; background: #1a1230; border: 1px solid #4a2c7a; color: white; border-radius: 6px; margin-top: 5px; box-sizing: border-box; }
+        button { background: var(--accent); color: #1a1230; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: #3d2a6b; border: 1px solid #5a3a9a; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .card h3 { margin: 0 0 10px 0; color: var(--accent); }
+        .flash { background: #4a2c7a; padding: 20px; border-radius: 8px; text-align: center; font-size: 1.2em; margin-bottom: 15px; }
+        .show-answer { color: #f0abfc; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Flashcards & Quiz Maker Pro</h1>
+        <div class="grid">
+            <div>
+                <label>Front (Question)</label>
+                <input type="text" id="front" placeholder="What is the capital of France?">
+                <label>Back (Answer)</label>
+                <input type="text" id="back" placeholder="Paris">
+                <label>Category</label>
+                <input type="text" id="category" placeholder="Geography">
+                <button onclick="addCard()">Add Flashcard</button>
+            </div>
+            <div>
+                <label>Flashcard Deck</label>
+                <div id="deck"></div>
+                <button onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+        <div id="quiz-area" style="display:none; margin-top: 20px;">
+            <div class="flash" id="flash-card">Click "Show Answer" to reveal</div>
+            <button onclick="showAnswer()">Show Answer</button>
+            <button onclick="nextCard()">Next Card</button>
+        </div>
+    </div>
+    <script>
+        let cards = JSON.parse(localStorage.getItem('flashcards') || '[]');
+        let quizIndex = 0;
+        let showingAnswer = false;
+
+        function render() {
+            const deck = document.getElementById('deck');
+            deck.innerHTML = cards.length === 0 ? '<p>No flashcards yet.</p>' : '';
+            cards.forEach((c, idx) => {
+                deck.innerHTML += `
+                    <div class="card">
+                        <h3>${escapeHtml(c.front)}</h3>
+                        <p><strong>Answer:</strong> ${escapeHtml(c.back)}</p>
+                        <p><em>Category:</em> ${escapeHtml(c.category || 'None')}</p>
+                        <button style="background: #7c3aed; padding: 5px 10px;" onclick="deleteCard(${idx})">Delete</button>
+                    </div>
+                `;
+            });
+        }
+
+        function addCard() {
+            const front = document.getElementById('front').value.trim();
+            const back = document.getElementById('back').value.trim();
+            const category = document.getElementById('category').value.trim();
+            if (!front || !back) return alert('Please fill in front and back.');
+            cards.push({ front, back, category });
+            localStorage.setItem('flashcards', JSON.stringify(cards));
+            document.getElementById('front').value = '';
+            document.getElementById('back').value = '';
+            document.getElementById('category').value = '';
+            render();
+        }
+
+        function deleteCard(idx) {
+            cards.splice(idx, 1);
+            localStorage.setItem('flashcards', JSON.stringify(cards));
+            render();
+        }
+
+        function startQuiz() {
+            if (cards.length === 0) return alert('Add some flashcards first!');
+            document.getElementById('quiz-area').style.display = 'block';
+            quizIndex = 0;
+            showingAnswer = false;
+            document.getElementById('flash-card').textContent = cards[quizIndex].front;
+            document.getElementById('flash-card').classList.remove('show-answer');
+        }
+
+        function showAnswer() {
+            if (showingAnswer) return;
+            showingAnswer = true;
+            const card = document.getElementById('flash-card');
+            card.textContent = cards[quizIndex].back;
+            card.classList.add('show-answer');
+        }
+
+        function nextCard() {
+            quizIndex = (quizIndex + 1) % cards.length;
+            showingAnswer = false;
+            document.getElementById('flash-card').textContent = cards[quizIndex].front;
+            document.getElementById('flash-card').classList.remove('show-answer');
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        render();
+    </script>
+</body>
+</html>

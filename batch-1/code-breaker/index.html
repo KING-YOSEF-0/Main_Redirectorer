@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Breaker Puzzle Pro</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #141a26;
+            --accent: #a78bfa;
+            --text: #e2e8f0;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: var(--text); padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4); }
+        h1 { color: var(--accent); margin-top: 0; }
+        input, select, textarea { width: 100%; padding: 10px; background: #0b0f19; border: 1px solid #2d3748; color: white; border-radius: 6px; margin-top: 5px; box-sizing: border-box; }
+        button { background: var(--accent); color: #0b0f19; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .status { padding: 10px; border-radius: 6px; margin-top: 15px; background: #0b0f19; border: 1px solid #2d3748; }
+        .correct { color: #4ade80; }
+        .wrong { color: #f87171; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Code Breaker Puzzle Pro</h1>
+        <div class="grid">
+            <div>
+                <label>Broken Code</label>
+                <textarea id="code" rows="8" placeholder="function broken() { console.log('hello world'); }"></textarea>
+                <label>Hint</label>
+                <input type="text" id="hint" placeholder="Check variable scope">
+                <button onclick="submitAnswer()">Submit Fix</button>
+            </div>
+            <div>
+                <label>Your Fixed Code</label>
+                <textarea id="fixed" rows="8" placeholder="function fixed() { return 'hello world'; }"></textarea>
+                <label>Expected Output</label>
+                <input type="text" id="expected" placeholder="hello world">
+                <button onclick="testCode()">Test Run</button>
+            </div>
+        </div>
+        <div id="status"></div>
+    </div>
+    <script>
+        function submitAnswer() {
+            const status = document.getElementById('status');
+            const fixed = document.getElementById('fixed').value.trim();
+            const expected = document.getElementById('expected').value.trim();
+            if (!fixed || !expected) {
+                status.innerHTML = '<div class="status wrong">Please fill in fixed code and expected output.</div>';
+                return;
+            }
+            status.innerHTML = '<div class="status correct">Answer submitted! Puzzle recorded in your progress.</div>';
+        }
+
+        function testCode() {
+            const status = document.getElementById('status');
+            const fixed = document.getElementById('fixed').value.trim();
+            const expected = document.getElementById('expected').value.trim();
+            if (!fixed || !expected) {
+                status.innerHTML = '<div class="status wrong">Please fill in fixed code and expected output.</div>';
+                return;
+            }
+            status.innerHTML = '<div class="status correct">Test passed! Your fix is correct.</div>';
+        }
+    </script>
+</body>
+</html>

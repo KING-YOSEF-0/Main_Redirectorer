@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub API Explorer Pro</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent: #f778ba;
+            --text: #c9d1d9;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-color); color: var(--text); padding: 20px; }
+        .container { max-width: 950px; margin: 0 auto; background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #30363d; }
+        h1 { color: var(--accent); margin-top: 0; }
+        input, select, textarea { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 6px; margin-top: 5px; box-sizing: border-box; }
+        button { background: var(--accent); color: #0d1117; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        pre { background: #0d1117; padding: 15px; border-radius: 6px; overflow-x: auto; color: #79c0ff; font-family: monospace; }
+        .repo-card { background: #21262d; border: 1px solid #30363d; padding: 15px; border-radius: 6px; margin-top: 15px; }
+        .repo-card h3 { margin: 0 0 10px 0; color: #58a6ff; }
+        .repo-card p { margin: 5px 0; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GitHub API Explorer Pro</h1>
+        <div class="grid">
+            <div>
+                <label>Search Query</label>
+                <input type="text" id="query" placeholder="react">
+                <label>Sort By</label>
+                <select id="sort">
+                    <option value="stars">Stars</option>
+                    <option value="forks">Forks</option>
+                    <option value="updated">Updated</option>
+                </select>
+                <button onclick="searchRepos()">Search Repositories</button>
+            </div>
+            <div>
+                <label>GitHub Token (Optional)</label>
+                <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx">
+            </div>
+        </div>
+        <h3>Results:</h3>
+        <div id="results"></div>
+    </div>
+    <script>
+        async function searchRepos() {
+            const query = document.getElementById('query').value || 'react';
+            const sort = document.getElementById('sort').value;
+            const token = document.getElementById('token').value;
+            const results = document.getElementById('results');
+
+            results.innerHTML = '<p>Searching GitHub...</p>';
+            try {
+                const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&per_page=5`;
+                const headers = { 'Accept': 'application/vnd.github.v3+json' };
+                if (token) headers['Authorization'] = `token ${token}`;
+
+                const res = await fetch(url, { headers });
+                if (!res.ok) throw new Error('GitHub API Error: ' + res.status);
+                const data = await res.json();
+
+                results.innerHTML = '';
+                data.items.forEach(repo => {
+                    results.innerHTML += `
+                        <div class="repo-card">
+                            <h3>${escapeHtml(repo.full_name)}</h3>
+                            <p>⭐ Stars: ${repo.stargazers_count} | 🍴 Forks: ${repo.forks_count} | ⚡ Updated: ${new Date(repo.updated_at).toLocaleDateString()}</p>
+                            <p>${escapeHtml(repo.description || 'No description')}</p>
+                            <a href="${repo.html_url}" target="_blank" style="color: #f778ba;">View on GitHub →</a>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                results.innerHTML = '<p style="color: #f85149;">Error: ' + err.message + '</p>';
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+</html>

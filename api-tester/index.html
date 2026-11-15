@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Endpoint Tester</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --primary: #4a90e2;
+            --text: #333;
+        }
+        body { font-family: sans-serif; background: var(--bg-color); color: var(--text); padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { text-align: center; }
+        .row { margin-bottom: 15px; }
+        select, input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; width: 100%; }
+        #response { margin-top: 20px; padding: 15px; border: 1px solid #eee; background: #fafafa; white-space: pre-wrap; word-break: break-all; min-height: 100px; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API Endpoint Tester</h1>
+        <div class="row">
+            <label>Method:</label>
+            <select id="method">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+            </select>
+        </div>
+        <div class="row">
+            <label>URL:</label>
+            <input type="text" id="url" placeholder="https://api.example.com/data">
+        </div>
+        <div class="row">
+            <label>Request Body (JSON):</label>
+            <textarea id="body" rows="5" placeholder='{"key": "value"}'></textarea>
+        </div>
+        <button onclick="sendRequest()">Send Request</button>
+        <div id="response">Response will appear here...</div>
+    </div>
+
+    <script>
+        async function sendRequest() {
+            const method = document.getElementById('method').value;
+            const url = document.getElementById('url').value;
+            const body = document.getElementById('body').value;
+            const responseDiv = document.getElementById('response');
+
+            responseDiv.textContent = 'Loading...';
+
+            try {
+                const options = { method };
+                if (method !== 'GET' && body) {
+                    options.body = body;
+                    options.headers = { 'Content-Type': 'application/json' };
+                }
+
+                const start = performance.now();
+                const res = await fetch(url, options);
+                const end = performance.now();
+
+                const data = await res.json();
+                responseDiv.textContent = `Status: ${res.status}\nTime: ${Math.round(end - start)}ms\n\n${JSON.stringify(data, null, 2)}`;
+            } catch (err) {
+                responseDiv.textContent = 'Error: ' + err.message;
+            }
+        }
+    </script>
+</body>
+</html>

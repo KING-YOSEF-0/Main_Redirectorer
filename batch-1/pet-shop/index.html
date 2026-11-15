@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberPet Simulator Pro</title>
+    <style>
+        :root {
+            --bg-color: #fdf2f8;
+            --card-bg: #ffffff;
+            --accent: #ec4899;
+            --secondary: #8b5cf6;
+            --text: #1e293b;
+            --energy: #22c55e;
+            --hunger: #f59e0b;
+            --happy: #3b82f6;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { width: 400px; background: var(--card-bg); padding: 30px; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border: 4px solid #fbcfe8; position: relative; }
+        .pet-screen { height: 200px; background: #f1f5f9; border-radius: 16px; display: flex; justify-content: center; align-items: center; font-size: 80px; margin-bottom: 20px; border: 4px inset #e2e8f0; position: relative; overflow: hidden; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-bar { height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden; margin-top: 5px; }
+        .stat-fill { height: 100%; transition: width 0.3s; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { padding: 12px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: transform 0.1s, filter 0.2s; color: white; }
+        button:active { transform: scale(0.95); }
+        .btn-feed { background: var(--hunger); }
+        .btn-play { background: var(--happy); }
+        .btn-sleep { background: var(--secondary); }
+        .btn-clean { background: #06b6d4; }
+        .status-msg { text-align: center; font-weight: bold; margin-bottom: 10px; height: 1.2em; color: var(--accent); }
+        .level-badge { position: absolute; top: 10px; right: 10px; background: var(--accent); color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+        .name-tag { position: absolute; top: 10px; left: 10px; font-weight: bold; color: #64748b; }
+        .death-screen { position: absolute; inset: 0; background: rgba(0,0,0,0.8); color: white; display: none; flex-direction: column; justify-content: center; align-items: center; border-radius: 24px; z-index: 10; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="death-screen" class="death-screen">
+            <h2>Your Pet has left...</h2>
+            <p>Don't forget to check back often!</p>
+            <button onclick="resetPet()" style="background: var(--accent); margin-top: 20px;">Adopt New Pet</button>
+        </div>
+        <div class="name-tag" id="pet-name-display">Pet</div>
+        <div class="level-badge" id="level-display">Lv. 1</div>
+        <div class="status-msg" id="status-msg">I'm happy!</div>
+        <div class="pet-screen" id="pet-visual">🐱</div>
+        <div class="stats">
+            <div>
+                <label>Energy</label>
+                <div class="stat-bar"><div id="energy-fill" class="stat-fill" style="background: var(--energy); width: 100%;"></div></div>
+            </div>
+            <div>
+                <label>Hunger</label>
+                <div class="stat-bar"><div id="hunger-fill" class="stat-fill" style="background: var(--hunger); width: 100%;"></div></div>
+            </div>
+            <div>
+                <label>Happiness</label>
+                <div class="stat-bar"><div id="happy-fill" class="stat-fill" style="background: var(--happy); width: 100%;"></div></div>
+            </div>
+            <div>
+                <label>Hygiene</label>
+                <div class="stat-bar"><div id="clean-fill" class="stat-fill" style="background: #06b6d4; width: 100%;"></div></div>
+            </div>
+        </div>
+        <div class="controls">
+            <button class="btn-feed" onclick="action('feed')">🍎 Feed</button>
+            <button class="btn-play" onclick="action('play')">🧶 Play</button>
+            <button class="btn-sleep" onclick="action('sleep')">💤 Sleep</button>
+            <button class="btn-clean" onclick="action('clean')">🧼 Clean</button>
+        </div>
+        <div style="margin-top: 15px;">
+            <input type="text" id="name-input" placeholder="Rename your pet..." style="width: 70%; padding: 8px; border-radius: 8px; border: 1px solid #ddd;">
+            <button onclick="rename()" style="width: 25%; padding: 8px; background: var(--accent);">Set</button>
+        </div>
+    </div>
+
+    <script>
+        let pet = {
+            name: "Mochi",
+            level: 1,
+            energy: 100,
+            hunger: 100,
+            happy: 100,
+            clean: 100,
+            exp: 0,
+            alive: true
+        };
+
+        const emojis = {
+            normal: "🐱",
+            hungry: "😿",
+            tired: "🥱",
+            dirty: "🤢",
+            playing: "😺",
+            sleeping: "😴",
+            dead: "👻"
+        };
+
+        function updateUI() {
+            if (!pet.alive) {
+                document.getElementById('death-screen').style.display = 'flex';
+                document.getElementById('pet-visual').textContent = emojis.dead;
+                return;
+            }
+            document.getElementById('pet-name-display').textContent = pet.name;
+            document.getElementById('level-display').textContent = `Lv. ${pet.level}`;
+            document.getElementById('energy-fill').style.width = pet.energy + '%';
+            document.getElementById('hunger-fill').style.width = pet.hunger + '%';
+            document.getElementById('happy-fill').style.width = pet.happy + '%';
+            document.getElementById('clean-fill').style.width = pet.clean + '%';
+
+            // Visual state
+            if (pet.energy < 20) document.getElementById('pet-visual').textContent = emojis.tired;
+            else if (pet.hunger < 20) document.getElementById('pet-visual').textContent = emojis.hungry;
+            else if (pet.clean < 20) document.getElementById('pet-visual').textContent = emojis.dirty;
+            else document.getElementById('pet-visual').textContent = emojis.normal;
+
+            localStorage.setItem('cyberpet_data', JSON.stringify(pet));
+        }
+
+        function action(type) {
+            if (!pet.alive) return;
+            const msg = document.getElementById('status-msg');
+
+            if (type === 'feed') {
+                if (pet.hunger >= 100) { msg.textContent = "I'm full!"; return; }
+                pet.hunger = Math.min(100, pet.hunger + 20);
+                pet.exp += 5;
+                msg.textContent = "Yum! 😋";
+            } else if (type === 'play') {
+                if (pet.energy < 20) { msg.textContent = "Too tired to play... 🥱"; return; }
+                pet.happy = Math.min(100, pet.happy + 25);
+                pet.energy = Math.max(0, pet.energy - 15);
+                pet.clean = Math.max(0, pet.clean - 10);
+                pet.exp += 15;
+                msg.textContent = "Yay! 😺";
+            } else if (type === 'sleep') {
+                pet.energy = 100;
+                pet.hunger = Math.max(0, pet.hunger - 10);
+                msg.textContent = "Zzz... 💤";
+                document.getElementById('pet-visual').textContent = emojis.sleeping;
+                setTimeout(updateUI, 1000);
+            } else if (type === 'clean') {
+                pet.clean = 100;
+                pet.happy = Math.max(0, pet.happy - 5);
+                pet.exp += 5;
+                msg.textContent = "So fresh! ✨";
+            }
+
+            if (pet.exp >= 100) {
+                pet.level++;
+                pet.exp = 0;
+                msg.textContent = "LEVEL UP! 🌟";
+            }
+            updateUI();
+        }
+
+        function rename() {
+            const val = document.getElementById('name-input').value.trim();
+            if (val) {
+                pet.name = val;
+                updateUI();
+            }
+        }
+
+        function resetPet() {
+            pet = { name: "Mochi", level: 1, energy: 100, hunger: 100, happy: 100, clean: 100, exp: 0, alive: true };
+            document.getElementById('death-screen').style.display = 'none';
+            updateUI();
+        }
+
+        // Tick system (Passive decay)
+        setInterval(() => {
+            if (!pet.alive) return;
+            pet.hunger = Math.max(0, pet.hunger - 2);
+            pet.energy = Math.max(0, pet.energy - 1);
+            pet.happy = Math.max(0, pet.happy - 2);
+            pet.clean = Math.max(0, pet.clean - 1);
+
+            if (pet.hunger === 0 || pet.energy === 0) {
+                // If neglected too long, could "die" but let's keep it simple
+                // pet.alive = false;
+            }
+            updateUI();
+        }, 5000);
+
+        // Load data
+        const saved = localStorage.getItem('cyberpet_data');
+        if (saved) pet = JSON.parse(saved);
+        updateUI();
+    </script>
+</body>
+</html>
