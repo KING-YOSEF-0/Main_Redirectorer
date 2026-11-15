@@ -3,44 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Endpoint Tester</title>
+    <title>API Endpoint Tester Pro</title>
     <style>
         :root {
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --primary: #4a90e2;
-            --text: #333;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --text: #f1f5f9;
         }
-        body { font-family: sans-serif; background: var(--bg-color); color: var(--text); padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { text-align: center; }
-        .row { margin-bottom: 15px; }
-        select, input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; width: 100%; }
-        #response { margin-top: 20px; padding: 15px; border: 1px solid #eee; background: #fafafa; white-space: pre-wrap; word-break: break-all; min-height: 100px; border-radius: 6px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: var(--text); padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+        h1 { margin-top: 0; color: var(--accent); }
+        .row { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; }
+        select, input, textarea { width: 100%; padding: 12px; background: #334155; border: 1px solid #475569; color: white; border-radius: 8px; box-sizing: border-box; font-family: monospace; }
+        button { background: var(--accent); color: #0f172a; border: none; padding: 14px 24px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px; transition: 0.2s; }
+        button:hover { filter: brightness(1.1); }
+        #response { margin-top: 20px; padding: 20px; background: #0f172a; border: 1px solid #475569; border-radius: 8px; white-space: pre-wrap; font-family: monospace; min-height:-legend;
+            overflow-x: auto; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.9em; margin-bottom: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>API Endpoint Tester</h1>
+        <h1>API Endpoint Tester Pro</h1>
         <div class="row">
-            <label>Method:</label>
-            <select id="method">
-                <option value="GET">GET</option>
-                <option value="POST">POST</option>
-                <option value="PUT">PUT</option>
-                <option value="DELETE">DELETE</option>
-            </select>
+            <label>Method & URL</label>
+            <div style="display: flex; gap: 10px;">
+                <select id="method" style="width: 120px;">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+                <input type="text" id="url" placeholder="https://api.example.com/v1/resource">
+            </div>
         </div>
         <div class="row">
-            <label>URL:</label>
-            <input type="text" id="url" placeholder="https://api.example.com/data">
+            <label>Headers (JSON)</label>
+            <textarea id="headers" rows="2" placeholder='{"Authorization": "Bearer token"}'></textarea>
         </div>
         <div class="row">
-            <label>Request Body (JSON):</label>
-            <textarea id="body" rows="5" placeholder='{"key": "value"}'></textarea>
+            <label>Request Body (JSON)</label>
+            <textarea id="body" rows="6" placeholder='{"key": "value"}'></textarea>
         </div>
-        <button onclick="sendRequest()">Send Request</button>
+        <button onclick="sendRequest()">Execute Request</button>
+        <div id="status"></div>
         <div id="response">Response will appear here...</div>
     </div>
 
@@ -48,26 +56,35 @@
         async function sendRequest() {
             const method = document.getElementById('method').value;
             const url = document.getElementById('url').value;
+            const headersStr = document.getElementById('headers').value;
             const body = document.getElementById('body').value;
             const responseDiv = document.getElementById('response');
+            const statusDiv = document.getElementById('status');
 
-            responseDiv.textContent = 'Loading...';
+            responseDiv.textContent = 'Executing...';
+            statusDiv.innerHTML = '';
 
             try {
                 const options = { method };
+                if (headersStr) options.headers = JSON.parse(headersStr);
+                if (!options.headers) options.headers = {};
                 if (method !== 'GET' && body) {
                     options.body = body;
-                    options.headers = { 'Content-Type': 'application/json' };
+                    options.headers['Content-Type'] = 'application/json';
                 }
 
                 const start = performance.now();
                 const res = await fetch(url, options);
                 const end = performance.now();
+                const duration = Math.round(end - start);
 
                 const data = await res.json();
-                responseDiv.textContent = `Status: ${res.status}\nTime: ${Math.round(end - start)}ms\n\n${JSON.stringify(data, null, 2)}`;
+
+                statusDiv.innerHTML = `<span class="status-badge" style="background: ${res.ok ? '#16a34a' : '#dc2626'}">Status: ${res.status}</span> &nbsp; <span>Time: ${duration}ms</span>`;
+                responseDiv.textContent = JSON.stringify(data, null, 2);
             } catch (err) {
-                responseDiv.textContent = 'Error: ' + err.message;
+                statusDiv.innerHTML = `<span class="status-badge" style="background: #dc2626">Error</span>`;
+                responseDiv.textContent = err.message;
             }
         }
     </script>
