@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Habit Tracker & Analytics | KING_YOSEF_</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="bubbles" aria-hidden="true"></div>
+
+<header class="hero">
+  <h1 class="logo">Habit Tracker & Analytics</h1>
+  <p class="tagline">Build better habits, track daily streaks, analyze completion trends, and visualize your progress.</p>
+</header>
+
+<main class="container">
+  <aside class="panel config-panel">
+    <h2>New Habit</h2>
+    <form id="habitForm">
+      <div class="field">
+        <label for="habitName">Habit Name</label>
+        <input type="text" id="habitName" placeholder="e.g., Drink Water, Read 20 mins" required>
+      </div>
+
+      <div class="field">
+        <label for="habitCategory">Category</label>
+        <select id="habitCategory">
+          <option value="health">💚 Health</option>
+          <option value="learning">📘 Learning</option>
+          <option value="productivity">⚡ Productivity</option>
+          <option value="fitness">🏃 Fitness</option>
+          <option value="mindfulness">🧘 Mindfulness</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="habitType">Type</label>
+        <select id="habitType">
+          <option value="boolean">Yes / No (Boolean)</option>
+          <option value="numeric">Numeric Target (e.g. 8 glasses)</option>
+          <option value="timer">Duration Timer (mins)</option>
+        </select>
+      </div>
+
+      <div class="field target-field" id="targetField" hidden>
+        <label for="habitTarget">Daily Target</label>
+        <input type="number" id="habitTarget" min="1" value="1">
+      </div>
+
+      <div class="field">
+        <label for="habitFrequency">Frequency</label>
+        <select id="habitFrequency">
+          <option value="daily">Everyday</option>
+          <option value="weekdays">Weekdays Only</option>
+          <option value="weekends">Weekends Only</option>
+          <option value="custom">3x per week</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="habitColor">Color Accent</label>
+        <div class="color-picker">
+          <input type="radio" name="color" value="#00d4aa" id="c1" checked><label for="c1" style="background:#00d4aa"></label>
+          <input type="radio" name="color" value="#ff6b6b" id="c2"><label for="c2" style="background:#ff6b6b"></label>
+          <input type="radio" name="color" value="#4ecdc4" id="c3"><label for="c3" style="background:#4ecdc4"></label>
+          <input type="radio" name="color" value="#ffe66d" id="c4"><label for="c4" style="background:#ffe66d"></label>
+          <input type="radio" name="color" value="#a29bfe" id="c5"><label for="c5" style="background:#a29bfe"></label>
+          <input type="radio" name="color" value="#fd79a8" id="c6"><label for="c6" style="background:#fd79a8"></label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn primary" id="saveHabitBtn">Create Habit</button>
+    </form>
+
+    <div class="stats-card">
+      <h3>Overall Progress</h3>
+      <div class="overall-progress">
+        <div class="stat-box">
+          <span class="stat-val" id="totalHabits">0</span>
+          <span class="stat-lbl">Active</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val" id="todayCompleted">0/0</span>
+          <span class="stat-lbl">Today</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-val" id="bestStreakOverall">0</span>
+          <span class="stat-lbl">Best Streak</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-actions">
+      <button class="btn" id="exportDataBtn">Export Data (JSON)</button>
+      <button class="btn" id="importDataBtn">Import Data</button>
+      <input type="file" id="importFile" accept=".json" hidden>
+    </div>
+  </aside>
+
+  <section class="panel main-panel">
+    <div class="tab-header">
+      <button class="tab-btn active" data-tab="today">Today's Habits</button>
+      <button class="tab-btn" data-tab="all">All Habits</button>
+      <button class="tab-btn" data-tab="heatmap">Contribution Map</button>
+      <button class="tab-btn" data-tab="analytics">Analytics</button>
+    </div>
+
+    <div class="tab-content" id="tabToday">
+      <div class="date-bar">
+        <button class="icon-btn" id="prevDay">←</button>
+        <span id="currentDateDisplay">Today</span>
+        <button class="icon-btn" id="nextDay">→</button>
+      </div>
+      <div id="todayHabitsList" class="habits-list"></div>
+    </div>
+
+    <div class="tab-content" id="tabAll" hidden>
+      <div id="allHabitsList" class="habits-list"></div>
+    </div>
+
+    <div class="tab-content" id="tabHeatmap" hidden>
+      <h3>Yearly Heatmap</h3>
+      <div class="heatmap-controls">
+        <select id="heatmapHabitSelect"><option value="all">All Habits Combined</option></select>
+      </div>
+      <div class="heatmap-grid" id="heatmapGrid"></div>
+      <div class="heatmap-legend">
+        <span>Less</span>
+        <span class="heat-level l0"></span>
+        <span class="heat-level l1"></span>
+        <span class="heat-level l2"></span>
+        <span class="heat-level l3"></span>
+        <span class="heat-level l4"></span>
+        <span>More</span>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tabAnalytics" hidden>
+      <h3>Completion Analytics</h3>
+      <div class="charts-grid">
+        <div class="chart-box">
+          <h4>Category Breakdown</h4>
+          <canvas id="categoryChart" width="300" height="200"></canvas>
+        </div>
+        <div class="chart-box">
+          <h4>Weekly Trend</h4>
+          <canvas id="weeklyChart" width="300" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Made with 💖 by <strong>KING_YOSEF_</strong>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
