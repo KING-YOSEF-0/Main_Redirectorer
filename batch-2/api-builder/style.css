@@ -1,0 +1,221 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    background: #0a0a0a;
+    color: #00ff88;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.api-builder-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border: 2px solid #00ff88;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3),
+                inset 0 0 20px rgba(0, 255, 136, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.api-builder-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #00ff88, #00ff88, transparent);
+    animation: scanline 3s linear infinite;
+}
+
+@keyframes scanline {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+h1 {
+    text-align: center;
+    padding: 30px;
+    background: rgba(0, 255, 136, 0.05);
+    border-bottom: 2px solid #00ff88;
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.8);
+    letter-spacing: 3px;
+    font-weight: 300;
+}
+
+form#api-request-form {
+    padding: 30px;
+    display: grid;
+    gap: 20px;
+}
+
+.form-group {
+    display: grid;
+    gap: 8px;
+}
+
+label {
+    color: #00cc66;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+input, select, textarea {
+    background: rgba(0, 255, 136, 0.03);
+    border: 1px solid #00ff88;
+    border-radius: 5px;
+    padding: 12px;
+    color: #00ff88;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    outline: none;
+    backdrop-filter: blur(5px);
+}
+
+input:focus, select:focus, textarea:focus {
+    background: rgba(0, 255, 136, 0.08);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4),
+                inset 0 0 0 1px rgba(0, 255, 136, 0.5);
+    border-color: #00ffcc;
+}
+
+input::placeholder, textarea::placeholder {
+    color: #008866;
+    opacity: 0.6;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.4;
+}
+
+button {
+    background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+    border: none;
+    border-radius: 5px;
+    padding: 15px 30px;
+    color: #000;
+    font-weight: bold;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 255, 136, 0.5);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.hidden {
+    display: none;
+}
+
+#request-preview {
+    padding: 30px;
+    border-top: 2px solid #00ff88;
+    background: rgba(0, 255, 136, 0.02);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#request-preview h2 {
+    color: #00ffcc;
+    margin-bottom: 20px;
+    text-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+}
+
+.request-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.request-item:last-child {
+    border-bottom: none;
+}
+
+.method-badge {
+    background: rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+    padding: 5px 12px;
+    border-radius: 3px;
+    border:  semicolon=1px Solid #00ff88;
+    font-weight: bold;
+    margin-right: 20px;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.request-label {
+    color: #00cc66;
+    font-weight: bold;
+    min-width: 100px;
+}
+
+.request-value {
+    color: #00ffcc;
+    font-family: 'JetBrains Mono', monospace;
+    word-break: break-all;
+}
+
+.request-value.json {
+    color: #00aa88;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 255, 136, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00ff88, #00cc66);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #00cc66, #00aa88);
+}

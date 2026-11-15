@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex Visualizer &amp; Tester</title>
+</head>
+<body>
+    <div class="regex-visualizer">
+        <header class="regex-header">
+            <h1>Regex Visualizer &amp; Tester</h1>
+            <div class="regex-controls">
+                <label class="regex-flag">
+                    <input type="checkbox" id="flag-i" name="flags" value="i">
+                    <span>i</span>
+                    <span class="flag-desc">Case-insensitive</span>
+                </label>
+                <label class="regex-flag">
+                    <input type="checkbox" id="flag-g" name="flags" value="g">
+                    <span>g</span>
+                    <span class="flag-desc">Global</span>
+                </label>
+                <label class="regex-flag">
+                    <input type="checkbox" id="flag-m" name="flags" value="m">
+                    <span>m</span>
+                    <span class="flag-desc">Multiline</span>
+                </label>
+                <label class="regex-flag">
+                    <input type="checkbox" id="flag-s" name="flags" value="s">
+                    <span>s</span>
+                    <span class="flag-desc">Dotall</span>
+                </label>
+                <label class="regex-flag">
+                    <input type="checkbox" id="flag-u" name="flags" value="u">
+                    <span>u</span>
+                    <span class="flag-desc">Unicode</span>
+                </label>
+            </div>
+        </header>
+
+        <main class="regex-workspace">
+            <section class="regex-input-panel">
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="pattern">Pattern</label>
+                        <div class="pattern-input">
+                            <span class="pattern-delimiter">/</span>
+                            <input type="text" id="pattern" placeholder="your-regex-pattern" autocomplete="off">
+                            <span class="pattern-delimiter">/</span>
+                            <span class="pattern-flags" id="pattern-flags"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="test-string">Test String</label>
+                        <textarea id="test-string" placeholder="Type text to test against the pattern..." rows="4"></textarea>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-field">
+                        <label for="replacement">Replacement</label>
+                        <input type="text" id="replacement" placeholder="Replacement string (for replace mode)">
+                    </div>
+                </div>
+
+                <div class="input-row button-group">
+                    <button id="btn-test" class="btn-primary">Test</button>
+                    <button id="btn-replace" class="btn-secondary">Replace</button>
+                    <button id="btn-clear" class="btn-ghost">Clear</button>
+                    <button id="btn-export" class="btn-ghost">Export</button>
+                </div>
+            </section>
+
+            <section class="regex-output-panel">
+                <div class="output-section">
+                    <h2>Matches</h2>
+                    <div id="matches-list" class="matches-list">
+                        <p class="empty-state">No matches yet</p>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <h2>Visualized String</h2>
+                    <div id="visualized-string" class="visualized-string">
+                        <p class="empty-state">Visualization will appear here</p>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <h2>Match Details</h2>
+                    <pre id="match-details" class="match-details"></pre>
+                </div>
+            </section>
+        </main>
+
+        <footer class="regex-footer">
+            <span id="status-text">Ready</span>
+            <span id="match-count">0 matches</span>
+        </footer>
+    </div>
+</body>
+</html>
