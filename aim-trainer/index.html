@@ -3,162 +3,301 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aim Trainer | KING_YOSEF_</title>
+<title>Aim Trainer Pro | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<div id="tactical-bg" aria-hidden="true"></div>
 
-<header class="hero">
-  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
-  <p class="tagline">Train your aim — reflex, tracking, flicking. Click targets, beat your best.</p>
+<header class="tactical-header">
+  <div class="header-left">
+    <div class="callsign">AIM_TRAINER_PRO</div>
+    <div class="version">v2.0.0</div>
+  </div>
+  <div class="header-center">
+    <h1 class="logo">TACTICAL AIM TRAINER</h1>
+    <div class="tagline">Precision • Speed • Consistency</div>
+  </div>
+  <div class="header-right">
+    <div class="status-indicator" id="connectionStatus">
+      <span class="status-dot"></span>
+      <span>SYSTEMS NOMINAL</span>
+    </div>
+  </div>
 </header>
 
-<main class="container">
-  <aside class="panel config-panel">
-    <h2>Configuration</h2>
+<main class="tactical-main">
+  <aside class="panel control-panel" id="controlPanel">
+    <div class="panel-header">
+      <span class="panel-title">CONTROL DECK</span>
+      <button class="panel-toggle" id="panelToggle" aria-label="Toggle panel">◢</button>
+    </div>
 
-    <div class="field">
-      <label>Mode</label>
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" role="tab" data-mode="static" aria-selected="true">Static</button>
-        <button class="mode-tab" role="tab" data-mode="moving" aria-selected="false">Moving</button>
-        <button class="mode-tab" role="tab" data-mode="strafing" aria-selected="false">Strafing</button>
-        <button class="mode-tab" role="tab" data-mode="grid" aria-selected="false">Grid</button>
-        <button class="mode-tab" role="tab" data-mode="reaction" aria-selected="false">Reaction</button>
+    <section class="config-section">
+      <h3 class="section-title">TRAINING MODE</h3>
+      <div class="mode-grid" role="tablist">
+        <button class="mode-btn active" role="tab" data-mode="static" aria-selected="true">
+          <span class="mode-icon">◎</span>
+          <span class="mode-name">STATIC</span>
+          <span class="mode-desc">Stationary targets</span>
+        </button>
+        <button class="mode-btn" role="tab" data-mode="moving" aria-selected="false">
+          <span class="mode-icon">⟳</span>
+          <span class="mode-name">MOVING</span>
+          <span class="mode-desc">Linear trajectories</span>
+        </button>
+        <button class="mode-btn" role="tab" data-mode="strafing" aria-selected="false">
+          <span class="mode-icon">⤫</span>
+          <span class="mode-name">STRAFING</span>
+          <span class="mode-desc">Erratic patterns</span>
+        </button>
+        <button class="mode-btn" role="tab" data-mode="grid" aria-selected="false">
+          <span class="mode-icon">⬚</span>
+          <span class="mode-name">GRID</span>
+          <span class="mode-desc">Rapid acquisition</span>
+        </button>
+        <button class="mode-btn" role="tab" data-mode="reaction" aria-selected="false">
+          <span class="mode-icon">⏱</span>
+          <span class="mode-name">REACTION</span>
+          <span class="mode-desc">Reflex test</span>
+        </button>
       </div>
-    </div>
+    </section>
 
-    <div class="field">
-      <label>Duration <span id="durationValue">30</span>s</label>
-      <input type="range" id="duration" min="10" max="120" value="30" step="5">
-    </div>
-
-    <div class="field">
-      <label>Target Size <span id="sizeValue">40</span>px</label>
-      <input type="range" id="targetSize" min="20" max="100" value="40" step="5">
-    </div>
-
-    <div class="field" id="spawnRateField">
-      <label>Spawn Rate <span id="spawnRateValue">1.0</span>/s</label>
-      <input type="range" id="spawnRate" min="0.3" max="3" value="1" step="0.1">
-    </div>
-
-    <div class="field" id="livesField">
-      <label>Lives <span id="livesValue">3</span></label>
-      <input type="range" id="lives" min="1" max="10" value="3" step="1">
-    </div>
-
-    <div class="field" id="penaltyField">
-      <label>Miss Penalty <span id="penaltyValue">0.5</span>s</label>
-      <input type="range" id="penalty" min="0" max="3" value="0.5" step="0.1">
-    </div>
-
-    <div class="field" id="reactionDelayField" hidden>
-      <label>Signal Delay <span id="reactionDelayValue">2.0</span>s</label>
-      <input type="range" id="reactionDelay" min="0.5" max="5" value="2" step="0.5">
-    </div>
-
-    <div class="field">
-      <label>Crosshair</label>
-      <div class="crosshair-select">
-        <button class="crosshair-option active" data-crosshair="dot" title="Dot">●</button>
-        <button class="crosshair-option" data-crosshair="cross" title="Cross">✚</button>
-        <button class="crosshair-option" data-crosshair="circle" title="Circle">○</button>
-        <button class="crosshair-option" data-crosshair="gap" title="Gap">⊙</button>
+    <section class="config-section">
+      <h3 class="section-title">PARAMETERS</h3>
+      <div class="param-group" id="durationGroup">
+        <label class="param-label">DURATION <span class="param-value" id="durationValue">30</span>s</label>
+        <input type="range" class="param-slider" id="duration" min="10" max="120" value="30" step="5">
       </div>
-    </div>
+      <div class="param-group" id="sizeGroup">
+        <label class="param-label">TARGET SIZE <span class="param-value" id="sizeValue">40</span>px</label>
+        <input type="range" class="param-slider" id="targetSize" min="15" max="80" value="40" step="5">
+      </div>
+      <div class="param-group" id="spawnGroup">
+        <label class="param-label">SPAWN RATE <span class="param-value" id="spawnRateValue">1.0</span>/s</label>
+        <input type="range" class="param-slider" id="spawnRate" min="0.2" max="4.0" value="1.0" step="0.1">
+      </div>
+      <div class="param-group" id="livesGroup">
+        <label class="param-label">LIVES <span class="param-value" id="livesValue">3</span></label>
+        <input type="range" class="param-slider" id="lives" min="1" max="10" value="3" step="1">
+      </div>
+      <div class="param-group" id="penaltyGroup">
+        <label class="param-label">MISS PENALTY <span class="param-value" id="penaltyValue">0.5</span>s</label>
+        <input type="range" class="param-slider" id="penalty" min="0" max="5" value="0.5" step="0.1">
+      </div>
+      <div class="param-group" id="reactionGroup" hidden>
+        <label class="param-label">SIGNAL DELAY <span class="param-value" id="reactionDelayValue">2.0</span>s</label>
+        <input type="range" class="param-slider" id="reactionDelay" min="0.5" max="8" value="2.0" step="0.5">
+      </div>
+    </section>
 
-    <div class="actions">
-      <button class="btn primary" id="startBtn">Start Training</button>
-      <button class="btn secondary" id="warmupBtn">Warm-up</button>
-    </div>
+    <section class="config-section">
+      <h3 class="section-title">CROSSHAIR CUSTOMIZER</h3>
+      <div class="crosshair-presets">
+        <button class="ch-preset active" data-ch="dot" title="Dot">●</button>
+        <button class="ch-preset" data-ch="cross" title="Cross">✚</button>
+        <button class="ch-preset" data-ch="circle" title="Circle">○</button>
+        <button class="ch-preset" data-ch="gap" title="Gap">⊙</button>
+        <button class="ch-preset" data-ch="tactical" title="Tactical">⌖</button>
+        <button class="ch-preset" data-ch="chevron" title="Chevron">⟍⟋</button>
+      </div>
+      <div class="ch-advanced">
+        <div class="param-group">
+          <label class="param-label">SIZE <span class="param-value" id="chSizeValue">24</span>px</label>
+          <input type="range" class="param-slider" id="chSize" min="12" max="48" value="24" step="2">
+        </div>
+        <div class="param-group">
+          <label class="param-label">GAP <span class="param-value" id="chGapValue">8</span>px</label>
+          <input type="range" class="param-slider" id="chGap" min="0" max="30" value="8" step="1">
+        </div>
+        <div class="param-group">
+          <label class="param-label">THICKNESS <span class="param-value" id="chThickValue">2</span>px</label>
+          <input type="range" class="param-slider" id="chThick" min="1" max="6" value="2" step="1">
+        </div>
+        <div class="param-group">
+          <label class="param-label">OPACITY <span class="param-value" id="chOpacityValue">100</span>%</label>
+          <input type="range" class="param-slider" id="chOpacity" min="30" max="100" value="100" step="5">
+        </div>
+        <label class="toggle-label">
+          <input type="checkbox" id="chTrail" checked>
+          <span class="toggle-slider"></span>
+          <span>MOTION TRAIL</span>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="chDynamic" checked>
+          <span class="toggle-slider"></span>
+          <span>DYNAMIC GAP</span>
+        </label>
+        <div class="color-picker-group">
+          <label class="param-label">COLOR</label>
+          <div class="color-swatches">
+            <button class="color-swatch active" data-color="#00ff88" style="background:#00ff88"></button>
+            <button class="color-swatch" data-color="#ff3366" style="background:#ff3366"></button>
+            <button class="color-swatch" data-color="#ffcc00" style="background:#ffcc00"></button>
+            <button class="color-swatch" data-color="#00ccff" style="background:#00ccff"></button>
+            <button class="color-swatch" data-color="#ff6600" style="background:#ff6600"></button>
+            <button class="color-swatch" data-color="#cc44ff" style="background:#cc44ff"></button>
+            <button class="color-swatch" data-color="#ffffff" style="background:#ffffff"></button>
+            <input type="color" id="chCustomColor" value="#00ff88" class="custom-color-input">
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <div class="field">
-      <label>High Scores</label>
-      <div id="leaderboard" class="leaderboard"></div>
-    </div>
+    <section class="config-section">
+      <h3 class="section-title">ACTIONS</h3>
+      <div class="action-buttons">
+        <button class="tactical-btn primary" id="startBtn">
+          <span class="btn-text">INITIATE TRAINING</span>
+          <span class="btn-key">[SPACE]</span>
+        </button>
+        <button class="tactical-btn secondary" id="warmupBtn">
+          <span class="btn-text">WARM-UP SEQUENCE</span>
+          <span class="btn-key">[W]</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="config-section leaderboard-section">
+      <div class="section-header">
+        <h3 class="section-title">LEADERBOARD</h3>
+        <select class="mode-filter" id="leaderboardFilter" aria-label="Filter leaderboard by mode">
+          <option value="static">STATIC</option>
+          <option value="moving">MOVING</option>
+          <option value="strafing">STRAFING</option>
+          <option value="grid">GRID</option>
+          <option value="reaction">REACTION</option>
+        </select>
+      </div>
+      <div class="leaderboard" id="leaderboard"></div>
+    </section>
+
+    <section class="config-section stats-preview">
+      <h3 class="section-title">CAREER STATS</h3>
+      <div class="mini-stats" id="careerStats">
+        <div class="mini-stat"><span class="mini-label">SESSIONS</span><span class="mini-value" id="careerSessions">0</span></div>
+        <div class="mini-stat"><span class="mini-label">TOTAL HITS</span><span class="mini-value" id="careerHits">0</span></div>
+        <div class="mini-stat"><span class="mini-label">BEST ACCURACY</span><span class="mini-value" id="careerAccuracy">0%</span></div>
+        <div class="mini-stat"><span class="mini-label">BEST REACTION</span><span class="mini-value" id="careerReaction">∞ms</span></div>
+      </div>
+    </section>
   </aside>
 
   <section class="panel game-panel">
     <div class="game-header">
-      <div class="game-stats">
-        <div class="stat">
-          <span class="stat-label">Time</span>
-          <span class="stat-value" id="timeLeft">30.0</span>
+      <div class="hud-row">
+        <div class="hud-item">
+          <span class="hud-label">TIME</span>
+          <span class="hud-value" id="timeLeft">30.0</span>
         </div>
-        <div class="stat">
-          <span class="stat-label">Score</span>
-          <span class="stat-value" id="score">0</span>
+        <div class="hud-item">
+          <span class="hud-label">SCORE</span>
+          <span class="hud-value" id="score">0</span>
         </div>
-        <div class="stat">
-          <span class="stat-label">Accuracy</span>
-          <span class="stat-value" id="accuracy">100%</span>
+        <div class="hud-item">
+          <span class="hud-label">ACCURACY</span>
+          <span class="hud-value" id="accuracy">100%</span>
         </div>
-        <div class="stat">
-          <span class="stat-label">Hits/s</span>
-          <span class="stat-value" id="hps">0.0</span>
+        <div class="hud-item">
+          <span class="hud-label">HITS/SEC</span>
+          <span class="hud-value" id="hps">0.0</span>
         </div>
-        <div class="stat" id="livesStat">
-          <span class="stat-label">Lives</span>
-          <span class="stat-value" id="livesLeft">3</span>
+        <div class="hud-item" id="livesHud">
+          <span class="hud-label">LIVES</span>
+          <span class="hud-value" id="livesLeft">3</span>
         </div>
       </div>
+      <div class="mode-indicator" id="modeIndicator">MODE: STATIC</div>
+      <div class="warmup-indicator" id="warmupIndicator" hidden>WARM-UP SEQUENCE ACTIVE</div>
     </div>
 
-    <div class="canvas-wrapper" id="canvasWrapper">
-      <canvas id="gameCanvas" aria-label="Aim training area"></canvas>
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="gameCanvas" aria-label="Tactical training area"></canvas>
       <div id="crosshair" class="crosshair" aria-hidden="true"></div>
       <div id="reactionOverlay" class="reaction-overlay" hidden>
-        <div class="reaction-circle" id="reactionCircle"></div>
-        <span class="reaction-text" id="reactionText">WAIT...</span>
+        <div class="reaction-ring" id="reactionRing"></div>
+        <div class="reaction-core" id="reactionCore"></div>
+        <span class="reaction-text" id="reactionText">STANDBY</span>
       </div>
+      <div class="grid-overlay" id="gridOverlay" hidden></div>
     </div>
 
     <div class="game-footer">
-      <button class="btn secondary" id="pauseBtn" hidden>Pause</button>
-      <button class="btn primary" id="restartBtn" hidden>Restart</button>
+      <button class="tactical-btn secondary" id="pauseBtn" hidden>
+        <span>PAUSE</span><span>[ESC]</span>
+      </button>
+      <button class="tactical-btn danger" id="restartBtn" hidden>
+        <span>RESTART</span><span>[R]</span>
+      </button>
     </div>
 
     <div id="resultsModal" class="modal" hidden>
       <div class="modal-content">
-        <h2>Session Complete!</h2>
+        <div class="modal-header">
+          <h2>MISSION COMPLETE</h2>
+          <span class="modal-mode" id="modalMode">STATIC</span>
+        </div>
         <div class="results-grid">
           <div class="result-card">
-            <span class="result-label">Final Score</span>
+            <span class="result-label">FINAL SCORE</span>
             <span class="result-value" id="finalScore">0</span>
           </div>
           <div class="result-card">
-            <span class="result-label">Accuracy</span>
+            <span class="result-label">ACCURACY</span>
             <span class="result-value" id="finalAccuracy">0%</span>
           </div>
           <div class="result-card">
-            <span class="result-label">Avg Reaction</span>
+            <span class="result-label">AVG REACTION</span>
             <span class="result-value" id="finalAvgReaction">0ms</span>
           </div>
           <div class="result-card">
-            <span class="result-label">Hits / Sec</span>
+            <span class="result-label">HITS/SEC</span>
             <span class="result-value" id="finalHps">0.0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">BEST STREAK</span>
+            <span class="result-value" id="finalStreak">0</span>
+          </div>
+          <div class="result-card">
+            <span class="result-label">TARGETS HIT</span>
+            <span class="result-value" id="finalHits">0</span>
           </div>
         </div>
         <div class="result-chart">
-          <canvas id="reactionChart" width="400" height="150"></canvas>
+          <canvas id="reactionChart" width="500" height="180"></canvas>
+        </div>
+        <div class="streak-chart">
+          <canvas id="streakChart" width="500" height="100"></canvas>
         </div>
         <div class="modal-actions">
-          <button class="btn secondary" id="shareBtn">Share Result</button>
-          <button class="btn primary" id="playAgainBtn">Play Again</button>
+          <button class="tactical-btn secondary" id="shareBtn">
+            <span>SHARE REPORT</span>
+          </button>
+          <button class="tactical-btn primary" id="playAgainBtn">
+            <span>REDEPLOY</span>
+          </button>
         </div>
       </div>
     </div>
   </section>
 </main>
 
-<footer>
-  Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+<footer class="tactical-footer">
+  <div class="footer-left">
+    <span class="copyright">MADE WITH 💖 BY <strong>KING_YOSEF_</strong></span>
+  </div>
+  <div class="footer-center">
+    <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank">ABOUT ME</a>
+  </div>
+  <div class="footer-right">
+    <span class="build-info">BUILD 2026.11.15 • TACTICAL OPS</span>
+  </div>
 </footer>
+
+<div class="toast-container" id="toastContainer"></div>
 
 <script src="script.js"></script>
 </body>

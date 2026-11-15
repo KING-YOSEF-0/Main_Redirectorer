@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "publisher": "king-yosef",
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.146.0"
   },
   "categories": [
     "Other"

@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reaction Timer | KING_YOSEF_</title>
+<title>Reaction Lab | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<div id="scanlines" aria-hidden="true"></div>
 
 <header class="hero">
   <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
-  <p class="tagline">Test your reflexes — simple, choice, go/no-go. How fast are you?</p>
+  <p class="tagline">Precision reaction testing suite — Simple, Choice, Go/No-Go. Measure. Analyze. Improve.</p>
 </header>
 
 <main class="container">
   <aside class="panel config-panel">
-    <h2>Test Setup</h2>
+    <h2>Test Configuration</h2>
 
     <div class="field">
       <label>Test Type</label>
@@ -45,20 +45,20 @@
     </div>
 
     <div class="field" id="delayRangeField">
-      <label>Delay Range <span id="delayRangeValue">1–4s</span></label>
+      <label>Delay Range <span id="delayRangeValue">1000–4000ms</span></label>
       <div class="range-inputs">
         <input type="number" id="minDelay" min="500" max="5000" value="1000" step="100" placeholder="Min (ms)">
-        <span>to</span>
+        <span>→</span>
         <input type="number" id="maxDelay" min="500" max="10000" value="4000" step="100" placeholder="Max (ms)">
       </div>
     </div>
 
     <div class="field">
-      <label>Sound</label>
+      <label>Signal Type</label>
       <select id="soundSelect">
-        <option value="beep">Beep</option>
-        <option value="click">Click</option>
-        <option value="tone">Tone</option>
+        <option value="beep">Beep (800Hz square)</option>
+        <option value="click">Click (1.5kHz sine)</option>
+        <option value="tone">Tone (440Hz sine)</option>
         <option value="none">None</option>
       </select>
     </div>
@@ -68,8 +68,13 @@
       <button class="btn secondary" id="dailyBtn">Daily Challenge</button>
     </div>
 
+    <div class="actions" style="margin-top: 0.5rem;">
+      <button class="btn ghost" id="practiceBtn">Practice Mode</button>
+      <button class="btn ghost" id="historyBtn">History</button>
+    </div>
+
     <div class="stats-panel">
-      <h3>Your Stats</h3>
+      <h3>Lifetime Stats</h3>
       <div class="stat-row">
         <span class="stat-label">Best (Simple)</span>
         <span class="stat-value" id="bestSimple">—</span>
@@ -95,14 +100,22 @@
         <span class="stat-value" id="dailyStreak">0</span>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Tests Taken</span>
+        <span class="stat-label">Tests Completed</span>
         <span class="stat-value" id="testsTaken">0</span>
       </div>
     </div>
 
     <div class="leaderboard-section">
-      <h3>Leaderboard (Local)</h3>
-      <div id="leaderboard" class="leaderboard"></div>
+      <h3>Local Leaderboard</h3>
+      <div id="leaderboard" class="leaderboard empty">No scores yet — run a test!</div>
+    </div>
+
+    <div class="export-section">
+      <h3>Export Data</h3>
+      <div class="export-btns">
+        <button class="btn secondary" id="exportJsonBtn">Export JSON</button>
+        <button class="btn secondary" id="exportTextBtn">Export Text</button>
+      </div>
     </div>
   </aside>
 
@@ -114,21 +127,24 @@
         <span class="trial-sep">/</span>
         <span class="trial-value" id="totalTrials">10</span>
       </div>
-      <div class="mode-badge" id="modeBadge">Simple</div>
-      <div class="daily-badge" id="dailyBadge" hidden>Daily Challenge</div>
+      <div class="badges">
+        <div class="mode-badge" id="modeBadge">Simple</div>
+        <div class="daily-badge" id="dailyBadge" hidden>Daily Challenge</div>
+        <div class="practice-badge" id="practiceBadge" hidden>Practice</div>
+      </div>
     </div>
 
     <div class="game-area" id="gameArea">
       <div class="instruction" id="instruction">
-        Press Start to begin
+        Configure test and press Start
       </div>
       <div class="target-zone" id="targetZone" tabindex="0" role="button" aria-label="Reaction target">
-        <div class="target-circle" id="targetCircle"></div>
+        <div class="target-core" id="targetCore"></div>
         <div class="target-text" id="targetText">WAIT</div>
       </div>
       <div class="choice-grid" id="choiceGrid" hidden></div>
       <div class="gonogo-display" id="gonogoDisplay" hidden>
-        <div class="gonogo-shape" id="gonogoShape"></div>
+        <div class="gonogo-shape" id="gonogoShape" tabindex="0" role="button" aria-label="Go/No-Go target"></div>
         <div class="gonogo-label" id="gonogoLabel"></div>
       </div>
     </div>
@@ -140,7 +156,7 @@
       </div>
       <div class="live-stat">
         <span class="live-label">Best</span>
-        <span class="live-value" id="bestReaction">—</span>
+        <span class="live-value best" id="bestReaction">—</span>
       </div>
       <div class="live-stat">
         <span class="live-label">Avg</span>
@@ -148,11 +164,11 @@
       </div>
       <div class="live-stat">
         <span class="live-label">Worst</span>
-        <span class="live-value" id="worstReaction">—</span>
+        <span class="live-value worst" id="worstReaction">—</span>
       </div>
       <div class="live-stat">
         <span class="live-label">Errors</span>
-        <span class="live-value" id="errorCount">0</span>
+        <span class="live-value error" id="errorCount">0</span>
       </div>
     </div>
 
@@ -187,11 +203,17 @@
           </div>
           <div class="result-card">
             <span class="result-label">Consistency</span>
-            <span class="result-value" id="finalConsistency">—</span>
+            <span class="result-value consistency" id="finalConsistency">—</span>
           </div>
         </div>
-        <div class="result-chart">
-          <canvas id="reactionChart" width="500" height="200"></canvas>
+        <div class="result-chart chart-container">
+          <canvas id="reactionChart" width="600" height="300"></canvas>
+          <div class="chart-legend">
+            <div class="legend-item"><span class="legend-color current"></span> Current Test</div>
+            <div class="legend-item"><span class="legend-color avg"></span> Average</div>
+            <div class="legend-item"><span class="legend-color best"></span> Best</div>
+            <div class="legend-item"><span class="legend-color error"></span> Errors</div>
+          </div>
         </div>
         <div class="daily-result" id="dailyResult" hidden>
           <h3>Daily Challenge</h3>
@@ -212,11 +234,31 @@
           <button class="history-tab" data-history="simple">Simple</button>
           <button class="history-tab" data-history="choice">Choice</button>
           <button class="history-tab" data-history="gonogo">Go/No-Go</button>
+          <button class="history-tab" data-history="daily">Daily</button>
         </div>
         <div class="history-list" id="historyList"></div>
         <div class="modal-actions">
-          <button class="btn secondary" id="clearHistoryBtn">Clear History</button>
+          <button class="btn danger" id="clearHistoryBtn">Clear History</button>
           <button class="btn primary" id="closeHistoryBtn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="practiceModal" class="modal" hidden>
+      <div class="modal-content" style="max-width: 500px;">
+        <h2>Practice Mode</h2>
+        <p style="color: var(--fg-dim); margin-bottom: 1.5rem; text-align: left;">Practice with instant feedback on each trial. No scores saved.</p>
+        <div class="field">
+          <label>Mode</label>
+          <select id="practiceMode">
+            <option value="simple">Simple Reaction</option>
+            <option value="choice">Choice Reaction</option>
+            <option value="gonogo">Go/No-Go</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn secondary" id="closePracticeBtn">Cancel</button>
+          <button class="btn primary" id="startPracticeBtn">Begin Practice</button>
         </div>
       </div>
     </div>
@@ -225,7 +267,7 @@
 
 <footer>
   Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">About Me</a>
 </footer>
 
 <script src="script.js"></script>

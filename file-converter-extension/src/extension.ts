@@ -3,6 +3,7 @@ import * as path from 'path';
 import { ImageConverter } from './converters/imageConverter';
 import { AudioConverter } from './converters/audioConverter';
 import { FileOps } from './utils/fileOps';
+import { ConverterPanel } from './webview/panel';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('File Converter Pro is now active!');
@@ -116,7 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  context.subscriptions.push(openPanel, convertImage, extractAudio, boostVolume, batchConvert);
+  context.subscriptions.push(openPanel, convertImage, extractAudio, boostVolume, batchConvert, panel);
 }
 
 export function deactivate() {}

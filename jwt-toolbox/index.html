@@ -3,347 +3,525 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JWT / JWK / Cert Toolbox | KING_YOSEF_</title>
+<title>JWT Toolbox | Cryptographic Operations Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="glitch-bg" aria-hidden="true"></div>
 
-<header class="hero">
-  <h1 class="logo">JWT / JWK / Cert Toolbox</h1>
-  <p class="tagline">Complete JWT workflow: decode, verify, sign, generate keys (RSA/EC), JWK Set builder, X.509 cert viewer.</p>
+<header class="term-header">
+  <div class="header-top">
+    <div class="window-controls">
+      <span class="control close" aria-label="Close"></span>
+      <span class="control minimize" aria-label="Minimize"></span>
+      <span class="control maximize" aria-label="Maximize"></span>
+    </div>
+    <div class="term-title">
+      <span class="prompt">$</span>
+      <span class="command">jwt-toolbox</span>
+      <span class="args">--suite=v1.0 --mode=interactive</span>
+    </div>
+  </div>
+  <div class="header-ascii">
+    <pre aria-hidden="true"><code>██╗  ██╗ ██████╗ ███████╗███████╗ █████╗ ██████╗ ██████╗
+██║  ██║██╔═══██╗██╔════╝██╔════╝██╔══██╗██╔══██╗██╔══██╗
+███████║██║   ██║███████╗███████╗███████║██████╔╝██████╔╝
+██╔══██║██║   ██║╚════██║╚════██║██╔══██║██╔═══╝ ██╔═══╝
+██║  ██║╚██████╔╝███████║███████║██║  ██║██║     ██║
+╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝     </code></pre>
+  </div>
+  <div class="header-status">
+    <span class="status-dot active" aria-label="System online"></span>
+    <span>CRYPTO_SUITE v1.0.0</span>
+    <span class="separator">|</span>
+    <span>ALGOS: HS/RS/PS/ES/EdDSA</span>
+    <span class="separator">|</span>
+    <span>WEB_CRYPTO_API</span>
+    <span class="separator">|</span>
+    <span id="clock" class="clock">00:00:00 UTC</span>
+  </div>
 </header>
 
-<main class="container">
-  <aside class="panel config-panel" aria-labelledby="config-heading">
-    <h2 id="config-heading">Toolbox</h2>
-
-    <div class="field">
-      <label>Mode</label>
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" role="tab" data-mode="decode" aria-selected="true">Decode</button>
-        <button class="mode-tab" role="tab" data-mode="verify" aria-selected="false">Verify</button>
-        <button class="mode-tab" role="tab" data-mode="sign" aria-selected="false">Sign</button>
-        <button class="mode-tab" role="tab" data-mode="keys" aria-selected="false">Keys</button>
-        <button class="mode-tab" role="tab" data-mode="certs" aria-selected="false">Certs</button>
-      </div>
+<main class="term-main">
+  <aside class="term-panel control-panel" role="complementary" aria-label="Control Panel">
+    <div class="panel-header">
+      <span class="panel-title">[ CONTROL PANEL ]</span>
+      <span class="panel-version">v1.0</span>
     </div>
 
-    <!-- Decode Mode -->
-    <div class="mode-panel" id="panel-decode">
-      <div class="field">
-        <label>JWT Input</label>
-        <textarea id="decodeInput" placeholder="Paste JWT here (header.payload.signature)..." rows="6"></textarea>
-        <div class="field-hint">Supports JWK in header (jwk claim) or x5c chain</div>
-      </div>
-      <div class="actions">
-        <button class="btn primary" id="decodeBtn">Decode JWT</button>
-        <button class="btn" id="decodeSampleBtn">Load Sample</button>
-      </div>
-    </div>
+    <nav class="mode-nav" role="tablist" aria-label="Operation modes">
+      <button class="mode-btn active" role="tab" data-mode="decode" aria-selected="true" aria-controls="panel-decode">
+        <span class="mode-icon">▸</span>
+        <span class="mode-label">DECODE</span>
+        <span class="mode-desc">Parse & inspect JWT</span>
+      </button>
+      <button class="mode-btn" role="tab" data-mode="verify" aria-selected="false" aria-controls="panel-verify">
+        <span class="mode-icon">▸</span>
+        <span class="mode-label">VERIFY</span>
+        <span class="mode-desc">Validate signatures</span>
+      </button>
+      <button class="mode-btn" role="tab" data-mode="sign" aria-selected="false" aria-controls="panel-sign">
+        <span class="mode-icon">▸</span>
+        <span class="mode-label">SIGN</span>
+        <span class="mode-desc">Create signed JWT</span>
+      </button>
+      <button class="mode-btn" role="tab" data-mode="keys" aria-selected="false" aria-controls="panel-keys">
+        <span class="mode-icon">▸</span>
+        <span class="mode-label">KEYS</span>
+        <span class="mode-desc">Generate & manage keys</span>
+      </button>
+      <button class="mode-btn" role="tab" data-mode="jwks" aria-selected="false" aria-controls="panel-jwks">
+        <span class="mode-icon">▸</span>
+        <span class="mode-label">JWKS</span>
+        <span class="mode-desc">Build JWK Sets</span>
+      </button>
+      <button class="mode-btn" role="tab" data-mode="convert" aria-selected="false" aria-controls="panel-convert">
+        <span class="mode-icon">▸</span>
+        <span class="mode-label">CONVERT</span>
+        <span class="mode-desc">PEM ⇄ JWK</span>
+      </button>
+      <button class="mode-btn" role="tab" data-mode="certs" aria-selected="false" aria-controls="panel-certs">
+        <span class="mode-icon">▸</span>
+        <span class="mode-label">CERTS</span>
+        <span class="mode-desc">X.509 parser</span>
+      </button>
+    </nav>
 
-    <!-- Verify Mode -->
-    <div class="mode-panel" id="panel-verify" hidden>
-      <div class="field">
-        <label>JWT to Verify</label>
-        <textarea id="verifyJwtInput" placeholder="Paste JWT to verify..." rows="4"></textarea>
-      </div>
-      <div class="field">
-        <label>Verification Method</label>
-        <div class="verify-method-tabs" role="tablist">
-          <button class="verify-tab active" role="tab" data-method="secret" aria-selected="true">HS* Secret</button>
-          <button class="verify-tab" role="tab" data-method="jwks" aria-selected="false">JWKS URL</button>
-          <button class="verify-tab" role="tab" data-method="pem" aria-selected="false">PEM Public Key</button>
-          <button class="verify-tab" role="tab" data-method="cert" aria-selected="false">X.509 Cert</button>
+    <div class="panel-content">
+      <!-- DECODE PANEL -->
+      <section class="mode-panel active" id="panel-decode" role="tabpanel" aria-labelledby="decode-tab">
+        <div class="field-group">
+          <label class="field-label" for="decodeInput">JWT INPUT</label>
+          <div class="input-wrapper">
+            <textarea id="decodeInput" placeholder="Paste JWT token (header.payload.signature)..." rows="6" spellcheck="false"></textarea>
+            <button class="input-action" id="decodePaste" aria-label="Paste from clipboard" title="Paste (Ctrl+V)">⎘</button>
+          </div>
         </div>
-      </div>
-      <div class="verify-method-panel" id="verify-secret">
-        <div class="field">
-          <label>Secret (Base64 or UTF-8)</label>
-          <input type="text" id="verifySecret" placeholder="Enter HMAC secret...">
-          <div class="field-hint">For HS256/HS384/HS512. Base64URL or plain text.</div>
+        <div class="field-hint">Supports JWK in header (jwk) or x5c certificate chain</div>
+        <div class="action-row">
+          <button class="term-btn primary" id="decodeBtn">
+            <span class="btn-text">DECODE</span>
+            <span class="btn-shortcut">[F1]</span>
+          </button>
+          <button class="term-btn secondary" id="decodeSampleBtn">
+            <span class="btn-text">SAMPLE</span>
+            <span class="btn-shortcut">[F2]</span>
+          </button>
         </div>
-      </div>
-      <div class="verify-method-panel" id="verify-jwks" hidden>
-        <div class="field">
-          <label>JWKS URL</label>
-          <input type="url" id="verifyJwksUrl" placeholder="https://example.com/.well-known/jwks.json">
+      </section>
+
+      <!-- VERIFY PANEL -->
+      <section class="mode-panel" id="panel-verify" role="tabpanel" aria-labelledby="verify-tab" hidden>
+        <div class="field-group">
+          <label class="field-label" for="verifyJwtInput">JWT TO VERIFY</label>
+          <div class="input-wrapper">
+            <textarea id="verifyJwtInput" placeholder="Paste JWT to verify..." rows="4" spellcheck="false"></textarea>
+            <button class="input-action" id="verifyPaste" aria-label="Paste from clipboard" title="Paste (Ctrl+V)">⎘</button>
+          </div>
         </div>
-        <div class="field checkbox-row">
-          <label class="checkbox-label">
+
+        <div class="field-group">
+          <label class="field-label">VERIFICATION METHOD</label>
+          <div class="method-tabs" role="tablist">
+            <button class="method-tab active" role="tab" data-method="secret" aria-selected="true">HMAC SECRET</button>
+            <button class="method-tab" role="tab" data-method="jwks" aria-selected="false">JWKS ENDPOINT</button>
+            <button class="method-tab" role="tab" data-method="pem" aria-selected="false">PEM PUBLIC KEY</button>
+            <button class="method-tab" role="tab" data-method="cert" aria-selected="false">X.509 CERT</button>
+          </div>
+        </div>
+
+        <div class="method-panel active" id="verify-secret">
+          <div class="field-group">
+            <label class="field-label" for="verifySecret">SECRET (Base64URL or UTF-8)</label>
+            <input type="text" id="verifySecret" placeholder="Enter HMAC secret for HS256/384/512..." spellcheck="false">
+          </div>
+        </div>
+        <div class="method-panel" id="verify-jwks" hidden>
+          <div class="field-group">
+            <label class="field-label" for="verifyJwksUrl">JWKS URL</label>
+            <input type="url" id="verifyJwksUrl" placeholder="https://example.com/.well-known/jwks.json" spellcheck="false">
+          </div>
+          <label class="checkbox-wrapper">
             <input type="checkbox" id="verifyJwksCache" checked>
-            <span>Cache JWKS (5 min)</span>
+            <span class="checkmark"></span>
+            <span>Cache JWKS (5 min TTL)</span>
           </label>
         </div>
-      </div>
-      <div class="verify-method-panel" id="verify-pem" hidden>
-        <div class="field">
-          <label>PEM Public Key</label>
-          <textarea id="verifyPem" placeholder="-----BEGIN PUBLIC KEY-----..." rows="6"></textarea>
+        <div class="method-panel" id="verify-pem" hidden>
+          <div class="field-group">
+            <label class="field-label" for="verifyPem">PEM PUBLIC KEY</label>
+            <div class="input-wrapper">
+              <textarea id="verifyPem" placeholder="-----BEGIN PUBLIC KEY-----..." rows="6" spellcheck="false"></textarea>
+              <button class="input-action" id="verifyPemPaste" aria-label="Paste from clipboard">⎘</button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="verify-method-panel" id="verify-cert" hidden>
-        <div class="field">
-          <label>X.509 Certificate (PEM)</label>
-          <textarea id="verifyCert" placeholder="-----BEGIN CERTIFICATE-----..." rows="6"></textarea>
+        <div class="method-panel" id="verify-cert" hidden>
+          <div class="field-group">
+            <label class="field-label" for="verifyCert">X.509 CERTIFICATE (PEM)</label>
+            <div class="input-wrapper">
+              <textarea id="verifyCert" placeholder="-----BEGIN CERTIFICATE-----..." rows="6" spellcheck="false"></textarea>
+              <button class="input-action" id="verifyCertPaste" aria-label="Paste from clipboard">⎘</button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="field checkbox-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="verifyCheckExp" checked>
-          <span>Check expiration (exp)</span>
-        </label>
-      </div>
-      <div class="field checkbox-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="verifyCheckNbf" checked>
-          <span>Check not-before (nbf)</span>
-        </label>
-      </div>
-      <div class="field checkbox-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="verifyCheckIat" checked>
-          <span>Check issued-at (iat)</span>
-        </label>
-      </div>
-      <div class="field checkbox-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="verifyAllowLeeway" checked>
-          <span>Allow clock skew (60s leeway)</span>
-        </label>
-      </div>
-      <div class="actions">
-        <button class="btn primary" id="verifyBtn">Verify JWT</button>
-        <button class="btn" id="verifySampleBtn">Load Sample</button>
-      </div>
-    </div>
 
-    <!-- Sign Mode -->
-    <div class="mode-panel" id="panel-sign" hidden>
-      <div class="field">
-        <label>Algorithm</label>
-        <select id="signAlg">
-          <optgroup label="HMAC (Symmetric)">
-            <option value="HS256">HS256</option>
-            <option value="HS384">HS384</option>
-            <option value="HS512">HS512</option>
-          </optgroup>
-          <optgroup label="RSA (Asymmetric)">
-            <option value="RS256">RS256</option>
-            <option value="RS384">RS384</option>
-            <option value="RS512">RS512</option>
-            <option value="PS256">PS256</option>
-            <option value="PS384">PS384</option>
-            <option value="PS512">PS512</option>
-          </optgroup>
-          <optgroup label="ECDSA (Asymmetric)">
-            <option value="ES256">ES256 (P-256)</option>
-            <option value="ES384">ES384 (P-384)</option>
-            <option value="ES512">ES512 (P-521)</option>
-          </optgroup>
-          <optgroup label="EdDSA">
-            <option value="EdDSA">EdDSA (Ed25519)</option>
-          </optgroup>
-        </select>
-      </div>
-      <div class="field">
-        <label>Key Input</label>
-        <div class="key-input-tabs" role="tablist">
-          <button class="key-tab active" role="tab" data-key-type="secret" aria-selected="true">Secret</button>
-          <button class="key-tab" role="tab" data-key-type="pem" aria-selected="false">PEM Private Key</button>
-          <button class="key-tab" role="tab" data-key-type="jwk" aria-selected="false">JWK</button>
-          <button class="key-tab" role="tab" data-key-type="generate" aria-selected="false">Generate New</button>
+        <div class="field-group options-group">
+          <label class="field-label">VALIDATION OPTIONS</label>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="verifyCheckExp" checked>
+            <span class="checkmark"></span>
+            <span>Check expiration (exp)</span>
+          </label>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="verifyCheckNbf" checked>
+            <span class="checkmark"></span>
+            <span>Check not-before (nbf)</span>
+          </label>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="verifyCheckIat" checked>
+            <span class="checkmark"></span>
+            <span>Check issued-at (iat)</span>
+          </label>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="verifyAllowLeeway" checked>
+            <span class="checkmark"></span>
+            <span>Allow clock skew (±60s leeway)</span>
+          </label>
         </div>
-      </div>
-      <div class="key-input-panel" id="sign-secret">
-        <div class="field">
-          <label>Secret (Base64 or UTF-8)</label>
-          <input type="text" id="signSecret" placeholder="Enter HMAC secret...">
+
+        <div class="action-row">
+          <button class="term-btn primary" id="verifyBtn">
+            <span class="btn-text">VERIFY</span>
+            <span class="btn-shortcut">[F1]</span>
+          </button>
+          <button class="term-btn secondary" id="verifySampleBtn">
+            <span class="btn-text">SAMPLE</span>
+            <span class="btn-shortcut">[F2]</span>
+          </button>
         </div>
-      </div>
-      <div class="key-input-panel" id="sign-pem" hidden>
-        <div class="field">
-          <label>PEM Private Key</label>
-          <textarea id="signPem" placeholder="-----BEGIN PRIVATE KEY-----..." rows="6"></textarea>
+      </section>
+
+      <!-- SIGN PANEL -->
+      <section class="mode-panel" id="panel-sign" role="tabpanel" aria-labelledby="sign-tab" hidden>
+        <div class="field-group">
+          <label class="field-label" for="signAlg">ALGORITHM</label>
+          <select id="signAlg" class="term-select">
+            <optgroup label="HMAC (SYMMETRIC)">
+              <option value="HS256">HS256 — HMAC-SHA256</option>
+              <option value="HS384">HS384 — HMAC-SHA384</option>
+              <option value="HS512">HS512 — HMAC-SHA512</option>
+            </optgroup>
+            <optgroup label="RSA (ASYMMETRIC)">
+              <option value="RS256">RS256 — RSASSA-PKCS1-v1_5 SHA256</option>
+              <option value="RS384">RS384 — RSASSA-PKCS1-v1_5 SHA384</option>
+              <option value="RS512">RS512 — RSASSA-PKCS1-v1_5 SHA512</option>
+              <option value="PS256">PS256 — RSA-PSS SHA256</option>
+              <option value="PS384">PS384 — RSA-PSS SHA384</option>
+              <option value="PS512">PS512 — RSA-PSS SHA512</option>
+            </optgroup>
+            <optgroup label="ECDSA (ASYMMETRIC)">
+              <option value="ES256">ES256 — ECDSA P-256 SHA256</option>
+              <option value="ES384">ES384 — ECDSA P-384 SHA384</option>
+              <option value="ES512">ES512 — ECDSA P-521 SHA512</option>
+            </optgroup>
+            <optgroup label="EdDSA">
+              <option value="EdDSA">EdDSA — Ed25519</option>
+            </optgroup>
+          </select>
         </div>
-        <div class="field checkbox-row">
-          <label class="checkbox-label">
+
+        <div class="field-group">
+          <label class="field-label">KEY SOURCE</label>
+          <div class="key-tabs" role="tablist">
+            <button class="key-tab active" role="tab" data-key-type="secret" aria-selected="true">SECRET</button>
+            <button class="key-tab" role="tab" data-key-type="pem" aria-selected="false">PEM PRIVATE KEY</button>
+            <button class="key-tab" role="tab" data-key-type="jwk" aria-selected="false">JWK</button>
+            <button class="key-tab" role="tab" data-key-type="generate" aria-selected="false">GENERATE</button>
+          </div>
+        </div>
+
+        <div class="key-panel active" id="sign-secret">
+          <div class="field-group">
+            <label class="field-label" for="signSecret">HMAC SECRET</label>
+            <input type="text" id="signSecret" placeholder="Base64URL or plain text secret..." spellcheck="false">
+          </div>
+        </div>
+        <div class="key-panel" id="sign-pem" hidden>
+          <div class="field-group">
+            <label class="field-label" for="signPem">PEM PRIVATE KEY</label>
+            <div class="input-wrapper">
+              <textarea id="signPem" placeholder="-----BEGIN PRIVATE KEY-----..." rows="6" spellcheck="false"></textarea>
+              <button class="input-action" id="signPemPaste" aria-label="Paste from clipboard">⎘</button>
+            </div>
+          </div>
+          <label class="checkbox-wrapper">
             <input type="checkbox" id="signPemPassphrase">
-            <span>Key has passphrase</span>
+            <span class="checkmark"></span>
+            <span>Key is encrypted (passphrase required)</span>
+          </label>
+          <div class="field-group" id="signPemPassphraseField" hidden>
+            <label class="field-label" for="signPemPass">PASSPHRASE</label>
+            <input type="password" id="signPemPass" placeholder="Enter decryption passphrase..." spellcheck="false">
+          </div>
+        </div>
+        <div class="key-panel" id="sign-jwk" hidden>
+          <div class="field-group">
+            <label class="field-label" for="signJwk">JWK PRIVATE KEY (JSON)</label>
+            <div class="input-wrapper">
+              <textarea id="signJwk" placeholder='{"kty":"RSA","d":"...","p":"...","q":"...","dp":"...","dq":"...","qi":"...","n":"...","e":"AQAB"}' rows="6" spellcheck="false"></textarea>
+              <button class="input-action" id="signJwkPaste" aria-label="Paste from clipboard">⎘</button>
+            </div>
+          </div>
+        </div>
+        <div class="key-panel" id="sign-generate" hidden>
+          <div class="field-group">
+            <label class="field-label" for="genKeyType">KEY TYPE TO GENERATE</label>
+            <select id="genKeyType" class="term-select">
+              <option value="RSA-2048">RSA 2048-bit</option>
+              <option value="RSA-4096">RSA 4096-bit</option>
+              <option value="EC-P256">EC P-256 (secp256r1)</option>
+              <option value="EC-P384">EC P-384 (secp384r1)</option>
+              <option value="EC-P521">EC P-521 (secp521r1)</option>
+              <option value="Ed25519">Ed25519</option>
+              <option value="HMAC-256">HMAC 256-bit</option>
+              <option value="HMAC-384">HMAC 384-bit</option>
+              <option value="HMAC-512">HMAC 512-bit</option>
+            </select>
+          </div>
+          <button class="term-btn primary" id="generateKeyBtn">
+            <span class="btn-text">GENERATE KEY PAIR</span>
+            <span class="btn-shortcut">[F3]</span>
+          </button>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="signHeader">HEADER (JSON)</label>
+          <div class="input-wrapper">
+            <textarea id="signHeader" rows="4" spellcheck="false">{"alg":"HS256","typ":"JWT"}</textarea>
+            <button class="input-action" id="signHeaderPaste" aria-label="Paste from clipboard">⎘</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="signPayload">PAYLOAD (JSON)</label>
+          <div class="input-wrapper">
+            <textarea id="signPayload" rows="6" spellcheck="false">{"sub":"1234567890","name":"John Doe","iat":1516239022,"exp":1516242622}</textarea>
+            <button class="input-action" id="signPayloadPaste" aria-label="Paste from clipboard">⎘</button>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="term-btn primary" id="signBtn">
+            <span class="btn-text">SIGN JWT</span>
+            <span class="btn-shortcut">[F1]</span>
+          </button>
+          <button class="term-btn secondary" id="signSampleBtn">
+            <span class="btn-text">SAMPLE</span>
+            <span class="btn-shortcut">[F2]</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- KEYS PANEL -->
+      <section class="mode-panel" id="panel-keys" role="tabpanel" aria-labelledby="keys-tab" hidden>
+        <div class="field-group">
+          <label class="field-label">KEY GENERATION</label>
+          <div class="gen-controls">
+            <select id="keysGenType" class="term-select">
+              <option value="RSA-2048">RSA 2048-bit</option>
+              <option value="RSA-4096">RSA 4096-bit</option>
+              <option value="EC-P256">EC P-256 (secp256r1)</option>
+              <option value="EC-P384">EC P-384 (secp384r1)</option>
+              <option value="EC-P521">EC P-521 (secp521r1)</option>
+              <option value="Ed25519">Ed25519</option>
+              <option value="HMAC-256">HMAC 256-bit</option>
+              <option value="HMAC-384">HMAC 384-bit</option>
+              <option value="HMAC-512">HMAC 512-bit</option>
+            </select>
+            <button class="term-btn primary" id="keysGenerateBtn">
+              <span class="btn-text">GENERATE</span>
+              <span class="btn-shortcut">[F3]</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">JWK SET BUILDER</label>
+          <div class="jwk-builder">
+            <div id="jwkKeysList" class="jwk-keys-list" role="list" aria-label="Keys in JWK Set"></div>
+            <div class="builder-actions">
+              <button class="term-btn secondary" id="jwkAddKeyBtn">
+                <span class="btn-text">ADD CURRENT KEY</span>
+              </button>
+              <button class="term-btn primary" id="jwkBuildBtn">
+                <span class="btn-text">BUILD JWKS</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="jwkSetOutput">GENERATED JWK SET</label>
+          <div class="input-wrapper output-wrapper">
+            <textarea id="jwkSetOutput" rows="8" readonly placeholder="Generated JWK Set will appear here..." spellcheck="false"></textarea>
+            <div class="output-actions">
+              <button class="term-btn ghost" id="jwkCopyBtn" title="Copy to clipboard">⎘</button>
+              <button class="term-btn ghost" id="jwkDownloadBtn" title="Download .json">⇓</button>
+              <button class="term-btn ghost" id="jwkClearBtn" title="Clear set">✕</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- JWKS PANEL (merged into KEYS, but keeping for nav structure) -->
+      <section class="mode-panel" id="panel-jwks" role="tabpanel" aria-labelledby="jwks-tab" hidden>
+        <div class="field-group">
+          <label class="field-label">JWK SET OPERATIONS</label>
+          <p class="panel-notice">JWK Set management is integrated into the <strong>KEYS</strong> panel.<br>Switch to KEYS mode to generate keys and build JWK Sets.</p>
+        </div>
+      </section>
+
+      <!-- CONVERT PANEL -->
+      <section class="mode-panel" id="panel-convert" role="tabpanel" aria-labelledby="convert-tab" hidden>
+        <div class="field-group">
+          <label class="field-label">CONVERSION MODE</label>
+          <div class="conv-tabs" role="tablist">
+            <button class="conv-tab active" role="tab" data-conv="pem-to-jwk" aria-selected="true">PEM → JWK</button>
+            <button class="conv-tab" role="tab" data-conv="jwk-to-pem" aria-selected="false">JWK → PEM</button>
+          </div>
+        </div>
+
+        <div class="conv-panel active" id="conv-pem-to-jwk">
+          <div class="field-group">
+            <label class="field-label" for="convPemInput">PEM KEY (PUBLIC OR PRIVATE)</label>
+            <div class="input-wrapper">
+              <textarea id="convPemInput" rows="6" placeholder="-----BEGIN PUBLIC KEY-----..." spellcheck="false"></textarea>
+              <button class="input-action" id="convPemPaste" aria-label="Paste from clipboard">⎘</button>
+            </div>
+          </div>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="convIncludePrivate" checked>
+            <span class="checkmark"></span>
+            <span>Include private parameters (if private key provided)</span>
+          </label>
+          <button class="term-btn primary" id="convPemToJwkBtn">
+            <span class="btn-text">CONVERT TO JWK</span>
+          </button>
+        </div>
+
+        <div class="conv-panel" id="conv-jwk-to-pem" hidden>
+          <div class="field-group">
+            <label class="field-label" for="convJwkInput">JWK (JSON)</label>
+            <div class="input-wrapper">
+              <textarea id="convJwkInput" rows="6" placeholder='{"kty":"RSA","n":"...","e":"AQAB"}' spellcheck="false"></textarea>
+              <button class="input-action" id="convJwkPaste" aria-label="Paste from clipboard">⎘</button>
+            </div>
+          </div>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="convJwkToPrivate" checked>
+            <span class="checkmark"></span>
+            <span>Output private key (if private params present in JWK)</span>
+          </label>
+          <button class="term-btn primary" id="convJwkToPemBtn">
+            <span class="btn-text">CONVERT TO PEM</span>
+          </button>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="convOutput">CONVERSION OUTPUT</label>
+          <div class="input-wrapper output-wrapper">
+            <textarea id="convOutput" rows="6" readonly spellcheck="false"></textarea>
+            <div class="output-actions">
+              <button class="term-btn ghost" id="convCopyBtn" title="Copy to clipboard">⎘</button>
+              <button class="term-btn ghost" id="convDownloadBtn" title="Download key">⇓</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CERTS PANEL -->
+      <section class="mode-panel" id="panel-certs" role="tabpanel" aria-labelledby="certs-tab" hidden>
+        <div class="field-group">
+          <label class="field-label" for="certInput">X.509 CERTIFICATE (PEM)</label>
+          <div class="input-wrapper">
+            <textarea id="certInput" rows="8" placeholder="-----BEGIN CERTIFICATE-----..." spellcheck="false"></textarea>
+            <button class="input-action" id="certPaste" aria-label="Paste from clipboard">⎘</button>
+          </div>
+        </div>
+        <div class="action-row">
+          <button class="term-btn primary" id="certParseBtn">
+            <span class="btn-text">PARSE CERTIFICATE</span>
+            <span class="btn-shortcut">[F1]</span>
+          </button>
+          <button class="term-btn secondary" id="certSampleBtn">
+            <span class="btn-text">SAMPLE</span>
+            <span class="btn-shortcut">[F2]</span>
+          </button>
+        </div>
+        <div class="field-group options-group">
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="certShowPem" checked>
+            <span class="checkmark"></span>
+            <span>Show full PEM in output</span>
+          </label>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="certValidateChain" checked>
+            <span class="checkmark"></span>
+            <span>Validate chain (basic path validation)</span>
           </label>
         </div>
-        <div class="field" id="signPemPassphraseField" hidden>
-          <label>Passphrase</label>
-          <input type="password" id="signPemPass" placeholder="Enter passphrase">
-        </div>
-      </div>
-      <div class="key-input-panel" id="sign-jwk" hidden>
-        <div class="field">
-          <label>JWK Private Key (JSON)</label>
-          <textarea id="signJwk" placeholder='{"kty":"RSA","d":"...","p":"...","q":"...","dp":"...","dq":"...","qi":"...","n":"...","e":"AQAB"}' rows="6"></textarea>
-        </div>
-      </div>
-      <div class="key-input-panel" id="sign-generate" hidden>
-        <div class="field">
-          <label>Key Type to Generate</label>
-          <select id="genKeyType">
-            <option value="RSA-2048">RSA 2048-bit</option>
-            <option value="RSA-4096">RSA 4096-bit</option>
-            <option value="EC-P256">EC P-256 (secp256r1)</option>
-            <option value="EC-P384">EC P-384 (secp384r1)</option>
-            <option value="EC-P521">EC P-521 (secp521r1)</option>
-            <option value="Ed25519">Ed25519</option>
-            <option value="HMAC-256">HMAC 256-bit</option>
-            <option value="HMAC-384">HMAC 384-bit</option>
-            <option value="HMAC-512">HMAC 512-bit</option>
-          </select>
-        </div>
-        <div class="actions">
-          <button class="btn primary" id="generateKeyBtn">Generate Key Pair</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Header (JSON)</label>
-        <textarea id="signHeader" rows="4">{"alg":"HS256","typ":"JWT"}</textarea>
-      </div>
-      <div class="field">
-        <label>Payload (JSON)</label>
-        <textarea id="signPayload" rows="6">{"sub":"1234567890","name":"John Doe","iat":1516239022,"exp":1516242622}</textarea>
-      </div>
-      <div class="actions">
-        <button class="btn primary" id="signBtn">Sign JWT</button>
-        <button class="btn" id="signSampleBtn">Load Sample</button>
-      </div>
+      </section>
     </div>
 
-    <!-- Keys Mode -->
-    <div class="mode-panel" id="panel-keys" hidden>
-      <div class="field">
-        <label>Generate Key Pair</label>
-        <div class="key-gen-options">
-          <select id="keysGenType">
-            <option value="RSA-2048">RSA 2048-bit</option>
-            <option value="RSA-4096">RSA 4096-bit</option>
-            <option value="EC-P256">EC P-256 (secp256r1)</option>
-            <option value="EC-P384">EC P-384 (secp384r1)</option>
-            <option value="EC-P521">EC P-521 (secp521r1)</option>
-            <option value="Ed25519">Ed25519</option>
-            <option value="HMAC-256">HMAC 256-bit</option>
-            <option value="HMAC-384">HMAC 384-bit</option>
-            <option value="HMAC-512">HMAC 512-bit</option>
-          </select>
-          <button class="btn primary" id="keysGenerateBtn">Generate</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>JWK Set Builder</label>
-        <div class="jwk-builder">
-          <div id="jwkKeysList" class="jwk-keys-list"></div>
-          <div class="actions">
-            <button class="btn" id="jwkAddKeyBtn">Add Key to Set</button>
-            <button class="btn primary" id="jwkBuildBtn">Build JWKS</button>
-          </div>
-        </div>
-      </div>
-      <div class="field">
-        <label>Current JWK Set</label>
-        <textarea id="jwkSetOutput" rows="8" readonly placeholder="Generated JWK Set will appear here..."></textarea>
-        <div class="actions">
-          <button class="btn" id="jwkCopyBtn">Copy JWKS</button>
-          <button class="btn" id="jwkDownloadBtn">Download .json</button>
-          <button class="btn" id="jwkClearBtn">Clear</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Key Conversion</label>
-        <div class="conversion-tabs" role="tablist">
-          <button class="conv-tab active" role="tab" data-conv="pem-to-jwk" aria-selected="true">PEM → JWK</button>
-          <button class="conv-tab" role="tab" data-conv="jwk-to-pem" aria-selected="false">JWK → PEM</button>
-        </div>
-        <div class="conversion-panel" id="conv-pem-to-jwk">
-          <div class="field">
-            <label>PEM Key (Public or Private)</label>
-            <textarea id="convPemInput" rows="6" placeholder="-----BEGIN PUBLIC KEY-----..."></textarea>
-          </div>
-          <div class="field checkbox-row">
-            <label class="checkbox-label">
-              <input type="checkbox" id="convIncludePrivate" checked>
-              <span>Include private params (if private key)</span>
-            </label>
-          </div>
-          <div class="actions">
-            <button class="btn primary" id="convPemToJwkBtn">Convert to JWK</button>
-          </div>
-        </div>
-        <div class="conversion-panel" id="conv-jwk-to-pem" hidden>
-          <div class="field">
-            <label>JWK (JSON)</label>
-            <textarea id="convJwkInput" rows="6" placeholder='{"kty":"RSA","n":"...","e":"AQAB"}'></textarea>
-          </div>
-          <div class="field checkbox-row">
-            <label class="checkbox-label">
-              <input type="checkbox" id="convJwkToPrivate" checked>
-              <span>Output private key (if params present)</span>
-            </label>
-          </div>
-          <div class="actions">
-            <button class="btn primary" id="convJwkToPemBtn">Convert to PEM</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>Conversion Output</label>
-          <textarea id="convOutput" rows="6" readonly></textarea>
-          <div class="actions">
-            <button class="btn" id="convCopyBtn">Copy</button>
-            <button class="btn" id="convDownloadBtn">Download</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Certs Mode -->
-    <div class="mode-panel" id="panel-certs" hidden>
-      <div class="field">
-        <label>X.509 Certificate (PEM)</label>
-        <textarea id="certInput" rows="8" placeholder="-----BEGIN CERTIFICATE-----..."></textarea>
-      </div>
-      <div class="actions">
-        <button class="btn primary" id="certParseBtn">Parse Certificate</button>
-        <button class="btn" id="certSampleBtn">Load Sample</button>
-      </div>
-      <div class="field checkbox-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="certShowPem" checked>
-          <span>Show full PEM in output</span>
-        </label>
-      </div>
-      <div class="field checkbox-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="certValidateChain" checked>
-          <span>Validate chain (basic)</span>
-        </label>
+    <div class="panel-footer">
+      <div class="keyboard-hint">
+        <kbd>Tab</kbd> Navigate • <kbd>Enter</kbd> Activate • <kbd>Esc</kbd> Close
       </div>
     </div>
   </aside>
 
-  <section class="panel preview-panel" aria-labelledby="preview-heading">
-    <h2 id="preview-heading">Output</h2>
-
-    <div id="outputArea">
+  <section class="term-panel output-panel" aria-label="Output Terminal">
+    <div class="panel-header">
+      <span class="panel-title">[ OUTPUT TERMINAL ]</span>
+      <span class="panel-status" id="outputStatus">READY</span>
+    </div>
+    <div class="terminal-output" id="outputArea" role="log" aria-live="polite">
       <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
-        <p>Select a mode and provide input to see results</p>
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <p class="empty-text">Awaiting input...</p>
+        <p class="empty-hint">Select an operation mode and provide data to begin</p>
       </div>
+    </div>
+    <div class="terminal-footer">
+      <span class="prompt">$</span>
+      <span class="cursor" aria-hidden="true"></span>
     </div>
   </section>
 </main>
 
-<footer>
-  Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+<footer class="term-footer">
+  <div class="footer-left">
+    <span class="made-by">Made with 💖 by <strong>KING_YOSEF_</strong></span>
+  </div>
+  <div class="footer-right">
+    <a href="https://king-yosef-0.github.io/Protfolio/" class="about-link" target="_blank" rel="noopener">
+      <span class="link-icon">▸</span>
+      <span>About Me</span>
+    </a>
+  </div>
 </footer>
+
+<div class="toast-container" id="toastContainer" role="region" aria-live="polite" aria-label="Notifications"></div>
+
 <script src="script.js"></script>
 </body>
 </html>

@@ -34,7 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImageConverter = void 0;
-const sharp = __importStar(require("sharp"));
+const sharp = require('sharp');
 const path = __importStar(require("path"));
 class ImageConverter {
     static async convert(inputPath, options) {
@@ -49,10 +49,9 @@ class ImageConverter {
         const base = path.basename(inputPath, ext);
         const outExt = '.' + options.format;
         const outputPath = path.join(dir, base + outExt);
-        const sharpInstance = sharp;
-        let pipeline = sharpInstance(inputPath);
+        let pipeline = sharp(inputPath);
         if (options.width || options.height) {
-            pipeline = pipeline.resize(options.width || 0, options.height || 0, { withoutEnlargement: true });
+            pipeline = pipeline.resize(options.width || null, options.height || null, { withoutEnlargement: true });
         }
         if (options.grayscale) {
             pipeline = pipeline.grayscale();

@@ -5,32 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Daily Typing Quote | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
 
 <header class="hero">
-  <h1 class="logo">Daily Typing Quote</h1>
-  <p class="tagline">A new quote every day — same for everyone. Practice typing with curated quotes from literature, philosophy, and tech. Track WPM, accuracy, and consistency. Share your daily result!</p>
+  <h1 class="logo"><span class="accent">Daily</span> Typing <span class="accent">Quote</span></h1>
+  <p class="tagline">A new literary quote every day — same for everyone worldwide. Practice typing with curated passages from literature, philosophy, science, and technology. Track your WPM, accuracy, consistency, and build a daily streak. Share beautiful results.</p>
 </header>
 
 <main class="container">
   <section class="panel input-panel" aria-labelledby="controls-heading">
-    <h2 id="controls-heading">Typing Test</h2>
+    <div class="panel-header">
+      <h2 id="controls-heading">Controls</h2>
+      <span class="badge">Settings</span>
+    </div>
 
     <div class="field">
       <label>Mode</label>
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-          <input type="radio" name="mode" value="daily" checked> 📅 Daily Quote
+      <div class="radio-group" role="radiogroup" aria-label="Typing mode">
+        <label class="radio-option">
+          <input type="radio" name="mode" value="daily" checked>
+          <span class="radio-label">📅 Daily Quote</span>
+          <span class="radio-desc">Same for everyone, date-seeded</span>
         </label>
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-          <input type="radio" name="mode" value="practice"> 🎲 Practice (Random)
+        <label class="radio-option">
+          <input type="radio" name="mode" value="practice">
+          <span class="radio-label">🎲 Practice</span>
+          <span class="radio-desc">Random quote from library</span>
         </label>
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-          <input type="radio" name="mode" value="custom"> ✏️ Custom Text
+        <label class="radio-option">
+          <input type="radio" name="mode" value="custom">
+          <span class="radio-label">✏️ Custom Text</span>
+          <span class="radio-desc">Paste your own passage</span>
         </label>
       </div>
     </div>
@@ -38,18 +47,31 @@
     <div class="field custom-field" id="custom-field" hidden>
       <label for="custom-text">Custom Text</label>
       <textarea id="custom-text" rows="4" placeholder="Paste or type your own text here..."></textarea>
+      <div class="field-hint">Text will be filtered by your punctuation/case settings below.</div>
+    </div>
+
+    <div class="field">
+      <label>Category Filter (Practice Mode)</label>
+      <select id="category-filter">
+        <option value="all">All Categories</option>
+        <option value="literature">Literature</option>
+        <option value="philosophy">Philosophy</option>
+        <option value="technology">Technology</option>
+        <option value="science">Science</option>
+        <option value="wisdom">Wisdom & Life</option>
+      </select>
     </div>
 
     <div class="field">
       <label>Options</label>
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+      <div class="checkbox-group">
+        <label class="checkbox-option">
           <input type="checkbox" id="opt-punctuation" checked> Punctuation
         </label>
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+        <label class="checkbox-option">
           <input type="checkbox" id="opt-numbers" checked> Numbers
         </label>
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+        <label class="checkbox-option">
           <input type="checkbox" id="opt-case" checked> Case Sensitive
         </label>
       </div>
@@ -57,19 +79,24 @@
 
     <div class="field">
       <label>Test Duration</label>
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button class="btn secondary duration-btn active" data-time="30">30s</button>
-        <button class="btn secondary duration-btn" data-time="60">60s</button>
-        <button class="btn secondary duration-btn" data-time="120">2min</button>
-        <button class="btn secondary duration-btn" data-time="300">5min</button>
-        <button class="btn secondary duration-btn" data-time="0">∞ (No Limit)</button>
+      <div class="duration-group">
+        <button class="duration-btn" data-time="15">15s</button>
+        <button class="duration-btn active" data-time="30">30s</button>
+        <button class="duration-btn" data-time="60">60s</button>
+        <button class="duration-btn" data-time="120">2 min</button>
+        <button class="duration-btn" data-time="0">∞ No Limit</button>
       </div>
     </div>
 
     <div class="field">
-      <label>Today's Quote</label>
-      <div id="daily-quote-info" class="daily-quote-info"></div>
+      <label>Font Size</label>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <input type="range" id="font-size-slider" min="14" max="24" value="18" style="flex: 1;">
+        <span id="font-size-value" style="font-family: var(--font-mono); font-size: 0.9rem; color: var(--ink); min-width: 2.5rem;">18px</span>
+      </div>
     </div>
+
+    <div class="field daily-quote-info" id="daily-quote-info"></div>
 
     <div class="actions">
       <button class="btn primary" id="btn-start">▶ Start Test</button>
@@ -79,25 +106,62 @@
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-label">Current Streak</div>
-        <div class="stat-value" id="stat-streak">0</div>
+        <div class="stat-value accent" id="stat-streak">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Best Streak</div>
-        <div class="stat-value" id="stat-best-streak">0</div>
+        <div class="stat-value gold" id="stat-best-streak">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Avg WPM</div>
-        <div class="stat-value" id="stat-avg-wpm">0</div>
+        <div class="stat-value sage" id="stat-avg-wpm">0</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Best WPM</div>
-        <div class="stat-value" id="stat-best-wpm">0</div>
+        <div class="stat-value rose" id="stat-best-wpm">0</div>
+      </div>
+    </div>
+
+    <div class="panel-header" style="margin-top: 1.5rem;">
+      <h2>Settings</h2>
+      <span class="badge">Preferences</span>
+    </div>
+
+    <div class="settings-grid">
+      <div class="setting-row">
+        <span class="setting-label">Show Errors Live</span>
+        <div class="setting-control">
+          <label class="checkbox-option" style="padding: 0.4rem 0.8rem;">
+            <input type="checkbox" id="setting-show-errors" checked>
+            Highlight mistakes as you type
+          </label>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Sound Effects</span>
+        <div class="setting-control">
+          <label class="checkbox-option" style="padding: 0.4rem 0.8rem;">
+            <input type="checkbox" id="setting-sound" checked>
+            Keystroke feedback
+          </label>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Auto-Save Results</span>
+        <div class="setting-control">
+          <label class="checkbox-option" style="padding: 0.4rem 0.8rem;">
+            <input type="checkbox" id="setting-autosave" checked>
+            Save session to history
+          </label>
+        </div>
       </div>
     </div>
   </section>
 
   <section class="panel results-panel" aria-labelledby="test-heading">
-    <h2 id="test-heading">Type Here</h2>
+    <div class="panel-header">
+      <h2 id="test-heading">Type Here</h2>
+    </div>
 
     <div class="live-stats">
       <div class="live-stat">
@@ -110,7 +174,7 @@
       </div>
       <div class="live-stat">
         <span class="live-label">Accuracy</span>
-        <span class="live-value" id="live-acc">100%</span>
+        <span class="live-value success" id="live-acc">100%</span>
       </div>
       <div class="live-stat">
         <span class="live-label">Time</span>
@@ -143,16 +207,28 @@
     <div class="results-panel" id="results-panel" hidden>
       <h3>Results</h3>
       <div class="summary-cards" id="results-summary"></div>
-      <div class="field">
-        <label>Error Heatmap</label>
-        <div class="heatmap" id="error-heatmap"></div>
+
+      <div class="heatmap-section">
+        <h4>Error Heatmap</h4>
+        <div class="heatmap-container" id="error-heatmap"></div>
+        <div class="heatmap-legend">
+          <span><span class="swatch" style="background: transparent; border: 1px solid var(--muted);"></span> Never typed</span>
+          <span><span class="swatch low"></span> Low errors</span>
+          <span><span class="swatch med"></span> Medium</span>
+          <span><span class="swatch high"></span> High</span>
+          <span><span class="swatch critical"></span> Critical</span>
+        </div>
       </div>
-      <div class="field">
-        <label>WPM Over Time</label>
-        <canvas id="wpm-chart" height="120"></canvas>
+
+      <div class="heatmap-section">
+        <h4>WPM Over Time</h4>
+        <div class="chart-container">
+          <canvas id="wpm-chart" height="140"></canvas>
+        </div>
       </div>
+
       <div class="actions">
-        <button class="btn" id="btn-share">📋 Share Result</button>
+        <button class="btn primary" id="btn-share">📋 Share Result</button>
         <button class="btn secondary" id="btn-retry">🔄 Retry</button>
       </div>
     </div>
@@ -166,7 +242,7 @@
 
 <footer>
   Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">About Me</a>
 </footer>
 
 <script src="script.js"></script>

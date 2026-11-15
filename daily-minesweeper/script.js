@@ -1,5 +1,11 @@
-const DailyMinesweeper = (() => {
-  // Game state
+/* ==========================================================================
+   DAILY MINEFIELD — TACTICAL MINEFIELD OPERATIONS
+   ========================================================================== */
+
+const MinefieldOps = (() => {
+  // ============================================================
+  // GAME STATE
+  // ============================================================
   let board = [];
   let width = 9;
   let height = 9;
@@ -13,15 +19,16 @@ const DailyMinesweeper = (() => {
   let currentDifficulty = 'beginner';
   let dailySeed = '';
   let prng = Math.random;
+  let currentTheme = 'classic';
 
-  // Difficulties
+  // Difficulty presets
   const DIFFICULTIES = {
     beginner: { width: 9, height: 9, mines: 10 },
     intermediate: { width: 16, height: 16, mines: 40 },
     expert: { width: 30, height: 16, mines: 99 }
   };
 
-  // Stats
+  // Persistent stats
   let stats = {
     streak: 0,
     bestStreak: 0,
@@ -36,88 +43,108 @@ const DailyMinesweeper = (() => {
     }
   };
 
-  const elements = {};
+  // DOM Elements
+  const el = {};
 
+  // ============================================================
+  // INITIALIZATION
+  // ============================================================
   function init() {
     cacheElements();
     bindEvents();
-    startBubbles();
     loadStats();
-    updateDailyDate();
-    newGame();
-    renderBoard();
-    updateStats();
+    applyTheme(currentTheme);
+    updateSystemTime();
+    setInterval(updateSystemTime, 1000);
+    updateMissionDate();
+    newMission();
+    renderField();
+    updateIntel();
     renderLeaderboard();
   }
 
   function cacheElements() {
-    elements.diffTabs = document.querySelectorAll('.diff-tab');
-    elements.customFields = document.getElementById('custom-fields');
-    elements.customWidth = document.getElementById('custom-width');
-    elements.customHeight = document.getElementById('custom-height');
-    elements.customMines = document.getElementById('custom-mines');
-    elements.modeRadios = document.querySelectorAll('input[name="mode"]');
-    elements.dailyDate = document.getElementById('daily-date');
-    elements.dailyHint = document.getElementById('daily-hint');
-    elements.btnNewGame = document.getElementById('btn-new-game');
-    elements.btnGiveUp = document.getElementById('btn-give-up');
-    elements.faceBtn = document.getElementById('face-btn');
-    elements.gameTimer = document.getElementById('game-timer');
-    elements.gameMines = document.getElementById('game-mines');
-    elements.board = document.getElementById('board');
-    elements.gameStatus = document.getElementById('game-status');
-    elements.lbTabs = document.querySelectorAll('.lb-tab');
-    elements.leaderboard = document.getElementById('leaderboard');
-    elements.btnShare = document.getElementById('btn-share');
-    elements.sharePreview = document.getElementById('share-preview');
-    elements.statStreak = document.getElementById('stat-streak');
-    elements.statBestStreak = document.getElementById('stat-best-streak');
-    elements.statWins = document.getElementById('stat-wins');
-    elements.statWinrate = document.getElementById('stat-winrate');
+    // Config
+    el.diffSelect = document.getElementById('difficulty-select');
+    el.customFields = document.getElementById('custom-fields');
+    el.customWidth = document.getElementById('custom-width');
+    el.customHeight = document.getElementById('custom-height');
+    el.customMines = document.getElementById('custom-mines');
+    el.modeRadios = document.querySelectorAll('input[name="mode"]');
+    el.missionDate = document.getElementById('mission-date');
+    el.modeHint = document.getElementById('mode-hint');
+    el.themeSelect = document.getElementById('theme-select');
+    el.themeIndicator = document.getElementById('theme-indicator');
+    el.btnNewMission = document.getElementById('btn-new-mission');
+    el.btnAbort = document.getElementById('btn-abort');
+
+    // HUD
+    el.hudMines = document.getElementById('hud-mines');
+    el.hudTime = document.getElementById('hud-time');
+    el.commandBtn = document.getElementById('command-btn');
+    el.cmdFace = document.getElementById('cmd-face');
+    el.minefield = document.getElementById('minefield');
+    el.statusDisplay = document.getElementById('status-display');
+    el.statusText = document.querySelector('.status-text');
+
+    // Leaderboard
+    el.lbTabs = document.querySelectorAll('.lb-tab');
+    el.leaderboard = document.getElementById('leaderboard');
+
+    // Transmission
+    el.btnTransmit = document.getElementById('btn-transmit');
+    el.transmissionLog = document.getElementById('transmission-log');
+
+    // Intel
+    el.intelStreak = document.getElementById('intel-streak');
+    el.intelBestStreak = document.getElementById('intel-best-streak');
+    el.intelWins = document.getElementById('intel-wins');
+    el.intelWinrate = document.getElementById('intel-winrate');
+
+    // System
+    el.sysTime = document.getElementById('sys-time');
   }
 
   function bindEvents() {
-    // Difficulty tabs
-    elements.diffTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        currentDifficulty = tab.dataset.diff;
-        elements.diffTabs.forEach(t => {
-          t.classList.toggle('active', t === tab);
-          t.setAttribute('aria-selected', t === tab);
-        });
-        elements.customFields.hidden = currentDifficulty !== 'custom';
-        if (currentDifficulty !== 'custom') {
-          applyDifficulty(currentDifficulty);
-        }
-        newGame();
-      });
+    // Difficulty select
+    el.diffSelect.addEventListener('change', () => {
+      currentDifficulty = el.diffSelect.value;
+      el.customFields.hidden = currentDifficulty !== 'custom';
+      if (currentDifficulty !== 'custom') applyDifficulty(currentDifficulty);
+      newMission();
     });
 
     // Custom fields
-    [elements.customWidth, elements.customHeight, elements.customMines].forEach(input => {
+    [el.customWidth, el.customHeight, el.customMines].forEach(input => {
       input.addEventListener('change', () => {
-        if (currentDifficulty === 'custom') newGame();
+        if (currentDifficulty === 'custom') newMission();
       });
     });
 
     // Mode radios
-    elements.modeRadios.forEach(radio => {
+    el.modeRadios.forEach(radio => {
       radio.addEventListener('change', () => {
         isDailyMode = radio.value === 'daily';
-        updateDailyHint();
-        newGame();
+        updateModeHint();
+        newMission();
       });
     });
 
+    // Theme select
+    el.themeSelect.addEventListener('change', () => {
+      currentTheme = el.themeSelect.value;
+      applyTheme(currentTheme);
+    });
+
     // Game controls
-    elements.btnNewGame.addEventListener('click', newGame);
-    elements.btnGiveUp.addEventListener('click', giveUp);
-    elements.faceBtn.addEventListener('click', newGame);
+    el.btnNewMission.addEventListener('click', newMission);
+    el.btnAbort.addEventListener('click', abortMission);
+    el.commandBtn.addEventListener('click', newMission);
 
     // Leaderboard tabs
-    elements.lbTabs.forEach(tab => {
+    el.lbTabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        elements.lbTabs.forEach(t => {
+        el.lbTabs.forEach(t => {
           t.classList.toggle('active', t === tab);
           t.setAttribute('aria-selected', t === tab);
         });
@@ -125,28 +152,36 @@ const DailyMinesweeper = (() => {
       });
     });
 
-    // Share
-    elements.btnShare.addEventListener('click', shareResult);
+    // Transmit
+    el.btnTransmit.addEventListener('click', transmitReport);
 
-    // Board events (delegated)
-    elements.board.addEventListener('click', (e) => handleCellClick(e));
-    elements.board.addEventListener('contextmenu', (e) => handleRightClick(e));
+    // Field events (delegated)
+    el.minefield.addEventListener('click', e => handleCellClick(e));
+    el.minefield.addEventListener('contextmenu', e => handleRightClick(e));
 
-    // Touch events for mobile
+    // Touch events for mobile flagging
     let touchStartTime = 0;
     let touchCell = null;
+    let touchMoved = false;
 
-    elements.board.addEventListener('touchstart', (e) => {
+    el.minefield.addEventListener('touchstart', e => {
       touchStartTime = Date.now();
-      const cell = e.target.closest('.cell');
+      touchMoved = false;
+      const cell = e.target.closest('.minefield-cell');
       if (cell) {
         touchCell = cell;
         cell.classList.add('touch-active');
       }
     }, { passive: true });
 
-    elements.board.addEventListener('touchend', (e) => {
-      if (touchCell) {
+    el.minefield.addEventListener('touchmove', () => {
+      touchMoved = true;
+      if (touchCell) touchCell.classList.remove('touch-active');
+      touchCell = null;
+    }, { passive: true });
+
+    el.minefield.addEventListener('touchend', e => {
+      if (touchCell && !touchMoved) {
         touchCell.classList.remove('touch-active');
         const duration = Date.now() - touchStartTime;
         if (duration > 500) {
@@ -156,45 +191,66 @@ const DailyMinesweeper = (() => {
           // Tap = reveal
           handleCellClick({ target: touchCell, preventDefault: () => {} });
         }
-        touchCell = null;
+      }
+      touchCell = null;
+    });
+
+    // Prevent context menu on cells
+    el.minefield.addEventListener('contextmenu', e => {
+      if (e.target.classList.contains('minefield-cell')) e.preventDefault();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      switch (e.key.toLowerCase()) {
+        case 'r':
+        case 'n':
+          e.preventDefault(); newMission(); break;
+        case 't':
+          e.preventDefault(); transmitReport(); break;
+        case 'escape':
+          e.preventDefault(); abortMission(); break;
+        case ' ':
+          if (gameState === 'playing') {
+            e.preventDefault(); handleChord(e);
+          }
+          break;
       }
     });
-
-    // Prevent context menu on long press
-    elements.board.addEventListener('contextmenu', (e) => {
-      if (e.target.classList.contains('cell')) e.preventDefault();
-    });
   }
 
-  function startBubbles() {
-    const container = document.getElementById('bubbles');
-    const colors = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)', 'var(--accent-4)', 'var(--accent-5)'];
-
-    function spawn() {
-      const bubble = document.createElement('div');
-      bubble.className = 'float';
-      const size = Math.random() * 60 + 20;
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      const left = Math.random() * 100;
-      const duration = Math.random() * 20 + 15;
-      const dx = (Math.random() - 0.5) * 200;
-
-      bubble.style.cssText = `
-        width: ${size}px;
-        height: ${size}px;
-        left: ${left}%;
-        --c: ${color};
-        --duration: ${duration}s;
-        --dx: ${dx}px;
-      `;
-      container.appendChild(bubble);
-      setTimeout(() => bubble.remove(), duration * 1000);
-    }
-
-    setInterval(spawn, 800);
-    for (let i = 0; i < 8; i++) setTimeout(spawn, i * 200);
+  // ============================================================
+  // THEME SYSTEM (Task 9)
+  // ============================================================
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    currentTheme = theme;
+    const labels = { classic: 'CLASSIC', dark: 'STEALTH', retro: 'RETRO', 'high-contrast': 'HI-VIS' };
+    el.themeIndicator.textContent = labels[theme] || 'CLASSIC';
+    el.themeSelect.value = theme;
   }
 
+  // ============================================================
+  // TIME & DATE
+  // ============================================================
+  function updateSystemTime() {
+    const now = new Date();
+    const utc = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    const timeStr = utc.toTimeString().slice(0, 8);
+    el.sysTime.textContent = `${timeStr} ZULU`;
+  }
+
+  function updateMissionDate() {
+    const today = new Date();
+    const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+    const dateStr = today.toLocaleDateString('en-US', options).toUpperCase();
+    el.missionDate.textContent = dateStr;
+  }
+
+  // ============================================================
+  // DIFFICULTY & MODE
+  // ============================================================
   function applyDifficulty(diff) {
     const d = DIFFICULTIES[diff];
     width = d.width;
@@ -202,15 +258,17 @@ const DailyMinesweeper = (() => {
     mineCount = d.mines;
   }
 
-  function getDailySeed() {
-    const today = new Date();
-    const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
-    return `daily-${dateStr}`;
+  function updateModeHint() {
+    el.modeHint.textContent = isDailyMode
+      ? 'IDENTICAL BOARD FOR ALL OPERATORS'
+      : 'RANDOMIZED BOARD EACH DEPLOYMENT';
   }
 
-  function seededRandom(seed) {
-    // Simple seeded PRNG (Mulberry32)
-    let t = seed;
+  // ============================================================
+  // PRNG — MULBERRY32 (Task 2)
+  // ============================================================
+  function mulberry32(seed) {
+    let t = seed >>> 0;
     return () => {
       t += 0x6D2B79F5;
       let r = Math.imul(t ^ (t >>> 15), 1 | t);
@@ -229,18 +287,24 @@ const DailyMinesweeper = (() => {
     return Math.abs(hash);
   }
 
-  function newGame() {
+  function getDailySeed() {
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+    return `minefield-op-${dateStr}`;
+  }
+
+  // ============================================================
+  // MISSION LIFECYCLE
+  // ============================================================
+  function newMission() {
     // Stop timer
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 
     // Set dimensions
     if (currentDifficulty === 'custom') {
-      width = parseInt(elements.customWidth.value) || 16;
-      height = parseInt(elements.customHeight.value) || 16;
-      mineCount = Math.min(parseInt(elements.customMines.value) || 40, width * height - 1);
+      width = Math.max(5, Math.min(50, parseInt(el.customWidth.value) || 16));
+      height = Math.max(5, Math.min(30, parseInt(el.customHeight.value) || 16));
+      mineCount = Math.max(1, Math.min(500, Math.min(parseInt(el.customMines.value) || 40, width * height - 1)));
     } else {
       applyDifficulty(currentDifficulty);
     }
@@ -248,7 +312,7 @@ const DailyMinesweeper = (() => {
     // Set PRNG
     if (isDailyMode) {
       dailySeed = getDailySeed();
-      prng = seededRandom(hashString(dailySeed));
+      prng = mulberry32(hashString(dailySeed));
     } else {
       prng = Math.random;
     }
@@ -259,52 +323,52 @@ const DailyMinesweeper = (() => {
     flaggedCount = 0;
     gameState = 'ready';
     startTime = 0;
-    elements.gameTimer.textContent = '000';
-    elements.gameMines.textContent = String(mineCount).padStart(3, '0');
-    elements.faceBtn.textContent = '😊';
-    elements.faceBtn.className = 'face-btn';
-    elements.gameStatus.textContent = isDailyMode ? "Today's Daily Challenge" : 'Click to start';
-    elements.gameStatus.className = 'game-status';
+
+    // HUD reset
+    el.hudTime.textContent = '000';
+    el.hudMines.textContent = String(mineCount).padStart(3, '0');
+    el.cmdFace.textContent = '◆';
+    el.commandBtn.className = 'command-btn';
+    el.statusText.textContent = isDailyMode ? 'DAILY OP — AWAITING DEPLOYMENT' : 'FREE PLAY — AWAITING DEPLOYMENT';
+    el.statusDisplay.className = 'status-display';
 
     // Create empty board
     for (let y = 0; y < height; y++) {
       const row = [];
       for (let x = 0; x < width; x++) {
-        row.push({
-          x, y,
-          isMine: false,
-          isRevealed: false,
-          isFlagged: false,
-          neighborMines: 0
-        });
+        row.push({ x, y, isMine: false, isRevealed: false, isFlagged: false, neighborMines: 0 });
       }
       board.push(row);
     }
 
-    renderBoard();
-    updateDailyDate();
+    renderField();
+    updateMissionDate();
+  }
+
+  function abortMission() {
+    if (gameState === 'playing') {
+      gameOver(false, true);
+    }
   }
 
   function placeMines(firstX, firstY) {
     const positions = [];
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        // Don't place mine on first click or its neighbors
+        // Safe zone: first click + neighbors
         if (Math.abs(x - firstX) <= 1 && Math.abs(y - firstY) <= 1) continue;
         positions.push({ x, y });
       }
     }
 
-    // Shuffle and pick mines
+    // Fisher-Yates shuffle with seeded PRNG
     for (let i = positions.length - 1; i > 0; i--) {
       const j = Math.floor(prng() * (i + 1));
       [positions[i], positions[j]] = [positions[j], positions[i]];
     }
 
     const mines = positions.slice(0, mineCount);
-    mines.forEach(pos => {
-      board[pos.y][pos.x].isMine = true;
-    });
+    mines.forEach(pos => { board[pos.y][pos.x].isMine = true; });
 
     // Calculate neighbor counts
     for (let y = 0; y < height; y++) {
@@ -314,9 +378,7 @@ const DailyMinesweeper = (() => {
         for (let dy = -1; dy <= 1; dy++) {
           for (let dx = -1; dx <= 1; dx++) {
             const nx = x + dx, ny = y + dy;
-            if (nx >= 0 && nx < width && ny >= 0 && ny < height && board[ny][nx].isMine) {
-              count++;
-            }
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height && board[ny][nx].isMine) count++;
           }
         }
         board[y][x].neighborMines = count;
@@ -324,41 +386,51 @@ const DailyMinesweeper = (() => {
     }
   }
 
-  function renderBoard() {
-    elements.board.style.gridTemplateColumns = `repeat(${width}, var(--cell-size))`;
-    elements.board.innerHTML = '';
+  // ============================================================
+  // RENDERING
+  // ============================================================
+  function renderField() {
+    el.minefield.style.gridTemplateColumns = `repeat(${width}, var(--cell-size))`;
+    el.minefield.innerHTML = '';
+
+    const fragment = document.createDocumentFragment();
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const cell = board[y][x];
-        const el = document.createElement('div');
-        el.className = 'cell';
-        el.dataset.x = x;
-        el.dataset.y = y;
+        const cellEl = document.createElement('div');
+        cellEl.className = 'minefield-cell';
+        cellEl.dataset.x = x;
+        cellEl.dataset.y = y;
 
         if (cell.isRevealed) {
-          el.classList.add('revealed');
+          cellEl.classList.add('revealed');
           if (cell.isMine) {
-            el.classList.add('mine');
-            el.textContent = '💣';
+            cellEl.classList.add('mine');
+            cellEl.textContent = '◆';
           } else if (cell.neighborMines > 0) {
-            el.dataset.num = cell.neighborMines;
-            el.textContent = cell.neighborMines;
+            cellEl.dataset.num = cell.neighborMines;
+            cellEl.textContent = cell.neighborMines;
           }
         } else if (cell.isFlagged) {
-          el.classList.add('flagged');
-          el.textContent = '🚩';
+          cellEl.classList.add('flagged');
+          cellEl.textContent = '▲';
         }
 
-        elements.board.appendChild(el);
+        fragment.appendChild(cellEl);
       }
     }
+
+    el.minefield.appendChild(fragment);
   }
 
+  // ============================================================
+  // INPUT HANDLING
+  // ============================================================
   function handleCellClick(e) {
     if (gameState !== 'playing' && gameState !== 'ready') return;
 
-    const cellEl = e.target.closest('.cell');
+    const cellEl = e.target.closest('.minefield-cell');
     if (!cellEl) return;
 
     const x = parseInt(cellEl.dataset.x);
@@ -367,28 +439,28 @@ const DailyMinesweeper = (() => {
 
     if (cell.isFlagged || cell.isRevealed) return;
 
-    // First click - place mines
+    // First click — place mines
     if (gameState === 'ready') {
       placeMines(x, y);
       gameState = 'playing';
       startTime = Date.now();
       timerInterval = setInterval(updateTimer, 1000);
-      elements.faceBtn.textContent = '😮';
-      elements.faceBtn.className = 'face-btn playing';
-      elements.gameStatus.textContent = 'Playing...';
-      elements.gameStatus.className = 'game-status playing';
+      el.cmdFace.textContent = '◈';
+      el.commandBtn.className = 'command-btn playing';
+      el.statusText.textContent = 'SCANNING SECTOR...';
+      el.statusDisplay.className = 'status-display playing';
     }
 
     revealCell(x, y);
-    checkWin();
-    renderBoard();
+    checkVictory();
+    renderField();
   }
 
   function handleRightClick(e) {
     e.preventDefault();
     if (gameState !== 'playing') return;
 
-    const cellEl = e.target.closest('.cell');
+    const cellEl = e.target.closest('.minefield-cell');
     if (!cellEl) return;
 
     const x = parseInt(cellEl.dataset.x);
@@ -399,8 +471,43 @@ const DailyMinesweeper = (() => {
 
     cell.isFlagged = !cell.isFlagged;
     flaggedCount += cell.isFlagged ? 1 : -1;
-    elements.gameMines.textContent = String(mineCount - flaggedCount).padStart(3, '0');
-    renderBoard();
+    el.hudMines.textContent = String(mineCount - flaggedCount).padStart(3, '0');
+    renderField();
+  }
+
+  function handleChord(e) {
+    // Chord clear: reveal all neighbors if flagged count matches number
+    const cellEl = document.querySelector('.minefield-cell:hover');
+    if (!cellEl) return;
+
+    const x = parseInt(cellEl.dataset.x);
+    const y = parseInt(cellEl.dataset.y);
+    const cell = board[y][x];
+
+    if (!cell.isRevealed || cell.neighborMines === 0) return;
+
+    // Count flags around
+    let flagCount = 0;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (nx >= 0 && nx < width && ny >= 0 && ny < height && board[ny][nx].isFlagged) flagCount++;
+      }
+    }
+
+    if (flagCount === cell.neighborMines) {
+      // Reveal all unflagged neighbors
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height && !board[ny][nx].isFlagged) {
+            revealCell(nx, ny);
+          }
+        }
+      }
+      checkVictory();
+      renderField();
+    }
   }
 
   function revealCell(x, y) {
@@ -417,7 +524,7 @@ const DailyMinesweeper = (() => {
     }
 
     if (cell.neighborMines === 0) {
-      // Auto-reveal neighbors
+      // Flood fill
       for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
           revealCell(x + dx, y + dy);
@@ -426,42 +533,38 @@ const DailyMinesweeper = (() => {
     }
   }
 
-  function checkWin() {
+  function checkVictory() {
     if (revealedCount === width * height - mineCount) {
       gameOver(true);
     }
   }
 
-  function gameOver(won) {
+  function gameOver(won, aborted = false) {
     gameState = won ? 'won' : 'lost';
 
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
 
     if (won) {
-      elements.faceBtn.textContent = '😎';
-      elements.faceBtn.className = 'face-btn win';
-      elements.gameStatus.textContent = `🎉 You won in ${elapsed}s!`;
-      elements.gameStatus.className = 'game-status win';
+      el.cmdFace.textContent = '✦';
+      el.commandBtn.className = 'command-btn win';
+      el.statusText.textContent = `SECTOR CLEARED — ${elapsed}s`;
+      el.statusDisplay.className = 'status-display win';
 
-      // Reveal all mines as flags
+      // Auto-flag all mines
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          if (board[y][x].isMine && !board[y][x].isFlagged) {
-            board[y][x].isFlagged = true;
-          }
+          if (board[y][x].isMine && !board[y][x].isFlagged) board[y][x].isFlagged = true;
         }
       }
       flaggedCount = mineCount;
-      elements.gameMines.textContent = '000';
+      el.hudMines.textContent = '000';
 
       // Update stats
       stats.games++;
       stats.wins++;
+
       if (isDailyMode) {
         const today = new Date().toISOString().split('T')[0];
         if (!stats.dailyWins.includes(today)) {
@@ -469,20 +572,20 @@ const DailyMinesweeper = (() => {
           stats.streak++;
           if (stats.streak > stats.bestStreak) stats.bestStreak = stats.streak;
         }
-        // Add to daily leaderboard
         addToLeaderboard('daily', elapsed);
       } else {
-        // Classic streak resets on loss, but we track separately
         addToLeaderboard(currentDifficulty, elapsed);
       }
+
       saveStats();
-      updateStats();
+      updateIntel();
       renderLeaderboard();
+      showToast('MISSION ACCOMPLISHED', 'success');
     } else {
-      elements.faceBtn.textContent = '💀';
-      elements.faceBtn.className = 'face-btn lose';
-      elements.gameStatus.textContent = '💥 Game Over! Click 😊 to retry';
-      elements.gameStatus.className = 'game-status lose';
+      el.cmdFace.textContent = '✗';
+      el.commandBtn.className = 'command-btn lose';
+      el.statusText.textContent = aborted ? 'MISSION ABORTED' : 'CONTACT DETONATED — SECTOR LOST';
+      el.statusDisplay.className = 'status-display lose';
 
       // Reveal all mines
       for (let y = 0; y < height; y++) {
@@ -496,31 +599,25 @@ const DailyMinesweeper = (() => {
         stats.games++;
         stats.streak = 0;
         saveStats();
-        updateStats();
+        updateIntel();
       }
+      showToast(aborted ? 'MISSION ABORTED' : 'SECTOR LOST', 'error');
     }
 
-    renderBoard();
-  }
-
-  function giveUp() {
-    if (gameState === 'playing') {
-      gameOver(false);
-    }
+    renderField();
   }
 
   function updateTimer() {
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    elements.gameTimer.textContent = String(Math.min(elapsed, 999)).padStart(3, '0');
+    el.hudTime.textContent = String(Math.min(elapsed, 999)).padStart(3, '0');
   }
 
+  // ============================================================
+  // LEADERBOARDS (Task 6)
+  // ============================================================
   function addToLeaderboard(difficulty, time) {
     const lb = stats.leaderboards[difficulty];
-    const entry = {
-      time,
-      date: new Date().toISOString().split('T')[0],
-      mode: isDailyMode ? 'daily' : 'classic'
-    };
+    const entry = { time, date: new Date().toISOString().split('T')[0], mode: isDailyMode ? 'DAILY' : 'CLASSIC' };
     lb.push(entry);
     lb.sort((a, b) => a.time - b.time);
     if (lb.length > 10) lb.pop();
@@ -528,10 +625,10 @@ const DailyMinesweeper = (() => {
 
   function renderLeaderboard(difficulty = 'beginner') {
     const lb = stats.leaderboards[difficulty];
-    let html = '<div class="lb-row header"><div>#</div><div>Time</div><div>Date</div><div>Mode</div></div>';
+    let html = '<div class="lb-row header"><div>#</div><div>TIME</div><div>DATE</div><div>MODE</div></div>';
 
     if (lb.length === 0) {
-      html += '<div class="lb-row empty">No times yet. Be the first!</div>';
+      html += '<div class="lb-row empty">NO RECORDS — BE THE FIRST</div>';
     } else {
       lb.forEach((entry, i) => {
         const timeStr = String(entry.time).padStart(3, '0');
@@ -539,43 +636,69 @@ const DailyMinesweeper = (() => {
           <div class="lb-rank">${i + 1}</div>
           <div class="lb-time">${timeStr}s</div>
           <div class="lb-date">${entry.date}</div>
-          <div style="text-align: right; color: var(--muted); font-size: 0.8rem;">${entry.mode}</div>
+          <div class="lb-mode">${entry.mode}</div>
         </div>`;
       });
     }
 
-    elements.leaderboard.innerHTML = html;
+    el.leaderboard.innerHTML = html;
   }
 
-  function updateStats() {
-    elements.statStreak.textContent = stats.streak;
-    elements.statBestStreak.textContent = stats.bestStreak;
-    elements.statWins.textContent = stats.wins;
-    elements.statWinrate.textContent = stats.games > 0 ? `${Math.round((stats.wins / stats.games) * 100)}%` : '0%';
+  // ============================================================
+  // STATISTICS DASHBOARD (Task 8)
+  // ============================================================
+  function updateIntel() {
+    el.intelStreak.textContent = stats.streak;
+    el.intelBestStreak.textContent = stats.bestStreak;
+    el.intelWins.textContent = stats.wins;
+    el.intelWinrate.textContent = stats.games > 0 ? `${Math.round((stats.wins / stats.games) * 100)}%` : '0%';
   }
 
-  function updateDailyDate() {
-    const today = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    elements.dailyDate.textContent = today.toLocaleDateString('en-US', options);
+  // ============================================================
+  // STREAK TRACKING (Task 5) — localStorage
+  // ============================================================
+  function loadStats() {
+    try {
+      const saved = localStorage.getItem('minefield-ops-stats');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        stats = { ...stats, ...parsed };
+        // Ensure leaderboards exist
+        stats.leaderboards = stats.leaderboards || { beginner: [], intermediate: [], expert: [], daily: [] };
+        stats.dailyWins = stats.dailyWins || [];
+      }
+    } catch (e) {
+      console.warn('[INTEL] Failed to load stats:', e);
+    }
   }
 
-  function updateDailyHint() {
-    elements.dailyHint.textContent = isDailyMode
-      ? 'Same board for everyone worldwide'
-      : 'Random board each game';
+  function saveStats() {
+    try {
+      localStorage.setItem('minefield-ops-stats', JSON.stringify(stats));
+    } catch (e) {
+      console.warn('[INTEL] Failed to save stats:', e);
+    }
   }
 
-  function shareResult() {
+  // ============================================================
+  // CUSTOM BOARD GENERATOR (Task 7)
+  // ============================================================
+  // Handled by custom difficulty fields in newMission()
+
+  // ============================================================
+  // TRANSMISSION / SHARE (Task 10)
+  // ============================================================
+  function transmitReport() {
     if (gameState !== 'won') {
-      showToast('Complete a game first!');
+      showToast('COMPLETE MISSION FIRST', 'error');
       return;
     }
 
     const elapsed = Math.floor((Date.now() - startTime) / 1000);
     const today = new Date().toISOString().split('T')[0];
-    const diffName = currentDifficulty === 'custom' ? `Custom (${width}×${height}, ${mineCount})` :
-      currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1);
+    const diffName = currentDifficulty === 'custom'
+      ? `CUSTOM (${width}×${height}, ${mineCount})`
+      : currentDifficulty.toUpperCase();
 
     // Generate emoji grid
     let emojiGrid = '';
@@ -590,51 +713,52 @@ const DailyMinesweeper = (() => {
       emojiGrid += row + '\n';
     }
 
-    const shareText = `Daily Minesweeper ${isDailyMode ? '📅' : '🎲'}
-${diffName} • ${elapsed}s
-${today}
+    const modeTag = isDailyMode ? 'DAILY OP' : 'FREE PLAY';
+    const transmission = `[MINEFIELD-OPS TRANSMISSION]
+${modeTag} | ${diffName} | ${elapsed}s
+DATE: ${today}
+SEED: ${isDailyMode ? dailySeed : 'RANDOM'}
 
 ${emojiGrid}
-#DailyMinesweeper #KING_YOSEF_`;
+OPERATOR: KING_YOSEF_
+STREAK: ${stats.streak} | WIN RATE: ${stats.games > 0 ? Math.round((stats.wins / stats.games) * 100) : 0}%
 
-    navigator.clipboard.writeText(shareText).then(() => {
-      elements.sharePreview.textContent = shareText;
-      elements.sharePreview.hidden = false;
-      showToast('Result copied to clipboard!');
+/// END TRANSMISSION ///`;
+
+    navigator.clipboard.writeText(transmission).then(() => {
+      el.transmissionLog.textContent = transmission;
+      el.transmissionLog.hidden = false;
+      showToast('TRANSMISSION COPIED TO CLIPBOARD', 'success');
+    }).catch(() => {
+      // Fallback
+      el.transmissionLog.textContent = transmission;
+      el.transmissionLog.hidden = false;
+      showToast('TRANSMISSION READY — COPY MANUALLY', 'error');
     });
   }
 
-  function loadStats() {
-    try {
-      const saved = localStorage.getItem('daily-minesweeper-stats');
-      if (saved) {
-        stats = { ...stats, ...JSON.parse(saved) };
-      }
-    } catch (e) {
-      console.warn('Failed to load stats');
-    }
-  }
-
-  function saveStats() {
-    try {
-      localStorage.setItem('daily-minesweeper-stats', JSON.stringify(stats));
-    } catch (e) {
-      console.warn('Failed to save stats');
-    }
-  }
-
-  function showToast(message) {
-    let toast = document.querySelector('.toast');
-    if (!toast) {
-      toast = document.createElement('div');
-      toast.className = 'toast';
-      document.body.appendChild(toast);
-    }
+  // ============================================================
+  // TOAST NOTIFICATIONS
+  // ============================================================
+  function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
     toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
+    container.appendChild(toast);
+
+    // Force reflow for animation
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
   }
 
+  // ============================================================
+  // BOOT
+  // ============================================================
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

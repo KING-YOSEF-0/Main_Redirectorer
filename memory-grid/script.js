@@ -1,5 +1,5 @@
 // Memory Grid — KING_YOSEF_
-// Modes: Classic, Sequence, Chess Knight
+// Retro Cyberpunk Neural Pattern Recall System
 
 (() => {
   'use strict';
@@ -12,6 +12,16 @@
       t ^= t + Math.imul(t ^ t >>> 7, t | 61);
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
+  }
+
+  // ===== Hash function for daily seed =====
+  function hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
   }
 
   // ===== State =====
@@ -34,20 +44,22 @@
     highScores: JSON.parse(localStorage.getItem('memoryGridScores') || '{}'),
     rng: mulberry32(Date.now()),
     colors: [
-      '#e74c3c', '#2ecc71', '#3498db', '#f39c12',
-      '#9b59b6', '#1abc9c', '#e67e22', '#34495e',
-      '#e91e63', '#00bcd4', '#ff5722', '#795548',
-      '#607d8b', '#8bc34a', '#ffc107', '#673ab7'
+      '#00ff88', '#00ccff', '#ffcc00', '#ff3366',
+      '#aa44ff', '#ff6600', '#00ffcc', '#ffff00',
+      '#ff0088', '#44ffff', '#88ff00', '#ff44aa',
+      '#8800ff', '#00ff44', '#ff8800', '#4488ff'
     ],
     patterns: [
       'linear-gradient(45deg, transparent 48%, currentColor 50%, transparent 52%)',
       'linear-gradient(-45deg, transparent 48%, currentColor 50%, transparent 52%)',
-      'repeating-linear-gradient(45deg, currentColor, currentColor 10px, transparent 10px, transparent 20px)',
-      'repeating-linear-gradient(-45deg, currentColor, currentColor 10px, transparent 10px, transparent 20px)',
+      'repeating-linear-gradient(45deg, currentColor, currentColor 8px, transparent 8px, transparent 16px)',
+      'repeating-linear-gradient(-45deg, currentColor, currentColor 8px, transparent 8px, transparent 16px)',
       'radial-gradient(circle at 30% 30%, currentColor 30%, transparent 40%)',
-      'repeating-radial-gradient(circle at center, currentColor, currentColor 8px, transparent 8px, transparent 16px)',
+      'repeating-radial-gradient(circle at center, currentColor, currentColor 6px, transparent 6px, transparent 12px)',
+      'linear-gradient(90deg, transparent 48%, currentColor 50%, transparent 52%)',
+      'linear-gradient(0deg, transparent 48%, currentColor 50%, transparent 52%)',
     ],
-    emojis: ['🎯', '🌟', '💎', '🎪', '🚀', '🌈', '🎨', '🎭', '🎲', '🎯', '🌟', '💎', '🎪', '🚀', '🌈', '🎨'],
+    emojis: ['▲', '◆', '■', '●', '★', '◆', '▲', '■', '●', '★', '◆', '▲', '■', '●', '★', '◆'],
   };
 
   // ===== DOM Elements =====
@@ -58,6 +70,8 @@
     sizeBadge: document.getElementById('sizeBadge'),
     dailyBadge: document.getElementById('dailyBadge'),
     gameStatus: document.getElementById('gameStatus'),
+    statusText: document.querySelector('.status-text'),
+    statusFill: document.querySelector('.status-fill'),
     startBtn: document.getElementById('startBtn'),
     dailyBtn: document.getElementById('dailyBtn'),
     replayBtn: document.getElementById('replayBtn'),
@@ -90,6 +104,7 @@
     setupEventListeners();
     updateStatsDisplay();
     updateLeaderboard();
+    setStatus('AWAITING INITIALIZATION...', 'idle');
   }
 
   function setupEventListeners() {
@@ -117,20 +132,24 @@
         btn.classList.add('active');
         btn.setAttribute('aria-selected', 'true');
         state.mode = btn.dataset.mode;
-        els.modeBadge.textContent = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
+        els.modeBadge.textContent = state.mode.toUpperCase();
         updateModeFields();
       });
     });
 
     // Sliders
-    document.getElementById('displayTime').addEventListener('input', e => {
+    const displayTimeInput = document.getElementById('displayTime');
+    const displayTimeValue = document.getElementById('displayTimeValue');
+    displayTimeInput.addEventListener('input', e => {
       state.displayTime = parseFloat(e.target.value) * 1000;
-      document.getElementById('displayTimeValue').textContent = parseFloat(e.target.value).toFixed(1);
+      displayTimeValue.textContent = parseFloat(e.target.value).toFixed(1) + 's';
     });
 
-    document.getElementById('sequenceLength').addEventListener('input', e => {
+    const sequenceLengthInput = document.getElementById('sequenceLength');
+    const seqLengthValue = document.getElementById('seqLengthValue');
+    sequenceLengthInput.addEventListener('input', e => {
       state.sequenceLength = parseInt(e.target.value, 10);
-      document.getElementById('seqLengthValue').textContent = state.sequenceLength;
+      seqLengthValue.textContent = state.sequenceLength;
     });
 
     // Tile style
@@ -148,12 +167,33 @@
       startGame(state.isDaily);
     });
     els.shareBtn.addEventListener('click', shareResult);
+
+    // Keyboard support for grid
+    document.addEventListener('keydown', handleKeydown);
   }
 
   function updateModeFields() {
     const isSequence = state.mode === 'sequence';
     document.getElementById('displayTimeField').hidden = isSequence;
     document.getElementById('sequenceLengthField').hidden = !isSequence;
+  }
+
+  function handleKeydown(e) {
+    if (!state.isRecalling || !state.isRunning) return;
+    const totalTiles = state.gridSize * state.gridSize;
+    let index = -1;
+    if (e.key >= '1' && e.key <= '9') {
+      index = parseInt(e.key, 10) - 1;
+    } else if (e.key === '0') {
+      index = 9;
+    } else if (e.key >= 'a' && e.key <= 'z') {
+      index = e.key.charCodeAt(0) - 'a'.charCodeAt(0) + 9;
+    } else if (e.key >= 'A' && e.key <= 'Z') {
+      index = e.key.charCodeAt(0) - 'A'.charCodeAt(0) + 9;
+    }
+    if (index >= 0 && index < totalTiles) {
+      handleTileClick(index);
+    }
   }
 
   // ===== Game Logic =====
@@ -184,15 +224,6 @@
 
     updateLevelDisplay();
     nextLevel();
-  }
-
-  function hashString(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return Math.abs(hash);
   }
 
   function nextLevel() {
@@ -270,14 +301,12 @@
     state.isRecalling = false;
 
     if (state.mode === 'sequence') {
-      els.gameStatus.textContent = `Memorize sequence (${state.pattern.length} steps)`;
-      els.gameStatus.className = 'game-status memorize';
-      els.seqStep.textContent = `Step 1 of ${state.pattern.length}`;
+      setStatus('MEMORIZING SEQUENCE...', 'memorize');
+      els.seqStep.textContent = `STEP 01 / ${state.pattern.length.toString().padStart(2, '0')}`;
       renderSequenceProgress(0);
       playSequenceStep(0);
     } else {
-      els.gameStatus.textContent = 'Memorize the pattern...';
-      els.gameStatus.className = 'game-status memorize';
+      setStatus('MEMORIZING PATTERN...', 'memorize');
       renderGrid(true);
       // Highlight pattern tiles
       setTimeout(() => {
@@ -291,15 +320,14 @@
       // Done showing sequence
       state.isMemorizing = false;
       state.isRecalling = true;
-      els.gameStatus.textContent = 'Your turn! Repeat the sequence.';
-      els.gameStatus.className = 'game-status recall';
+      setStatus('RECALL SEQUENCE', 'recall');
       renderGrid(false);
       return;
     }
 
     // Show current step
     renderGrid(true, state.pattern[step]);
-    els.seqStep.textContent = `Step ${step + 1} of ${state.pattern.length}`;
+    els.seqStep.textContent = `STEP ${(step + 1).toString().padStart(2, '0')} / ${state.pattern.length.toString().padStart(2, '0')}`;
     renderSequenceProgress(step);
 
     setTimeout(() => {
@@ -319,8 +347,7 @@
       tiles.forEach(t => t.classList.remove('revealed'));
       state.isMemorizing = false;
       state.isRecalling = true;
-      els.gameStatus.textContent = 'Your turn! Click the tiles in order.';
-      els.gameStatus.className = 'game-status recall';
+      setStatus('RECALL PATTERN', 'recall');
     }, state.displayTime);
   }
 
@@ -347,7 +374,7 @@
       if (state.tileStyle === 'emoji') {
         tile.textContent = state.emojis[colorIdx];
       } else if (state.tileStyle === 'number') {
-        tile.textContent = i + 1;
+        tile.textContent = (i + 1).toString().padStart(2, '0');
       }
 
       // Determine if this tile should be revealed
@@ -397,6 +424,24 @@
 
       tiles[index].classList.add('correct');
 
+      // Update sequence progress if in sequence mode
+      if (state.mode === 'sequence' || state.mode === 'chess') {
+        const dots = els.seqProgress.querySelectorAll('.seq-dot');
+        if (dots[state.sequenceStep - 1]) {
+          dots[state.sequenceStep - 1].classList.add('done');
+        }
+        if (dots[state.sequenceStep]) {
+          dots[state.sequenceStep].classList.add('active');
+        }
+        els.seqStep.textContent = `STEP ${(state.sequenceStep + 1).toString().padStart(2, '0')} / ${state.pattern.length.toString().padStart(2, '0')}`;
+      }
+
+      // Update status bar
+      const progress = (state.sequenceStep / state.pattern.length) * 100;
+      if (els.statusFill) {
+        els.statusFill.style.width = `${progress}%`;
+      }
+
       if (state.sequenceStep >= state.pattern.length) {
         // Level complete!
         levelComplete();
@@ -407,24 +452,34 @@
       if (tiles[expectedIndex]) {
         tiles[expectedIndex].classList.add('missed');
       }
+      // Mark the sequence dot as error
+      if (state.mode === 'sequence' || state.mode === 'chess') {
+        const dots = els.seqProgress.querySelectorAll('.seq-dot');
+        if (dots[state.sequenceStep]) {
+          dots[state.sequenceStep].classList.add('error');
+        }
+      }
       gameOver();
     }
   }
 
   function levelComplete() {
     state.isRecalling = false;
-    els.gameStatus.textContent = 'Correct! Next level...';
-    els.gameStatus.className = 'game-status success';
+    setStatus('LEVEL CLEAR', 'success');
 
     // Update sequence progress dots
     const dots = els.seqProgress.querySelectorAll('.seq-dot');
     dots.forEach(d => d.classList.add('done'));
 
+    if (els.statusFill) {
+      els.statusFill.style.width = '100%';
+    }
+
     setTimeout(() => {
       state.currentLevel++;
       updateLevelDisplay();
       nextLevel();
-    }, 1000);
+    }, 1200);
   }
 
   function gameOver() {
@@ -444,10 +499,10 @@
 
     // Show results
     setTimeout(() => {
-      els.modalTitle.textContent = state.isDaily ? 'Daily Challenge Complete!' : 'Game Over!';
-      els.finalLevel.textContent = finalLevel;
+      els.modalTitle.textContent = state.isDaily ? 'DAILY CHALLENGE COMPLETE' : 'OPERATION TERMINATED';
+      els.finalLevel.textContent = finalLevel.toString().padStart(2, '0');
       els.finalSize.textContent = `${state.gridSize}×${state.gridSize}`;
-      els.finalMode.textContent = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
+      els.finalMode.textContent = state.mode.toUpperCase();
       els.finalAccuracy.textContent = accuracy + '%';
 
       if (state.isDaily) {
@@ -457,8 +512,8 @@
         const key = `${state.mode}-${state.gridSize}-${today}`;
         const isNewBest = !dailyStats[key] || finalLevel > dailyStats[key].level;
         els.dailyMessage.textContent = isNewBest
-          ? `🎉 New daily best! Level ${finalLevel}`
-          : `Today's best: Level ${dailyStats[key]?.level || '—'}`;
+          ? `>> NEW DAILY RECORD: LEVEL ${finalLevel} <<`
+          : `TODAY'S BEST: LEVEL ${dailyStats[key]?.level || '—'}`;
       } else {
         els.dailyResult.hidden = true;
       }
@@ -466,6 +521,7 @@
       els.resultsModal.hidden = false;
       els.replayBtn.hidden = true;
       els.restartBtn.hidden = false;
+      setStatus('OPERATION TERMINATED', 'error');
     }, 800);
   }
 
@@ -535,19 +591,19 @@
     modes.forEach(mode => {
       const s = state.stats[mode];
       const el = document.getElementById(`best${mode.charAt(0).toUpperCase() + mode.slice(1)}`);
-      if (s) el.textContent = s.best || '—';
+      if (s) el.textContent = s.best ? s.best.toString().padStart(2, '0') : '—';
       else el.textContent = '—';
     });
 
-    els.currentStreak.textContent = state.stats.classic?.streak || 0;
-    els.bestStreak.textContent = state.stats.classic?.bestStreak || 0;
+    els.currentStreak.textContent = (state.stats.classic?.streak || 0).toString().padStart(2, '0');
+    els.bestStreak.textContent = (state.stats.classic?.bestStreak || 0).toString().padStart(2, '0');
     els.gamesPlayed.textContent = Object.values(state.stats).reduce((sum, s) => sum + (s.games || 0), 0);
 
     // Daily best
     const daily = state.stats.daily || {};
     const today = new Date().toISOString().split('T')[0];
     const todayKey = `${state.mode}-${state.gridSize}-${today}`;
-    els.dailyBest.textContent = daily[todayKey]?.level || '—';
+    els.dailyBest.textContent = daily[todayKey]?.level ? daily[todayKey].level.toString().padStart(2, '0') : '—';
   }
 
   function updateLeaderboard() {
@@ -556,32 +612,43 @@
     const scores = state.highScores[modeKey]?.[sizeKey] || [];
 
     if (scores.length === 0) {
-      els.leaderboard.innerHTML = '<div style="color:var(--muted);text-align:center;padding:1rem;">No scores yet</div>';
+      els.leaderboard.innerHTML = '<div class="leaderboard-empty">>> NO RECORDS <<</div>';
       return;
     }
 
     els.leaderboard.innerHTML = scores.map((s, i) => `
       <div class="leaderboard-entry">
         <span class="rank">#${i+1}</span>
-        <span class="score">Level ${s.level}</span>
+        <span class="score">LVL ${s.level.toString().padStart(2, '0')}</span>
         <span class="mode">${s.accuracy}% • ${s.date}</span>
       </div>
     `).join('');
   }
 
   function updateLevelDisplay() {
-    els.currentLevel.textContent = state.currentLevel;
+    els.currentLevel.textContent = state.currentLevel.toString().padStart(2, '0');
+  }
+
+  function setStatus(text, type) {
+    if (els.statusText) {
+      els.statusText.textContent = text;
+    }
+    els.gameStatus.className = 'game-status ' + type;
+    if (els.statusFill && type !== 'memorize' && type !== 'recall') {
+      els.statusFill.style.width = type === 'success' ? '100%' : '0%';
+    }
   }
 
   function shareResult() {
     const level = els.finalLevel.textContent;
-    const mode = state.mode;
+    const mode = state.mode.toUpperCase();
     const size = `${state.gridSize}×${state.gridSize}`;
-    const text = `🧩 Memory Grid (${mode}, ${size})\nLevel: ${level} | Accuracy: ${els.finalAccuracy.textContent}\n#KING_YOSEF_`;
+    const accuracy = els.finalAccuracy.textContent;
+    const text = `MEMORY GRID [${mode}, ${size}]\nLEVEL: ${level} | ACCURACY: ${accuracy}\n#KING_YOSEF_`;
     if (navigator.share) {
       navigator.share({ title: 'Memory Grid Result', text });
     } else {
-      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
+      navigator.clipboard.writeText(text).then(() => showToast('COPIED TO CLIPBOARD'));
     }
   }
 

@@ -1,12 +1,9 @@
-import * as ffmpeg from 'fluent-ffmpeg';
+const ffmpeg = require('fluent-ffmpeg');
 import * as path from 'path';
-import * as vscode from 'vscode';
 
 export interface AudioConvertOptions {
   outputFormat?: string;
   bitrate?: string;
-  sampleRate?: number;
-  channels?: number;
 }
 
 export interface VolumeOptions {
@@ -52,21 +49,11 @@ export class AudioConverter {
     const base = path.basename(inputPath, ext);
     const outputPath = path.join(dir, base + '_boosted.' + outFormat);
     return new Promise((resolve, reject) => {
-      const command = ffmpeg(inputPath)
-        .audioFilter('volume=' + options.gainDb + 'dB');
-      command
+      ffmpeg(inputPath)
+        .audioFilter('volume=' + options.gainDb + 'dB')
         .on('error', (err: any) => reject(err))
         .on('end', () => resolve(outputPath))
         .save(outputPath);
-    });
-  }
-
-  static async getDuration(filePath: string): Promise<number> {
-    return new Promise((resolve, reject) => {
-      ffmpeg.ffprobe(filePath, (err: any, metadata: any) => {
-        if (err) reject(err);
-        else resolve(metadata.format.duration || 0);
-      });
     });
   }
 }

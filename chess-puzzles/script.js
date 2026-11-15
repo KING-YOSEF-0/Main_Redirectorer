@@ -1,6 +1,7 @@
 // Chess Puzzles - Tactical training with daily challenges
-// Features: Mate in 1/2/3, Forks, Pins, Skewers, Discovery, Sacrifice
-// Daily challenges, local leaderboards, PGN export, board themes
+// Features: Mate in 1/2/3, Forks, Pins, Skewers, Discovery, Sacrifices
+// Daily challenges, local leaderboards, PGN/FEN export, board themes
+// 4 difficulty levels, move validation, hint system
 
 (() => {
   'use strict';
@@ -37,11 +38,9 @@
 
   function createBoard() {
     const board = Array(64).fill(null);
-    // Black pieces (rank 8, 7)
     board[0] = 'br'; board[1] = 'bn'; board[2] = 'bb'; board[3] = 'bq';
     board[4] = 'bk'; board[5] = 'bb'; board[6] = 'bn'; board[7] = 'br';
     for (let i = 8; i < 16; i++) board[i] = 'bp';
-    // White pieces (rank 2, 1)
     for (let i = 48; i < 56; i++) board[i] = 'wp';
     board[56] = 'wr'; board[57] = 'wn'; board[58] = 'wb'; board[59] = 'wq';
     board[60] = 'wk'; board[61] = 'wb'; board[62] = 'wn'; board[63] = 'wr';
@@ -102,17 +101,14 @@
       if (type === 'p') {
         const dir = color === 'w' ? -1 : 1;
         const startRank = color === 'w' ? 6 : 1;
-        // Forward
         const one = square(r + dir, f);
         if (inBounds(one) && !board[one]) {
           moves.push({ from: i, to: one, promotion: rank(one) === 0 || rank(one) === 7 });
-          // Double
           if (r === startRank) {
             const two = square(r + 2 * dir, f);
             if (!board[two]) moves.push({ from: i, to: two, double: true });
           }
         }
-        // Captures
         for (const df of [-1, 1]) {
           const cap = square(r + dir, f + df);
           if (inBounds(cap) && board[cap] && board[cap][0] === oppColor) {
@@ -183,7 +179,6 @@
     const piece = newBoard[move.from];
     newBoard[move.to] = move.promotion ? piece[0] + promotion : piece;
     newBoard[move.from] = null;
-    // Handle en passant (simplified - not fully implemented)
     return newBoard;
   }
 
@@ -219,19 +214,12 @@
     const type = piece[1];
     let san = '';
 
-    if (type === 'k') {
-      san = 'K';
-    } else if (type === 'q') {
-      san = 'Q';
-    } else if (type === 'r') {
-      san = 'R';
-    } else if (type === 'b') {
-      san = 'B';
-    } else if (type === 'n') {
-      san = 'N';
-    } else {
-      san = '';
-    }
+    if (type === 'k') san = 'K';
+    else if (type === 'q') san = 'Q';
+    else if (type === 'r') san = 'R';
+    else if (type === 'b') san = 'B';
+    else if (type === 'n') san = 'N';
+    else san = '';
 
     if (captured) {
       if (type === 'p') san += squareToAlg(move.from)[0];
@@ -244,65 +232,176 @@
       san += '=' + move.promotion.toUpperCase();
     }
 
-    // Check/checkmate detection would need the new board
+    // Check for check/checkmate
+    const newBoard = makeMove(board, move);
+    const oppColor = piece[0] === 'w' ? 'b' : 'w';
+    if (isCheckmate(newBoard, oppColor)) san += '#';
+    else if (isInCheck(newBoard, oppColor)) san += '+';
+
     return san;
   }
 
+  function parseSan(board, color, san) {
+    // Simplified SAN parser for puzzle solution validation
+    san = san.replace(/[#+]/g, '');
+    const moves = getMoves(board, color);
+    for (const move of moves) {
+      if (moveToSan(board, move).replace(/[#+]/g, '') === san) {
+        return move;
+      }
+    }
+    return null;
+  }
+
   // ============================================
-  // PUZZLE DATABASE
+  // COMPREHENSIVE PUZZLE DATABASE
   // ============================================
   const PUZZLES = {
     mate1: [
-      // Mate in 1 puzzles
+      // Beginner
       { fen: '8/8/8/4k3/3Q4/8/8/4K3 w - - 0 1', solution: ['Qe4#'], theme: 'mate1', difficulty: 'easy', name: 'Queen Mate' },
       { fen: '8/8/8/4k3/3R4/8/8/4K3 w - - 0 1', solution: ['Re4#'], theme: 'mate1', difficulty: 'easy', name: 'Rook Mate' },
       { fen: '8/8/8/4k3/3B4/8/8/4K3 w - - 0 1', solution: ['Be4#'], theme: 'mate1', difficulty: 'easy', name: 'Bishop Mate' },
       { fen: '8/8/8/4k3/3N4/8/8/4K3 w - - 0 1', solution: ['Ne4#'], theme: 'mate1', difficulty: 'easy', name: 'Knight Mate' },
-      { fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1', solution: ['Qxf7#'], theme: 'mate1', difficulty: 'easy', name: 'Scholar\'s Mate' },
+      { fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1', solution: ['Qxf7#'], theme: 'mate1', difficulty: 'easy', name: "Scholar's Mate" },
       { fen: '8/8/8/4k3/8/3Q4/8/4K3 w - - 0 1', solution: ['Qd5#'], theme: 'mate1', difficulty: 'easy', name: 'Queen Box Mate' },
       { fen: '8/8/8/4k3/8/3R4/8/4K3 w - - 0 1', solution: ['Rd5#'], theme: 'mate1', difficulty: 'easy', name: 'Rook Box Mate' },
       { fen: '8/8/8/4k3/8/8/3Q4/4K3 w - - 0 1', solution: ['Qd6#'], theme: 'mate1', difficulty: 'easy', name: 'Smothered Queen' },
-      { fen: 'rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR w KQkq - 0 1', solution: ['Qh5#'], theme: 'mate1', difficulty: 'easy', name: 'Fool\'s Mate' },
+      { fen: 'rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR w KQkq - 0 1', solution: ['Qh5#'], theme: 'mate1', difficulty: 'easy', name: "Fool's Mate" },
       { fen: '8/8/8/4k3/3P4/8/8/4K3 w - - 0 1', solution: ['e4#'], theme: 'mate1', difficulty: 'easy', name: 'Pawn Mate' },
+      // Intermediate
+      { fen: '8/8/8/4k3/2Q5/8/8/4K3 w - - 0 1', solution: ['Qd5#'], theme: 'mate1', difficulty: 'medium', name: 'Diagonal Queen Mate' },
+      { fen: '8/8/8/4k3/2R5/8/8/4K3 w - - 0 1', solution: ['Rd5#'], theme: 'mate1', difficulty: 'medium', name: 'Diagonal Rook Mate' },
+      { fen: '8/8/8/4k3/8/2Q5/8/4K3 w - - 0 1', solution: ['Qc6#'], theme: 'mate1', difficulty: 'medium', name: 'Long Range Queen' },
+      { fen: '8/8/8/4k3/8/2R5/8/4K3 w - - 0 1', solution: ['Rc6#'], theme: 'mate1', difficulty: 'medium', name: 'Long Range Rook' },
+      { fen: '8/8/8/4k3/8/8/2Q5/4K3 w - - 0 1', solution: ['Qc7#'], theme: 'mate1', difficulty: 'medium', name: 'Seventh Rank Queen' },
+      // Advanced
+      { fen: '6k1/5ppp/8/8/8/5Q2/5PPP/6K1 w - - 0 1', solution: ['Qg7#'], theme: 'mate1', difficulty: 'hard', name: 'Back Rank Mate' },
+      { fen: '6k1/5ppp/8/8/8/5R2/5PPP/6K1 w - - 0 1', solution: ['Rg7#'], theme: 'mate1', difficulty: 'hard', name: 'Back Rank Rook' },
+      { fen: '8/5k2/8/8/8/5Q2/5PPP/6K1 w - - 0 1', solution: ['Qg7#'], theme: 'mate1', difficulty: 'hard', name: 'Smothered Mate Pattern' },
+      { fen: '8/5k2/8/8/8/5R2/5PPP/6K1 w - - 0 1', solution: ['Rg7#'], theme: 'mate1', difficulty: 'hard', name: 'Rook Smothered' },
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Qxf7#'], theme: 'mate1', difficulty: 'hard', name: "Scholar's Mate Variation" },
+      // Expert
+      { fen: 'r1bqk2r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K2R w KQkq - 0 1', solution: ['Qxf7#'], theme: 'mate1', difficulty: 'expert', name: 'Advanced Scholar Mate' },
+      { fen: '6k1/5ppp/8/8/5Q2/8/5PPP/6K1 w - - 0 1', solution: ['Qg7#'], theme: 'mate1', difficulty: 'expert', name: 'Epaulette Mate' },
     ],
     mate2: [
-      { fen: '8/8/8/4k3/3Q4/8/8/4K3 w - - 0 1', solution: ['Qd5', 'Qe4#'], theme: 'mate2', difficulty: 'medium', name: 'Queen Approach' },
-      { fen: '8/8/8/4k3/3R4/8/8/4K3 w - - 0 1', solution: ['Rd5', 'Re4#'], theme: 'mate2', difficulty: 'medium', name: 'Rook Approach' },
-      { fen: '8/8/8/4k3/8/3Q4/8/4K3 w - - 0 1', solution: ['Qd6', 'Qd5#'], theme: 'mate2', difficulty: 'medium', name: 'Box Mate 2' },
-      { fen: '8/8/8/4k3/8/8/3R4/4K3 w - - 0 1', solution: ['Rd6', 'Rd5#'], theme: 'mate2', difficulty: 'medium', name: 'Rook Box 2' },
-      { fen: '8/8/8/4k3/3B4/8/8/4K3 w - - 0 1', solution: ['Bd5', 'Be4#'], theme: 'mate2', difficulty: 'medium', name: 'Bishop Mate 2' },
-      { fen: '8/8/8/4k3/3N4/8/8/4K3 w - - 0 1', solution: ['Nd5', 'Ne7#'], theme: 'mate2', difficulty: 'medium', name: 'Knight Mate 2' },
+      // Beginner
+      { fen: '8/8/8/4k3/3Q4/8/8/4K3 w - - 0 1', solution: ['Qd5', 'Qe4#'], theme: 'mate2', difficulty: 'easy', name: 'Queen Approach' },
+      { fen: '8/8/8/4k3/3R4/8/8/4K3 w - - 0 1', solution: ['Rd5', 'Re4#'], theme: 'mate2', difficulty: 'easy', name: 'Rook Approach' },
+      { fen: '8/8/8/4k3/8/3Q4/8/4K3 w - - 0 1', solution: ['Qd6', 'Qd5#'], theme: 'mate2', difficulty: 'easy', name: 'Box Mate 2' },
+      { fen: '8/8/8/4k3/8/3R4/8/4K3 w - - 0 1', solution: ['Rd6', 'Rd5#'], theme: 'mate2', difficulty: 'easy', name: 'Rook Box 2' },
+      { fen: '8/8/8/4k3/3B4/8/8/4K3 w - - 0 1', solution: ['Bd5', 'Be4#'], theme: 'mate2', difficulty: 'easy', name: 'Bishop Mate 2' },
+      // Intermediate
       { fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1', solution: ['Qxf7+', 'Kxf7', 'Bc4#'], theme: 'mate2', difficulty: 'medium', name: 'Sacrifice Mate' },
+      { fen: '8/8/8/4k3/2Q5/8/8/4K3 w - - 0 1', solution: ['Qd5+', 'Kc6', 'Qd6#'], theme: 'mate2', difficulty: 'medium', name: 'Queen Chase' },
+      { fen: '8/8/8/4k3/2R5/8/8/4K3 w - - 0 1', solution: ['Rd5+', 'Kc6', 'Rd6#'], theme: 'mate2', difficulty: 'medium', name: 'Rook Chase' },
+      { fen: '8/8/8/4k3/8/2B5/8/4K3 w - - 0 1', solution: ['Bd6+', 'Kc5', 'Bc6#'], theme: 'mate2', difficulty: 'medium', name: 'Bishop Chase' },
+      { fen: '8/8/8/4k3/8/2N5/8/4K3 w - - 0 1', solution: ['Nd6+', 'Kc5', 'Ne7#'], theme: 'mate2', difficulty: 'medium', name: 'Knight Mate 2' },
+      // Advanced
+      { fen: '8/8/8/4k3/3Q4/8/8/4K3 w - - 0 1', solution: ['Qe5+', 'Kc6', 'Qe6#'], theme: 'mate2', difficulty: 'hard', name: 'Queen Zigzag' },
+      { fen: '8/8/8/4k3/3R4/8/8/4K3 w - - 0 1', solution: ['Re5+', 'Kc6', 'Re6#'], theme: 'mate2', difficulty: 'hard', name: 'Rook Zigzag' },
+      { fen: '8/8/8/4k3/3B4/8/8/4K3 w - - 0 1', solution: ['Be5+', 'Kc6', 'Be6#'], theme: 'mate2', difficulty: 'hard', name: 'Bishop Zigzag' },
+      // Expert
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Qxf7+', 'Kxf7', 'Bc4#'], theme: 'mate2', difficulty: 'expert', name: 'Complex Sacrifice' },
+      { fen: '6k1/5ppp/8/8/5Q2/8/5PPP/6K1 w - - 0 1', solution: ['Qg7+', 'Kxg7', 'Rg1#'], theme: 'mate2', difficulty: 'expert', name: 'Double Sacrifice' },
     ],
     mate3: [
-      { fen: '8/8/8/4k3/8/3Q4/8/4K3 w - - 0 1', solution: ['Qd6', 'Kc5', 'Qd5#'], theme: 'mate3', difficulty: 'hard', name: 'King Hunt' },
-      { fen: '8/8/8/4k3/8/3R4/8/4K3 w - - 0 1', solution: ['Rd6', 'Kc5', 'Rd5#'], theme: 'mate3', difficulty: 'hard', name: 'Rook Hunt' },
-      { fen: '8/8/8/4k3/3B4/8/8/4K3 w - - 0 1', solution: ['Bd5', 'Kc5', 'Be4#'], theme: 'mate3', difficulty: 'hard', name: 'Bishop Hunt' },
+      // Beginner
+      { fen: '8/8/8/4k3/8/3Q4/8/4K3 w - - 0 1', solution: ['Qd6', 'Kc5', 'Qd5#'], theme: 'mate3', difficulty: 'easy', name: 'King Hunt' },
+      { fen: '8/8/8/4k3/8/3R4/8/4K3 w - - 0 1', solution: ['Rd6', 'Kc5', 'Rd5#'], theme: 'mate3', difficulty: 'easy', name: 'Rook Hunt' },
+      { fen: '8/8/8/4k3/3B4/8/8/4K3 w - - 0 1', solution: ['Bd5', 'Kc5', 'Be4#'], theme: 'mate3', difficulty: 'easy', name: 'Bishop Hunt' },
+      // Intermediate
+      { fen: '8/8/8/4k3/8/2Q5/8/4K3 w - - 0 1', solution: ['Qc6+', 'Kb5', 'Qc5#'], theme: 'mate3', difficulty: 'medium', name: 'Side Box Mate' },
+      { fen: '8/8/8/4k3/8/2R5/8/4K3 w - - 0 1', solution: ['Rc6+', 'Kb5', 'Rc5#'], theme: 'mate3', difficulty: 'medium', name: 'Rook Side Box' },
+      { fen: '8/8/8/4k3/8/8/2Q5/4K3 w - - 0 1', solution: ['Qc7+', 'Kb6', 'Qc6#'], theme: 'mate3', difficulty: 'medium', name: 'Seventh Rank Box' },
+      // Advanced
+      { fen: '8/8/8/4k3/3Q4/8/8/4K3 w - - 0 1', solution: ['Qe5+', 'Kd6', 'Qe6#'], theme: 'mate3', difficulty: 'hard', name: 'Direct Mate 3' },
+      { fen: '8/8/8/4k3/3R4/8/8/4K3 w - - 0 1', solution: ['Re5+', 'Kd6', 'Re6#'], theme: 'mate3', difficulty: 'hard', name: 'Rook Direct 3' },
+      { fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1', solution: ['Qxf7+', 'Kxf7', 'Bc4+', 'Ke7', 'Qd5#'], theme: 'mate3', difficulty: 'hard', name: 'Extended Scholar' },
+      // Expert
+      { fen: '6k1/5ppp/8/8/5Q2/8/5PPP/6K1 w - - 0 1', solution: ['Qg7+', 'Kxg7', 'Rg1+', 'Kh8', 'Rg8#'], theme: 'mate3', difficulty: 'expert', name: 'Masterpiece Mate' },
+      { fen: '8/5k2/8/8/8/5Q2/5PPP/6K1 w - - 0 1', solution: ['Qg7+', 'Kxg7', 'f8=Q+', 'Kh8', 'Qg7#'], theme: 'mate3', difficulty: 'expert', name: 'Promotion Mate' },
     ],
     fork: [
+      // Beginner
       { fen: '8/8/8/3k4/8/2N5/8/4K3 w - - 0 1', solution: ['Ne5+'], theme: 'fork', difficulty: 'easy', name: 'Knight Fork King+Queen' },
       { fen: '8/8/8/3k4/8/2N5/8/4K3 w - - 0 1', solution: ['Nc5+'], theme: 'fork', difficulty: 'easy', name: 'Knight Fork King+Rook' },
-      { fen: '8/8/8/3k4/8/2N5/8/4K3 w - - 0 1', solution: ['Nd6+'], theme: 'fork', difficulty: 'medium', name: 'Knight Fork Family' },
+      { fen: '8/8/8/3k4/8/2N5/8/4K3 w - - 0 1', solution: ['Nd6+'], theme: 'fork', difficulty: 'easy', name: 'Knight Fork King+Bishop' },
+      // Intermediate
       { fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5Q2/PPPP1PPP/RNB1K1NR w KQkq - 0 1', solution: ['Nxe5'], theme: 'fork', difficulty: 'medium', name: 'Opening Fork' },
+      { fen: '8/8/8/3k4/3q4/2N5/8/4K3 w - - 0 1', solution: ['Ne5+'], theme: 'fork', difficulty: 'medium', name: 'Fork Queen+Bishop' },
+      { fen: '8/8/8/3k4/3r4/2N5/8/4K3 w - - 0 1', solution: ['Nc5+'], theme: 'fork', difficulty: 'medium', name: 'Fork Rook+Bishop' },
+      // Advanced
+      { fen: '8/8/8/3k4/3q4/8/2N5/4K3 w - - 0 1', solution: ['Ne6+'], theme: 'fork', difficulty: 'hard', name: 'Double Fork' },
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/5N2/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Nxe5'], theme: 'fork', difficulty: 'hard', name: 'Complex Opening Fork' },
+      // Expert
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/5N2/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Nxf7'], theme: 'fork', difficulty: 'expert', name: 'Knight Sacrifice Fork' },
+      { fen: '8/8/8/3k4/3q1r2/8/2N5/4K3 w - - 0 1', solution: ['Ne6+'], theme: 'fork', difficulty: 'expert', name: 'Triple Fork' },
     ],
     pin: [
+      // Beginner
       { fen: '8/8/8/3k4/3b4/8/8/4K3 w - - 0 1', solution: ['Bd5'], theme: 'pin', difficulty: 'easy', name: 'Absolute Pin' },
-      { fen: '8/8/8/3k4/3b4/8/8/4K3 w - - 0 1', solution: ['Rd1'], theme: 'pin', difficulty: 'medium', name: 'Rook Pin' },
+      { fen: '8/8/8/3k4/3n4/8/8/4K3 w - - 0 1', solution: ['Bd5'], theme: 'pin', difficulty: 'easy', name: 'Knight Pin' },
+      { fen: '8/8/8/3k4/3r4/8/8/4K3 w - - 0 1', solution: ['Rd1'], theme: 'pin', difficulty: 'easy', name: 'Rook Pin' },
+      // Intermediate
       { fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 1', solution: ['Bg5'], theme: 'pin', difficulty: 'medium', name: 'Opening Pin' },
+      { fen: '8/8/8/3k4/3b4/8/3R4/4K3 w - - 0 1', solution: ['Rd1'], theme: 'pin', difficulty: 'medium', name: 'Rook Pin Line' },
+      { fen: '8/8/8/3k4/3q4/8/3B4/4K3 w - - 0 1', solution: ['Bd5'], theme: 'pin', difficulty: 'medium', name: 'Bishop Pin Queen' },
+      // Advanced
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQ - 0 1', solution: ['Bg5'], theme: 'pin', difficulty: 'hard', name: 'Advanced Opening Pin' },
+      { fen: '8/8/8/3k4/3q4/8/3R4/4K3 w - - 0 1', solution: ['Rd1'], theme: 'pin', difficulty: 'hard', name: 'Pin on Queen' },
+      // Expert
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Qxf7+'], theme: 'pin', difficulty: 'expert', name: 'Pin to Sacrifice' },
+      { fen: '8/8/8/3k4/3q1r2/8/3R4/4K3 w - - 0 1', solution: ['Rd1'], theme: 'pin', difficulty: 'expert', name: 'Double Pin' },
     ],
     skewer: [
+      // Beginner
       { fen: '8/8/8/3k4/8/8/8/4K2R w - - 0 1', solution: ['Rd8+'], theme: 'skewer', difficulty: 'easy', name: 'Rook Skewer' },
       { fen: '8/8/8/3k4/8/8/8/4K2B w - - 0 1', solution: ['Bd8+'], theme: 'skewer', difficulty: 'easy', name: 'Bishop Skewer' },
-      { fen: '8/8/8/3k4/8/8/8/4K1QR w - - 0 1', solution: ['Qd8+'], theme: 'skewer', difficulty: 'medium', name: 'Queen Skewer' },
+      { fen: '8/8/8/3k4/8/8/8/4K1QR w - - 0 1', solution: ['Qd8+'], theme: 'skewer', difficulty: 'easy', name: 'Queen Skewer' },
+      // Intermediate
+      { fen: '8/8/8/3k4/8/8/8/4K2R w - - 0 1', solution: ['Rd8+'], theme: 'skewer', difficulty: 'medium', name: 'Long Range Skewer' },
+      { fen: '8/8/8/3k4/8/8/8/4K2B w - - 0 1', solution: ['Bd8+'], theme: 'skewer', difficulty: 'medium', name: 'Diagonal Skewer' },
+      { fen: '8/8/8/3k4/3r4/8/8/4K2Q w - - 0 1', solution: ['Qd8+'], theme: 'skewer', difficulty: 'medium', name: 'Skewer Rook' },
+      // Advanced
+      { fen: '8/8/8/3k4/3q4/8/8/4K2R w - - 0 1', solution: ['Rd8+'], theme: 'skewer', difficulty: 'hard', name: 'Skewer Queen' },
+      { fen: '8/8/8/3k4/3b4/8/8/4K2R w - - 0 1', solution: ['Rd8+'], theme: 'skewer', difficulty: 'hard', name: 'Skewer Bishop' },
+      // Expert
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Qxf7+'], theme: 'skewer', difficulty: 'expert', name: 'Skewer Sacrifice' },
+      { fen: '8/8/8/3k4/3q1r2/8/8/4K2R w - - 0 1', solution: ['Rd8+'], theme: 'skewer', difficulty: 'expert', name: 'Complex Skewer' },
     ],
     discovery: [
-      { fen: '8/8/8/3k4/8/2N5/8/4K2B w - - 0 1', solution: ['Ne5+'], theme: 'discovery', difficulty: 'medium', name: 'Discovered Attack' },
-      { fen: '8/8/8/3k4/8/2B5/8/4K2R w - - 0 1', solution: ['Bd5+'], theme: 'discovery', difficulty: 'medium', name: 'Discovered Check' },
+      // Beginner
+      { fen: '8/8/8/3k4/8/2N5/8/4K2B w - - 0 1', solution: ['Ne5+'], theme: 'discovery', difficulty: 'easy', name: 'Discovered Attack' },
+      { fen: '8/8/8/3k4/8/2B5/8/4K2R w - - 0 1', solution: ['Bd5+'], theme: 'discovery', difficulty: 'easy', name: 'Discovered Check' },
+      { fen: '8/8/8/3k4/8/2N5/8/4K2Q w - - 0 1', solution: ['Ne5+'], theme: 'discovery', difficulty: 'easy', name: 'Knight Discovery' },
+      // Intermediate
+      { fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 1', solution: ['Nxe5'], theme: 'discovery', difficulty: 'medium', name: 'Opening Discovery' },
+      { fen: '8/8/8/3k4/3q4/2B5/8/4K2R w - - 0 1', solution: ['Bd5+'], theme: 'discovery', difficulty: 'medium', name: 'Bishop Discovery Queen' },
+      { fen: '8/8/8/3k4/3r4/2B5/8/4K2Q w - - 0 1', solution: ['Bd5+'], theme: 'discovery', difficulty: 'medium', name: 'Discovery Rook' },
+      // Advanced
+      { fen: '8/8/8/3k4/3q4/2N5/8/4K2R w - - 0 1', solution: ['Ne5+'], theme: 'discovery', difficulty: 'hard', name: 'Double Discovery' },
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQ - 0 1', solution: ['Nxe5'], theme: 'discovery', difficulty: 'hard', name: 'Advanced Discovery' },
+      // Expert
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/5N2/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Nxf7+'], theme: 'discovery', difficulty: 'expert', name: 'Discovery Sacrifice' },
+      { fen: '8/8/8/3k4/3q1r2/2N5/8/4K2R w - - 0 1', solution: ['Ne5+'], theme: 'discovery', difficulty: 'expert', name: 'Multi Discovery' },
     ],
     sacrifice: [
-      { fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1', solution: ['Qxf7+'], theme: 'sacrifice', difficulty: 'medium', name: 'Queen Sacrifice' },
-      { fen: '8/8/8/4k3/3R4/8/8/4K3 w - - 0 1', solution: ['Rf7+'], theme: 'sacrifice', difficulty: 'hard', name: 'Rook Sacrifice' },
-      { fen: '8/8/8/4k3/3B4/8/8/4K3 w - - 0 1', solution: ['Bf7+'], theme: 'sacrifice', difficulty: 'hard', name: 'Bishop Sacrifice' },
+      // Beginner
+      { fen: 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1', solution: ['Qxf7+'], theme: 'sacrifice', difficulty: 'easy', name: 'Queen Sacrifice' },
+      { fen: '8/8/8/4k3/3R4/8/8/4K3 w - - 0 1', solution: ['Rf7+'], theme: 'sacrifice', difficulty: 'easy', name: 'Rook Sacrifice' },
+      { fen: '8/8/8/4k3/3B4/8/8/4K3 w - - 0 1', solution: ['Bf7+'], theme: 'sacrifice', difficulty: 'easy', name: 'Bishop Sacrifice' },
+      // Intermediate
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Qxf7+'], theme: 'sacrifice', difficulty: 'medium', name: 'Opening Queen Sac' },
+      { fen: '8/8/8/4k3/3R4/8/8/4K3 w - - 0 1', solution: ['Rf7+'], theme: 'sacrifice', difficulty: 'medium', name: 'Rook Sac Mate' },
+      { fen: '8/8/8/4k3/3B4/8/8/4K3 w - - 0 1', solution: ['Bf7+'], theme: 'sacrifice', difficulty: 'medium', name: 'Bishop Sac Mate' },
+      // Advanced
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/5N2/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Nxf7+'], theme: 'sacrifice', difficulty: 'hard', name: 'Knight Sacrifice' },
+      { fen: '8/8/8/4k3/3Q4/8/8/4K3 w - - 0 1', solution: ['Qf7+'], theme: 'sacrifice', difficulty: 'hard', name: 'Queen Sac Mate 2' },
+      // Expert
+      { fen: '6k1/5ppp/8/8/5Q2/8/5PPP/6K1 w - - 0 1', solution: ['Qg7+', 'Kxg7', 'Rg1#'], theme: 'sacrifice', difficulty: 'expert', name: 'Double Sacrifice Mate' },
+      { fen: 'r1bq1rk1/pppp1ppp/2n2n2/4p2Q/2B1P3/5N2/PPPP1PPP/RNB1K2R w KQ - 0 1', solution: ['Qxf7+', 'Kxf7', 'Bc4+', 'Ke7', 'Nd5#'], theme: 'sacrifice', difficulty: 'expert', name: 'Masterpiece Sacrifice' },
     ],
   };
 
@@ -313,6 +412,9 @@
       ALL_PUZZLES.push({ ...p, theme });
     }
   }
+
+  // Difficulty order for sorting
+  const DIFFICULTY_ORDER = { easy: 0, medium: 1, hard: 2, expert: 3 };
 
   // ============================================
   // STATE MANAGEMENT
@@ -332,7 +434,7 @@
     timerInterval: null,
     hintUsed: false,
     showSolution: false,
-    gameStatus: 'idle', // idle, active, solved, failed
+    gameStatus: 'idle',
     stats: loadStats(),
     boardTheme: 'classic',
     difficulty: 'easy',
@@ -367,7 +469,6 @@
       time: Date.now(),
     });
     state.stats.leaderboard.sort((a, b) => {
-      // Sort by score (puzzles solved), then by time
       if (b.score !== a.score) return b.score - a.score;
       return a.time - b.time;
     });
@@ -379,12 +480,13 @@
   // DOM ELEMENTS
   // ============================================
   const els = {
-    bubbles: document.getElementById('bubbles'),
     boardContainer: document.getElementById('boardContainer'),
     gameStatus: document.getElementById('gameStatus'),
     timer: document.getElementById('timer'),
     puzzleLabel: document.getElementById('puzzleLabel'),
     puzzleMeta: document.getElementById('puzzleMeta'),
+    difficultyBadge: document.getElementById('difficultyBadge'),
+    themeBadge: document.getElementById('themeBadge'),
     moveList: document.getElementById('moveList'),
     moves: document.getElementById('moves'),
     newBtn: document.getElementById('newBtn'),
@@ -395,6 +497,7 @@
     flipBoardBtn: document.getElementById('flipBoardBtn'),
     copyFenBtn: document.getElementById('copyFenBtn'),
     copyPgnBtn: document.getElementById('copyPgnBtn'),
+    exportBtn: document.getElementById('exportBtn'),
     shareBtn: document.getElementById('shareBtn'),
     playAgainBtn: document.getElementById('playAgainBtn'),
     resultsModal: document.getElementById('resultsModal'),
@@ -422,25 +525,6 @@
   };
 
   // ============================================
-  // BUBBLE ANIMATION
-  // ============================================
-  function spawnBubble() {
-    const bubble = document.createElement('div');
-    bubble.className = 'float';
-    const colors = ['#ff4fa3', '#ff9f1c', '#2ee6a6', '#35c3ff', '#9b5cff'];
-    const c = colors[Math.floor(Math.random() * colors.length)];
-    bubble.style.setProperty('--c', c);
-    bubble.style.setProperty('--dx', (Math.random() - 0.5) * 200 + 'px');
-    bubble.style.setProperty('--duration', (15 + Math.random() * 20) + 's');
-    bubble.style.left = Math.random() * 100 + 'vw';
-    bubble.style.width = bubble.style.height = (10 + Math.random() * 40) + 'px';
-    els.bubbles.appendChild(bubble);
-    setTimeout(() => bubble.remove(), 35000);
-  }
-
-  setInterval(spawnBubble, 800);
-
-  // ============================================
   // BOARD RENDERING
   // ============================================
   function renderBoard() {
@@ -448,6 +532,19 @@
     const flipped = state.flipped;
 
     let html = '<div class="chess-board" data-board-theme="' + state.boardTheme + '">';
+
+    // Add coordinate labels
+    html += '<div class="coordinates">';
+    for (let f = 0; f < 8; f++) {
+      const displayFile = flipped ? 7 - f : f;
+      const fileChar = String.fromCharCode(97 + displayFile);
+      html += `<div class="coordinate file" style="left: ${f * 12.5}%;">${fileChar}</div>`;
+    }
+    for (let r = 0; r < 8; r++) {
+      const displayRank = flipped ? r + 1 : 8 - r;
+      html += `<div class="coordinate rank" style="top: ${r * 12.5}%;">${displayRank}</div>`;
+    }
+    html += '</div>';
 
     for (let r = 0; r < 8; r++) {
       for (let f = 0; f < 8; f++) {
@@ -533,13 +630,20 @@
 
     // Update UI
     els.puzzleLabel.textContent = isDaily ? 'Daily Challenge' : 'Practice Mode';
-    els.puzzleMeta.textContent = `${capitalize(puzzle.difficulty)} • ${capitalize(puzzle.theme.replace('mate', 'Mate '))}`;
+    const diffClass = `difficulty-${puzzle.difficulty}`;
+    const diffLabel = puzzle.difficulty.charAt(0).toUpperCase() + puzzle.difficulty.slice(1);
+    const themeLabel = puzzle.theme.replace('mate', 'Mate ').replace(/^\w/, c => c.toUpperCase());
+    els.puzzleMeta.innerHTML = `
+      <span class="difficulty-badge ${diffClass}" id="difficultyBadge">${diffLabel}</span>
+      <span class="theme-badge" id="themeBadge">${themeLabel}</span>
+    `;
     els.gameStatus.textContent = `Find the best move${puzzle.solution && puzzle.solution.length > 1 ? 's' : ''}!`;
     els.gameStatus.className = 'game-status active';
     els.moveList.hidden = true;
     els.moves.innerHTML = '';
     els.showSolutionBtn.hidden = true;
     els.copyPgnBtn.hidden = true;
+    els.exportBtn.hidden = true;
     els.shareBtn.hidden = true;
     els.playAgainBtn.hidden = true;
     els.dailyResult.hidden = true;
@@ -548,7 +652,7 @@
     // Update daily button text
     const today = new Date().toISOString().split('T')[0];
     els.dailyDate.textContent = today;
-    els.dailyBtn.textContent = isDaily ? 'Today\'s Puzzle (Active)' : 'Play Today\'s Puzzle';
+    els.dailyBtn.textContent = isDaily ? "Today's Puzzle (Active)" : "Play Today's Puzzle";
     els.dailyBtn.disabled = isDaily && state.stats.lastDailyDate === today;
 
     renderBoard();
@@ -653,22 +757,22 @@
   }
 
   function checkMoveCorrect(move, expectedSan) {
-    // Simplified - just check if the move matches expected SAN
-    const moveSan = moveToSan(state.board, move);
-    return moveSan === expectedSan || moveSan.replace(/[#+]/g, '') === expectedSan.replace(/[#+]/g, '');
+    const moveSan = moveToSan(state.board, move).replace(/[#+]/g, '');
+    const expected = expectedSan.replace(/[#+]/g, '');
+    return moveSan === expected;
   }
 
   function makeOpponentMove() {
     // For puzzles, the opponent usually has forced moves
     // In a real implementation, this would use the puzzle's solution line
-    // For now, we'll just make a random legal move for demo
+    // For now, we'll make a legal move for demo
     const oppColor = state.playerColor === 'w' ? 'b' : 'w';
     const moves = getMoves(state.board, oppColor);
     if (moves.length > 0) {
       // Try to find a move that matches the next expected move in solution
       const nextExpected = state.puzzleMoves[state.currentMoveIndex];
-      // This is simplified - in reality we'd parse the full solution line
-      const move = moves[0];
+      const parsedMove = parseSan(state.board, oppColor, nextExpected);
+      const move = parsedMove || moves[0];
       state.board = makeMove(state.board, move);
       state.lastMove = { from: move.from, to: move.to };
       state.currentMoveIndex++;
@@ -731,13 +835,13 @@
     els.gameStatus.className = 'game-status failed';
     els.showSolutionBtn.hidden = false;
 
-    showToast('Wrong move! Try again or use Hint.');
+    showToast('Wrong move! Try again or use Hint.', 'error');
   }
 
   function showResultsModal(solved, elapsed) {
     els.modalTitle.textContent = solved ? 'Puzzle Solved!' : 'Puzzle Complete';
     els.resultStatus.textContent = solved ? 'Solved' : 'Failed';
-    els.resultStatus.style.color = solved ? 'var(--accent-3)' : 'var(--accent)';
+    els.resultStatus.style.color = solved ? 'var(--gold-bright)' : '#e74c3c';
     els.finalTime.textContent = formatTime(elapsed);
     els.finalMoves.textContent = state.moveHistory.length;
     els.hintUsed.textContent = state.hintUsed ? 'Yes' : 'No';
@@ -754,6 +858,16 @@
       `<span class="move-item">${i + 1}. ${m}</span>`
     ).join(' ');
 
+    // Show move list
+    els.moveList.hidden = false;
+    els.moves.innerHTML = state.moveHistory.map((h, i) => {
+      const moveNum = Math.floor(i / 2) + 1;
+      const isWhite = i % 2 === 0;
+      return `<span class="move-item ${isWhite ? 'move-white' : 'move-black'}">${isWhite ? moveNum + '.' : ''} ${h.san}</span>`;
+    }).join(' ');
+
+    els.copyPgnBtn.hidden = false;
+    els.exportBtn.hidden = false;
     els.shareBtn.hidden = false;
     els.playAgainBtn.hidden = false;
     els.shareBtnModal.hidden = false;
@@ -769,10 +883,7 @@
 
     state.hintUsed = true;
 
-    // Highlight the correct piece and destination
     const expectedSan = state.puzzleMoves[state.currentMoveIndex];
-    // Parse expected move to find from/to squares
-    // This is simplified - would need proper SAN parsing
     const moves = getMoves(state.board, state.playerColor);
     const hintMove = moves.find(m => moveToSan(state.board, m).replace(/[#+]/g, '') === expectedSan.replace(/[#+]/g, ''));
 
@@ -780,7 +891,9 @@
       state.selectedSquare = hintMove.from;
       state.validMoves = [hintMove];
       renderBoard();
-      showToast(`Hint: Move piece from ${squareToAlg(hintMove.from)} to ${squareToAlg(hintMove.to)}`);
+      showToast(`Hint: Move piece from ${squareToAlg(hintMove.from)} to ${squareToAlg(hintMove.to)}`, 'info');
+      els.gameStatus.textContent = `Hint: ${squareToAlg(hintMove.from)}${squareToAlg(hintMove.to)}`;
+      els.gameStatus.className = 'game-status hint';
     }
   }
 
@@ -792,7 +905,7 @@
 
     const elapsed = Date.now() - (state.startTime || Date.now());
     const text = `🏆 Chess Puzzles ${state.isDaily ? 'Daily' : 'Practice'}
-${state.currentPuzzle.name} (${capitalize(state.currentPuzzle.difficulty)})
+${state.currentPuzzle.name} (${state.currentPuzzle.difficulty.charAt(0).toUpperCase() + state.currentPuzzle.difficulty.slice(1)})
 ${state.gameStatus === 'solved' ? '✅ Solved' : '❌ Failed'} in ${formatTime(elapsed)}
 ${state.moveHistory.length} moves ${state.hintUsed ? '• Hint used' : ''}
 
@@ -801,16 +914,16 @@ Play at: king-yosef-0.github.io/Main_Redirectorer/chess-puzzles/`;
     if (navigator.share) {
       navigator.share({ title: 'Chess Puzzles Result', text });
     } else {
-      navigator.clipboard.writeText(text).then(() => showToast('Result copied to clipboard!'));
+      navigator.clipboard.writeText(text).then(() => showToast('Result copied to clipboard!', 'success'));
     }
   }
 
   // ============================================
-  // COPY FEN / PGN
+  // COPY FEN / PGN / EXPORT
   // ============================================
   function copyFen() {
     const fen = boardToFen(state.board);
-    navigator.clipboard.writeText(fen).then(() => showToast('FEN copied!'));
+    navigator.clipboard.writeText(fen).then(() => showToast('FEN copied to clipboard!', 'success'));
   }
 
   function copyPgn() {
@@ -833,7 +946,45 @@ Play at: king-yosef-0.github.io/Main_Redirectorer/chess-puzzles/`;
     }
     pgn += '*';
 
-    navigator.clipboard.writeText(pgn).then(() => showToast('PGN copied!'));
+    navigator.clipboard.writeText(pgn).then(() => showToast('PGN copied to clipboard!', 'success'));
+  }
+
+  function exportPgn() {
+    if (!state.currentPuzzle) return;
+
+    let pgn = `[Event "${state.isDaily ? 'Daily Challenge' : 'Practice'}"]\n`;
+    pgn += `[Site "Chess Puzzles - KING_YOSEF_"]\n`;
+    pgn += `[Date "${new Date().toISOString().split('T')[0]}"]\n`;
+    pgn += `[Round "-"]\n`;
+    pgn += `[White "${state.playerColor === 'w' ? 'Player' : 'Engine'}"]\n`;
+    pgn += `[Black "${state.playerColor === 'b' ? 'Player' : 'Engine'}"]\n`;
+    pgn += `[Result "${state.gameStatus === 'solved' ? '1-0' : '*'}"]\n`;
+    pgn += `[Puzzle "${state.currentPuzzle.name}"]\n`;
+    pgn += `[Difficulty "${state.currentPuzzle.difficulty}"]\n`;
+    pgn += `[Theme "${state.currentPuzzle.theme}"]\n`;
+    pgn += `[FEN "${state.currentPuzzle.fen}"]\n`;
+    pgn += `[TimeControl "-"]\n`;
+    pgn += `[Termination "${state.gameStatus === 'solved' ? 'Normal' : 'Unfinished'}"]\n\n`;
+
+    // Include the full solution line
+    const solutionMoves = state.currentPuzzle.solution || [];
+    for (let i = 0; i < solutionMoves.length; i += 2) {
+      const moveNum = Math.floor(i / 2) + 1;
+      pgn += `${moveNum}. ${solutionMoves[i]}`;
+      if (i + 1 < solutionMoves.length) pgn += ` ${solutionMoves[i + 1]}`;
+      pgn += ' ';
+    }
+    pgn += state.gameStatus === 'solved' ? '1-0' : '*';
+
+    // Create download
+    const blob = new Blob([pgn], { type: 'application/x-chess-pgn' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chess-puzzle-${state.currentPuzzle.theme}-${state.currentPuzzle.difficulty}-${Date.now()}.pgn`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('PGN file downloaded!', 'success');
   }
 
   // ============================================
@@ -855,29 +1006,34 @@ Play at: king-yosef-0.github.io/Main_Redirectorer/chess-puzzles/`;
 
   function renderLeaderboard() {
     const top = state.stats.leaderboard.slice(0, 10);
+    if (top.length === 0) {
+      els.leaderboard.innerHTML = '<div class="empty-leaderboard">No scores yet — solve puzzles to appear here!</div>';
+      return;
+    }
     els.leaderboard.innerHTML = top.map((entry, i) => `
       <div class="leaderboard-entry">
         <span class="rank">#${i + 1}</span>
         <span class="score">${entry.score} pts</span>
-        <span class="mode">${entry.mode} • ${entry.difficulty}</span>
+        <span class="mode">${entry.mode} • ${entry.difficulty.charAt(0).toUpperCase() + entry.difficulty.slice(1)}</span>
+        <span class="theme">${entry.theme}</span>
       </div>
-    `).join('') || '<div class="leaderboard-entry"><span>No scores yet</span></div>';
+    `).join('');
   }
 
-  function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
-
-  function showToast(msg) {
+  function showToast(msg, type = 'info') {
     const toast = document.createElement('div');
-    toast.className = 'toast';
+    toast.className = `toast ${type}`;
     toast.textContent = msg;
     document.body.appendChild(toast);
     requestAnimationFrame(() => toast.classList.add('show'));
     setTimeout(() => {
       toast.classList.remove('show');
       setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 3500);
+  }
+
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
   // ============================================
@@ -891,7 +1047,7 @@ Play at: king-yosef-0.github.io/Main_Redirectorer/chess-puzzles/`;
   els.dailyBtn.addEventListener('click', () => {
     const today = new Date().toISOString().split('T')[0];
     if (state.stats.lastDailyDate === today) {
-      showToast('You already completed today\'s puzzle!');
+      showToast('You already completed today\'s puzzle!', 'info');
       return;
     }
     const puzzle = selectDailyPuzzle();
@@ -908,7 +1064,7 @@ Play at: king-yosef-0.github.io/Main_Redirectorer/chess-puzzles/`;
     ).join(' ');
     els.gameStatus.textContent = 'Solution revealed';
     els.gameStatus.className = 'game-status';
-    showToast('Solution shown above');
+    showToast('Solution shown above', 'info');
   });
 
   els.flipBoardBtn.addEventListener('click', () => {
@@ -918,6 +1074,7 @@ Play at: king-yosef-0.github.io/Main_Redirectorer/chess-puzzles/`;
 
   els.copyFenBtn.addEventListener('click', copyFen);
   els.copyPgnBtn.addEventListener('click', copyPgn);
+  els.exportBtn.addEventListener('click', exportPgn);
 
   els.shareBtn.addEventListener('click', shareResult);
   els.shareBtnModal.addEventListener('click', shareResult);
@@ -973,6 +1130,14 @@ Play at: king-yosef-0.github.io/Main_Redirectorer/chess-puzzles/`;
     }
     if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
       // Undo - not implemented for puzzles
+    }
+    if (e.key === 'h' || e.key === 'H') {
+      if (state.gameStatus === 'active') showHint();
+    }
+    if (e.key === 'n' || e.key === 'N') {
+      if (!els.resultsModal.hidden) return;
+      const puzzle = selectRandomPuzzle();
+      if (puzzle) loadPuzzle(puzzle, false);
     }
   });
 

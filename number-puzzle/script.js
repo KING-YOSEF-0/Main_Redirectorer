@@ -1,5 +1,5 @@
 // Number Puzzle — KING_YOSEF_
-// 2048, Threes, Fibonacci, and custom variants. Daily challenge included.
+// 2048, Threes, Fibonacci, Powers of 3/5, Primes + Grid sizes, Undo, Themes, Stats, Leaderboards
 
 (() => {
   'use strict';
@@ -14,7 +14,44 @@
     };
   }
 
-  // ===== Variant Rules =====
+  // ===== Hash for Daily Challenge =====
+  function hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+
+  // ===== Prime Numbers Generator =====
+  function generatePrimes(limit) {
+    const sieve = new Array(limit + 1).fill(true);
+    sieve[0] = sieve[1] = false;
+    for (let i = 2; i * i <= limit; i++) {
+      if (sieve[i]) {
+        for (let j = i * i; j <= limit; j += i) sieve[j] = false;
+      }
+    }
+    return sieve.map((isPrime, i) => isPrime ? i : null).filter(x => x !== null);
+  }
+
+  const PRIMES = generatePrimes(1000);
+  const PRIME_SET = new Set(PRIMES);
+
+  // ===== Fibonacci Sequence =====
+  function generateFibonacci(limit) {
+    const fib = [1, 1];
+    while (fib[fib.length - 1] + fib[fib.length - 2] <= limit) {
+      fib.push(fib[fib.length - 1] + fib[fib.length - 2]);
+    }
+    return fib;
+  }
+
+  const FIBONACCI = generateFibonacci(100000);
+  const FIB_SET = new Set(FIBONACCI);
+
+  // ===== Variant Definitions =====
   const VARIANTS = {
     '2048': {
       name: '2048',
@@ -24,7 +61,7 @@
       canMerge: (a, b) => a === b,
       mergeResult: (a, b) => a + b,
       targetTile: 2048,
-      tileColors: {}
+      description: 'Classic 2048 — merge same numbers'
     },
     'threes': {
       name: 'Threes',
@@ -34,21 +71,14 @@
       canMerge: (a, b) => {
         if (a === 1 && b === 2) return true;
         if (a === 2 && b === 1) return true;
-        if (a >= 3 && b >= 3 && a === b) return true;
-        return false;
+        return a >= 3 && b >= 3 && a === b;
       },
       mergeResult: (a, b) => {
         if ((a === 1 && b === 2) || (a === 2 && b === 1)) return 3;
         return a + b;
       },
       targetTile: 6144,
-      tileColors: {
-        1: '#e6e6e6', 2: '#ffcc00', 3: '#ff6600',
-        6: '#cc3300', 12: '#990000', 24: '#660000',
-        48: '#cc0066', 96: '#99004d', 192: '#660033',
-        384: '#cc00cc', 768: '#990099', 1536: '#660066',
-        3072: '#6600cc', 6144: '#330099'
-      }
+      description: 'Threes! — 1+2=3, then merge 3+3=6, etc.'
     },
     'fibonacci': {
       name: 'Fibonacci',
@@ -56,19 +86,18 @@
       spawnValues: [1, 2],
       spawnWeights: [0.7, 0.3],
       canMerge: (a, b) => {
-        const fib = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765];
-        const ia = fib.indexOf(a);
-        const ib = fib.indexOf(b);
-        return Math.abs(ia - ib) === 1;
+        const ia = FIBONACCI.indexOf(a);
+        const ib = FIBONACCI.indexOf(b);
+        return ia !== -1 && ib !== -1 && Math.abs(ia - ib) === 1;
       },
       mergeResult: (a, b) => {
-        const fib = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765];
-        const ia = fib.indexOf(a);
-        const ib = fib.indexOf(b);
-        return fib[Math.max(ia, ib) + 1] || a + b;
+        const ia = FIBONACCI.indexOf(a);
+        const ib = FIBONACCI.indexOf(b);
+        const maxIdx = Math.max(ia, ib);
+        return FIBONACCI[maxIdx + 1] || a + b;
       },
       targetTile: 6765,
-      tileColors: {}
+      description: 'Fibonacci — merge adjacent sequence numbers'
     },
     'powers3': {
       name: 'Powers of 3',
@@ -78,7 +107,7 @@
       canMerge: (a, b) => a === b,
       mergeResult: (a, b) => a + b,
       targetTile: 6561,
-      tileColors: {}
+      description: 'Powers of 3 — 3, 9, 27, 81... reach 3⁸'
     },
     'powers5': {
       name: 'Powers of 5',
@@ -88,7 +117,7 @@
       canMerge: (a, b) => a === b,
       mergeResult: (a, b) => a + b,
       targetTile: 15625,
-      tileColors: {}
+      description: 'Powers of 5 — 5, 25, 125, 625... reach 5⁶'
     },
     'primes': {
       name: 'Primes',
@@ -97,12 +126,119 @@
       spawnWeights: [0.3, 0.25, 0.2, 0.15, 0.1],
       canMerge: (a, b) => a === b,
       mergeResult: (a, b) => {
-        const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
-        const idx = primes.indexOf(a);
-        return primes[idx + 1] || a + b;
+        const idx = PRIMES.indexOf(a);
+        return PRIMES[idx + 1] || a + b;
       },
-      targetTile: 97,
-      tileColors: {}
+      targetTile: 997,
+      description: 'Prime Numbers — merge to next prime'
+    }
+  };
+
+  // ===== Tile Color Schemes per Variant =====
+  const TILE_COLORS = {
+    '2048': {
+      0: { bg: 'var(--tile-0)', text: 'var(--tile-text)', border: 'transparent', shadow: 'transparent' },
+      2: { bg: '#eee4da', text: '#776e65', border: '#e0d4c8', shadow: 'rgba(238, 228, 218, 0.4)' },
+      4: { bg: '#ede0c8', text: '#776e65', border: '#dcc8b0', shadow: 'rgba(237, 224, 200, 0.4)' },
+      8: { bg: '#f2b179', text: '#f9f6f2', border: '#e09c5e', shadow: 'rgba(242, 177, 121, 0.5)' },
+      16: { bg: '#f59563', text: '#f9f6f2', border: '#e07d4a', shadow: 'rgba(245, 149, 99, 0.5)' },
+      32: { bg: '#f67c5f', text: '#f9f6f2', border: '#e06545', shadow: 'rgba(246, 124, 95, 0.5)' },
+      64: { bg: '#f65e3b', text: '#f9f6f2', border: '#e04525', shadow: 'rgba(246, 94, 59, 0.6)' },
+      128: { bg: '#edcf72', text: '#f9f6f2', border: '#d8b85a', shadow: 'rgba(237, 207, 114, 0.5)' },
+      256: { bg: '#edcc61', text: '#f9f6f2', border: '#d8b54a', shadow: 'rgba(237, 204, 97, 0.5)' },
+      512: { bg: '#edc850', text: '#f9f6f2', border: '#d8b038', shadow: 'rgba(237, 200, 80, 0.6)' },
+      1024: { bg: '#edc53f', text: '#f9f6f2', border: '#d8ad2a', shadow: 'rgba(237, 197, 63, 0.6)' },
+      2048: { bg: '#edc22e', text: '#f9f6f2', border: '#d8a91c', shadow: 'rgba(237, 194, 46, 0.7)' },
+      4096: { bg: '#3c3a32', text: '#f9f6f2', border: '#5a574d', shadow: 'rgba(60, 58, 50, 0.7)' },
+      8192: { bg: '#3c3a32', text: '#f9f6f2', border: '#5a574d', shadow: 'rgba(60, 58, 50, 0.7)' },
+      16384: { bg: '#3c3a32', text: '#f9f6f2', border: '#5a574d', shadow: 'rgba(60, 58, 50, 0.7)' }
+    },
+    'threes': {
+      0: { bg: 'var(--tile-0)', text: 'var(--tile-text)', border: 'transparent', shadow: 'transparent' },
+      1: { bg: '#e6e6e6', text: '#333333', border: '#cccccc', shadow: 'rgba(230, 230, 230, 0.4)' },
+      2: { bg: '#ffcc00', text: '#333333', border: '#e6b800', shadow: 'rgba(255, 204, 0, 0.5)' },
+      3: { bg: '#ff6600', text: '#ffffff', border: '#e65c00', shadow: 'rgba(255, 102, 0, 0.5)' },
+      6: { bg: '#cc3300', text: '#ffffff', border: '#b32d00', shadow: 'rgba(204, 51, 0, 0.5)' },
+      12: { bg: '#990000', text: '#ffffff', border: '#800000', shadow: 'rgba(153, 0, 0, 0.5)' },
+      24: { bg: '#660000', text: '#ffffff', border: '#4d0000', shadow: 'rgba(102, 0, 0, 0.5)' },
+      48: { bg: '#cc0066', text: '#ffffff', border: '#b3005c', shadow: 'rgba(204, 0, 102, 0.5)' },
+      96: { bg: '#99004d', text: '#ffffff', border: '#800040', shadow: 'rgba(153, 0, 77, 0.5)' },
+      192: { bg: '#660033', text: '#ffffff', border: '#4d0029', shadow: 'rgba(102, 0, 51, 0.5)' },
+      384: { bg: '#cc00cc', text: '#ffffff', border: '#b300b3', shadow: 'rgba(204, 0, 204, 0.5)' },
+      768: { bg: '#990099', text: '#ffffff', border: '#800080', shadow: 'rgba(153, 0, 153, 0.5)' },
+      1536: { bg: '#660066', text: '#ffffff', border: '#4d004d', shadow: 'rgba(102, 0, 102, 0.5)' },
+      3072: { bg: '#6600cc', text: '#ffffff', border: '#5500b3', shadow: 'rgba(102, 0, 204, 0.5)' },
+      6144: { bg: '#330099', text: '#ffffff', border: '#290080', shadow: 'rgba(51, 0, 153, 0.6)' }
+    },
+    'fibonacci': {
+      0: { bg: 'var(--tile-0)', text: 'var(--tile-text)', border: 'transparent', shadow: 'transparent' },
+      1: { bg: '#ffebcc', text: '#8b6914', border: '#ffd9a3', shadow: 'rgba(255, 235, 204, 0.4)' },
+      2: { bg: '#ffe0b3', text: '#8b6914', border: '#ffcc80', shadow: 'rgba(255, 224, 179, 0.4)' },
+      3: { bg: '#ffd499', text: '#8b6914', border: '#ffbf80', shadow: 'rgba(255, 212, 153, 0.5)' },
+      5: { bg: '#ffc87f', text: '#ffffff', border: '#ffb366', shadow: 'rgba(255, 200, 127, 0.5)' },
+      8: { bg: '#ffbc66', text: '#ffffff', border: '#ffa34d', shadow: 'rgba(255, 188, 102, 0.5)' },
+      13: { bg: '#ffb04d', text: '#ffffff', border: '#ff9433', shadow: 'rgba(255, 176, 77, 0.5)' },
+      21: { bg: '#ffa433', text: '#ffffff', border: '#ff851a', shadow: 'rgba(255, 164, 51, 0.5)' },
+      34: { bg: '#ff981a', text: '#ffffff', border: '#ff7600', shadow: 'rgba(255, 152, 26, 0.5)' },
+      55: { bg: '#ff8c00', text: '#ffffff', border: '#e67e00', shadow: 'rgba(255, 140, 0, 0.6)' },
+      89: { bg: '#e67e00', text: '#ffffff', border: '#cc6d00', shadow: 'rgba(230, 126, 0, 0.6)' },
+      144: { bg: '#cc6d00', text: '#ffffff', border: '#b35c00', shadow: 'rgba(204, 109, 0, 0.6)' },
+      233: { bg: '#b35c00', text: '#ffffff', border: '#994d00', shadow: 'rgba(179, 92, 0, 0.6)' },
+      377: { bg: '#994d00', text: '#ffffff', border: '#803d00', shadow: 'rgba(153, 77, 0, 0.6)' },
+      610: { bg: '#803d00', text: '#ffffff', border: '#662e00', shadow: 'rgba(128, 61, 0, 0.6)' },
+      987: { bg: '#662e00', text: '#ffffff', border: '#4d1f00', shadow: 'rgba(102, 46, 0, 0.6)' },
+      1597: { bg: '#4d1f00', text: '#ffffff', border: '#331300', shadow: 'rgba(77, 31, 0, 0.6)' },
+      2584: { bg: '#331300', text: '#ffffff', border: '#1a0a00', shadow: 'rgba(51, 19, 0, 0.6)' },
+      4181: { bg: '#1a0a00', text: '#ffffff', border: '#0d0500', shadow: 'rgba(26, 10, 0, 0.6)' },
+      6765: { bg: '#0d0500', text: '#ffd700', border: '#ffd700', shadow: 'rgba(255, 215, 0, 0.8)' }
+    },
+    'powers3': {
+      0: { bg: 'var(--tile-0)', text: 'var(--tile-text)', border: 'transparent', shadow: 'transparent' },
+      3: { bg: '#cce5ff', text: '#004080', border: '#99ccff', shadow: 'rgba(204, 229, 255, 0.4)' },
+      9: { bg: '#99ccff', text: '#003366', border: '#66b3ff', shadow: 'rgba(153, 204, 255, 0.4)' },
+      27: { bg: '#66b3ff', text: '#ffffff', border: '#3399ff', shadow: 'rgba(102, 179, 255, 0.5)' },
+      81: { bg: '#3399ff', text: '#ffffff', border: '#0080ff', shadow: 'rgba(51, 153, 255, 0.5)' },
+      243: { bg: '#0080ff', text: '#ffffff', border: '#0066cc', shadow: 'rgba(0, 128, 255, 0.5)' },
+      729: { bg: '#0066cc', text: '#ffffff', border: '#0052a3', shadow: 'rgba(0, 102, 204, 0.5)' },
+      2187: { bg: '#0052a3', text: '#ffffff', border: '#003d7a', shadow: 'rgba(0, 82, 163, 0.5)' },
+      6561: { bg: '#003d7a', text: '#ffffff', border: '#002952', shadow: 'rgba(0, 61, 122, 0.6)' }
+    },
+    'powers5': {
+      0: { bg: 'var(--tile-0)', text: 'var(--tile-text)', border: 'transparent', shadow: 'transparent' },
+      5: { bg: '#ffe4cc', text: '#8b4513', border: '#ffcc99', shadow: 'rgba(255, 228, 204, 0.4)' },
+      25: { bg: '#ffcc99', text: '#8b4513', border: '#ffb366', shadow: 'rgba(255, 204, 153, 0.4)' },
+      125: { bg: '#ffb366', text: '#ffffff', border: '#ff9933', shadow: 'rgba(255, 179, 102, 0.5)' },
+      625: { bg: '#ff9933', text: '#ffffff', border: '#ff8000', shadow: 'rgba(255, 153, 51, 0.5)' },
+      3125: { bg: '#ff8000', text: '#ffffff', border: '#e67300', shadow: 'rgba(255, 128, 0, 0.5)' },
+      15625: { bg: '#e67300', text: '#ffffff', border: '#cc6600', shadow: 'rgba(230, 115, 0, 0.6)' }
+    },
+    'primes': {
+      0: { bg: 'var(--tile-0)', text: 'var(--tile-text)', border: 'transparent', shadow: 'transparent' },
+      2: { bg: '#ff6b6b', text: '#ffffff', border: '#ff4444', shadow: 'rgba(255, 107, 107, 0.5)' },
+      3: { bg: '#ffa502', text: '#ffffff', border: '#ff9400', shadow: 'rgba(255, 165, 2, 0.5)' },
+      5: { bg: '#ffd32a', text: '#333333', border: '#e6bf00', shadow: 'rgba(255, 211, 42, 0.5)' },
+      7: { bg: '#32e0c4', text: '#333333', border: '#2accb0', shadow: 'rgba(50, 224, 196, 0.5)' },
+      11: { bg: '#2ed573', text: '#ffffff', border: '#26bf62', shadow: 'rgba(46, 213, 115, 0.5)' },
+      13: { bg: '#1e90ff', text: '#ffffff', border: '#157ae6', shadow: 'rgba(30, 144, 255, 0.5)' },
+      17: { bg: '#a55eea', text: '#ffffff', border: '#9146d4', shadow: 'rgba(165, 94, 234, 0.5)' },
+      19: { bg: '#ff4757', text: '#ffffff', border: '#e63242', shadow: 'rgba(255, 71, 87, 0.5)' },
+      23: { bg: '#ff6348', text: '#ffffff', border: '#e64d32', shadow: 'rgba(255, 99, 72, 0.5)' },
+      29: { bg: '#ff9f1a', text: '#ffffff', border: '#e68f00', shadow: 'rgba(255, 159, 26, 0.5)' },
+      31: { bg: '#ee5a24', text: '#ffffff', border: '#d4451b', shadow: 'rgba(238, 90, 36, 0.5)' },
+      37: { bg: '#009432', text: '#ffffff', border: '#007a29', shadow: 'rgba(0, 148, 50, 0.5)' },
+      41: { bg: '#0652dd', text: '#ffffff', border: '#0542b3', shadow: 'rgba(6, 82, 221, 0.5)' },
+      43: { bg: '#9980fa', text: '#333333', border: '#856af8', shadow: 'rgba(153, 128, 250, 0.5)' },
+      47: { bg: '#f368e0', text: '#ffffff', border: '#e04ec9', shadow: 'rgba(243, 104, 224, 0.5)' },
+      53: { bg: '#ff9ff3', text: '#333333', border: '#ff85e6', shadow: 'rgba(255, 159, 243, 0.5)' },
+      59: { bg: '#54a0ff', text: '#ffffff', border: '#3d8cff', shadow: 'rgba(84, 160, 255, 0.5)' },
+      61: { bg: '#5f27cd', text: '#ffffff', border: '#4a1fc4', shadow: 'rgba(95, 39, 205, 0.5)' },
+      67: { bg: '#00d2d3', text: '#333333', border: '#00b8b9', shadow: 'rgba(0, 210, 211, 0.5)' },
+      71: { bg: '#1dd1a1', text: '#333333', border: '#18b88e', shadow: 'rgba(29, 209, 161, 0.5)' },
+      73: { bg: '#10ac84', text: '#ffffff', border: '#0e9672', shadow: 'rgba(16, 172, 132, 0.5)' },
+      79: { bg: '#ee5253', text: '#ffffff', border: '#d43d3e', shadow: 'rgba(238, 82, 83, 0.5)' },
+      83: { bg: '#0abde3', text: '#333333', border: '#09a8c9', shadow: 'rgba(10, 189, 227, 0.5)' },
+      89: { bg: '#ffbe76', text: '#333333', border: '#ffad5c', shadow: 'rgba(255, 190, 118, 0.5)' },
+      97: { bg: '#686de0', text: '#ffffff', border: '#4f54c8', shadow: 'rgba(104, 109, 224, 0.6)' }
     }
   };
 
@@ -125,23 +261,25 @@
     leaderboard: JSON.parse(localStorage.getItem('numberPuzzleLeaderboard') || '{}'),
     touchStartX: 0,
     touchStartY: 0,
+    maxHistory: 10
   };
 
   // ===== DOM Elements =====
   const els = {
-    gridContainer: document.getElementById('gridContainer'),
+    board: document.getElementById('board'),
     currentScore: document.getElementById('currentScore'),
-    bestScoreDisplay: document.getElementById('bestScoreDisplay'),
-    variantBadge: document.getElementById('variantBadge'),
-    dailyBadge: document.getElementById('dailyBadge'),
-    gameStatus: document.getElementById('gameStatus'),
-    newBtn: document.getElementById('newBtn'),
+    bestScore: document.getElementById('bestScore'),
+    variantTag: document.getElementById('variantTag'),
+    dailyTag: document.getElementById('dailyTag'),
+    moveCounter: document.getElementById('moveCounter'),
+    statusBar: document.getElementById('statusBar'),
+    newGameBtn: document.getElementById('newGameBtn'),
     undoBtn: document.getElementById('undoBtn'),
     dailyBtn: document.getElementById('dailyBtn'),
     dailyDate: document.getElementById('dailyDate'),
     shareBtn: document.getElementById('shareBtn'),
     playAgainBtn: document.getElementById('playAgainBtn'),
-    resultsModal: document.getElementById('resultsModal'),
+    resultModal: document.getElementById('resultModal'),
     winModal: document.getElementById('winModal'),
     modalTitle: document.getElementById('modalTitle'),
     finalScore: document.getElementById('finalScore'),
@@ -153,17 +291,18 @@
     shareBtnModal: document.getElementById('shareBtnModal'),
     playAgainBtnModal: document.getElementById('playAgainBtnModal'),
     continueBtn: document.getElementById('continueBtn'),
-    newGameBtn: document.getElementById('newGameBtn'),
-    bestTile: document.getElementById('bestTile'),
-    bestScore: document.getElementById('bestScore'),
-    gamesPlayed: document.getElementById('gamesPlayed'),
-    winRate: document.getElementById('winRate'),
-    dailyWins: document.getElementById('dailyWins'),
-    currentStreak: document.getElementById('currentStreak'),
+    newGameFromWinBtn: document.getElementById('newGameFromWinBtn'),
+    modalClose: document.getElementById('modalClose'),
+    statBestTile: document.getElementById('statBestTile'),
+    statBestScore: document.getElementById('statBestScore'),
+    statGamesPlayed: document.getElementById('statGamesPlayed'),
+    statWinRate: document.getElementById('statWinRate'),
+    statDailyWins: document.getElementById('statDailyWins'),
+    statStreak: document.getElementById('statStreak'),
     leaderboard: document.getElementById('leaderboard'),
     themeSelect: document.getElementById('themeSelect'),
-    customMergeField: document.getElementById('customMergeField'),
-    customMerge: document.getElementById('customMerge'),
+    miniBest: document.getElementById('miniBest'),
+    miniGames: document.getElementById('miniGames')
   };
 
   // ===== Initialize =====
@@ -175,29 +314,29 @@
     updateTheme();
     newGame();
     updateDailyDate();
+    updateMiniStats();
   }
 
   function setupEventListeners() {
-    // Variant tabs
-    document.querySelectorAll('.mode-tab').forEach(btn => {
+    // Mode buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.mode-tab').forEach(b => {
+        document.querySelectorAll('.mode-btn').forEach(b => {
           b.classList.remove('active');
           b.setAttribute('aria-selected', 'false');
         });
         btn.classList.add('active');
         btn.setAttribute('aria-selected', 'true');
         state.variant = btn.dataset.variant;
-        els.customMergeField.hidden = state.variant !== 'custom';
-        els.variantBadge.textContent = VARIANTS[state.variant].name;
+        els.variantTag.textContent = VARIANTS[state.variant].name.toUpperCase();
         newGame();
       });
     });
 
-    // Size tabs
-    document.querySelectorAll('.size-tab').forEach(btn => {
+    // Size buttons
+    document.querySelectorAll('.size-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.size-tab').forEach(b => {
+        document.querySelectorAll('.size-btn').forEach(b => {
           b.classList.remove('active');
           b.setAttribute('aria-selected', 'false');
         });
@@ -208,57 +347,55 @@
       });
     });
 
-    // Custom merge rule
-    els.customMerge.addEventListener('change', () => {
-      const customVariant = 'custom';
-      VARIANTS[customVariant] = {
-        name: 'Custom',
-        ...VARIANTS[els.customMerge.value],
-        targetTile: VARIANTS[els.customMerge.value].targetTile
-      };
-      state.variant = customVariant;
-      els.variantBadge.textContent = 'Custom';
-      newGame();
-    });
-
-    // Theme
+    // Theme select
     els.themeSelect.addEventListener('change', () => {
       document.body.dataset.theme = els.themeSelect.value;
+      localStorage.setItem('numberPuzzleTheme', els.themeSelect.value);
       updateTheme();
     });
 
-    // Buttons
-    els.newBtn.addEventListener('click', () => newGame(false));
+    // Action buttons
+    els.newGameBtn.addEventListener('click', () => newGame(false));
     els.undoBtn.addEventListener('click', undoMove);
     els.dailyBtn.addEventListener('click', () => newGame(true));
     els.shareBtn.addEventListener('click', shareResult);
     els.playAgainBtn.addEventListener('click', () => {
-      els.resultsModal.hidden = true;
+      closeModals();
       newGame(state.isDaily);
     });
     els.shareBtnModal.addEventListener('click', shareResult);
     els.playAgainBtnModal.addEventListener('click', () => {
-      els.resultsModal.hidden = true;
+      closeModals();
       newGame(state.isDaily);
     });
     els.continueBtn.addEventListener('click', () => {
-      els.winModal.hidden = true;
+      closeModals();
       state.hasWon = true;
     });
-    els.newGameBtn.addEventListener('click', () => {
-      els.winModal.hidden = true;
+    els.newGameFromWinBtn.addEventListener('click', () => {
+      closeModals();
       newGame(state.isDaily);
+    });
+    els.modalClose.addEventListener('click', closeModals);
+
+    // Close modal on backdrop click
+    els.resultModal.addEventListener('click', (e) => {
+      if (e.target === els.resultModal) closeModals();
+    });
+    els.winModal.addEventListener('click', (e) => {
+      if (e.target === els.winModal) closeModals();
     });
 
     // Keyboard
     document.addEventListener('keydown', handleKeydown);
 
     // Touch
-    els.gridContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
-    els.gridContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
+    els.board.addEventListener('touchstart', handleTouchStart, { passive: true });
+    els.board.addEventListener('touchend', handleTouchEnd, { passive: true });
+    els.board.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
-    // Prevent scrolling on grid
-    els.gridContainer.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+    // Prevent context menu on board
+    els.board.addEventListener('contextmenu', e => e.preventDefault());
   }
 
   function updateTheme() {
@@ -267,7 +404,19 @@
 
   function updateDailyDate() {
     const today = new Date();
-    els.dailyDate.textContent = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    els.dailyDate.textContent = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
+  }
+
+  function closeModals() {
+    els.resultModal.close();
+    els.winModal.close();
+  }
+
+  function updateMiniStats() {
+    const variantKey = `${state.variant}-${state.gridSize}`;
+    const s = state.stats[variantKey] || { bestScore: 0, gamesPlayed: 0 };
+    els.miniBest.querySelector('span').textContent = s.bestScore || 0;
+    els.miniGames.querySelector('span').textContent = s.gamesPlayed || 0;
   }
 
   // ===== Game Logic =====
@@ -285,10 +434,10 @@
     if (isDaily) {
       const today = new Date().toISOString().split('T')[0];
       state.rng = mulberry32(hashString(today + state.variant + state.gridSize));
-      els.dailyBadge.hidden = false;
+      els.dailyTag.classList.remove('hidden');
     } else {
       state.rng = mulberry32(Date.now());
-      els.dailyBadge.hidden = true;
+      els.dailyTag.classList.add('hidden');
     }
 
     // Add initial tiles
@@ -296,12 +445,11 @@
     addRandomTile();
 
     updateDisplay();
-    els.gameStatus.textContent = isDaily ? 'Daily Challenge - Make your moves!' : 'Use arrow keys or swipe to move tiles';
-    els.gameStatus.className = 'game-status active';
+    els.statusBar.textContent = isDaily ? 'DAILY CHALLENGE — MAKE YOUR MOVES' : 'ARROW KEYS OR SWIPE TO MERGE TILES';
+    els.statusBar.className = 'status-bar active';
     els.shareBtn.hidden = true;
     els.playAgainBtn.hidden = true;
-    els.resultsModal.hidden = true;
-    els.winModal.hidden = true;
+    updateMiniStats();
   }
 
   function createEmptyGrid() {
@@ -352,11 +500,9 @@
     const variant = VARIANTS[state.variant];
     const oldGrid = cloneGrid(state.grid);
     let moved = false;
-    let merged = false;
     let newBestTile = state.bestTile;
 
     const processLine = (line) => {
-      // Filter non-zero
       const tiles = line.filter(v => v !== 0);
       const result = [];
       let i = 0;
@@ -368,19 +514,16 @@
           state.score += mergedValue;
           newBestTile = Math.max(newBestTile, mergedValue);
           i += 2;
-          merged = true;
         } else {
           result.push(tiles[i]);
           i++;
         }
       }
 
-      // Pad with zeros
       while (result.length < line.length) result.push(0);
       return result;
     };
 
-    // Process based on direction
     if (direction === 'up') {
       for (let j = 0; j < state.gridSize; j++) {
         const line = [];
@@ -423,8 +566,13 @@
     if (moved) {
       state.moves++;
       state.bestTile = newBestTile;
-      state.history.push({ grid: oldGrid, score: state.score - (merged ? 0 : 0), bestTile: state.bestTile, moves: state.moves - 1 });
-      if (state.history.length > 10) state.history.shift();
+      state.history.push({
+        grid: oldGrid,
+        score: state.score,
+        bestTile: state.bestTile,
+        moves: state.moves
+      });
+      if (state.history.length > state.maxHistory) state.history.shift();
 
       addRandomTile();
       updateDisplay();
@@ -476,8 +624,8 @@
     state.moves = last.moves;
     state.hasWon = false;
     updateDisplay();
-    els.gameStatus.textContent = 'Move undone';
-    els.gameStatus.className = 'game-status active';
+    els.statusBar.textContent = 'MOVE UNDONE';
+    els.statusBar.className = 'status-bar active';
   }
 
   function handleKeydown(e) {
@@ -513,7 +661,7 @@
     const absDx = Math.abs(dx);
     const absDy = Math.abs(dy);
 
-    if (Math.max(absDx, absDy) < 30) return; // Too short
+    if (Math.max(absDx, absDy) < 30) return;
 
     if (absDx > absDy) {
       move(dx > 0 ? 'right' : 'left');
@@ -522,58 +670,72 @@
     }
   }
 
+  // ===== Display =====
   function updateDisplay() {
-    renderGrid();
+    renderBoard();
     els.currentScore.textContent = state.score;
-    els.bestScoreDisplay.textContent = state.bestScore;
+    els.bestScore.textContent = state.bestScore;
+    els.moveCounter.textContent = `MOVES: ${state.moves}`;
+    updateMiniStats();
   }
 
-  function renderGrid() {
-    const container = els.gridContainer;
-    container.innerHTML = '';
-
-    const grid = document.createElement('div');
-    grid.className = 'game-grid';
-    grid.dataset.size = state.gridSize;
+  function renderBoard() {
+    const board = els.board;
+    board.innerHTML = '';
+    board.dataset.size = state.gridSize;
 
     for (let i = 0; i < state.gridSize; i++) {
       for (let j = 0; j < state.gridSize; j++) {
         const tile = document.createElement('div');
-        tile.className = 'grid-tile';
+        tile.className = 'tile';
         const value = state.grid[i][j];
 
         if (value === 0) {
           tile.classList.add('empty');
+          tile.style.setProperty('--tile-bg', getTileColor(0).bg);
+          tile.style.setProperty('--tile-text', getTileColor(0).text);
+          tile.style.setProperty('--tile-border', getTileColor(0).border);
+          tile.style.setProperty('--tile-shadow', getTileColor(0).shadow);
           tile.textContent = '';
         } else {
           tile.dataset.value = value;
           tile.textContent = formatNumber(value);
 
-          // Apply custom colors for Threes
-          const variant = VARIANTS[state.variant];
-          if (variant.tileColors[value]) {
-            tile.style.background = variant.tileColors[value];
-            tile.style.color = value <= 3 ? '#333' : '#fff';
-          }
+          const colors = getTileColor(value);
+          tile.style.setProperty('--tile-bg', colors.bg);
+          tile.style.setProperty('--tile-text', colors.text);
+          tile.style.setProperty('--tile-border', colors.border);
+          tile.style.setProperty('--tile-shadow', colors.shadow);
         }
 
-        grid.appendChild(tile);
+        board.appendChild(tile);
       }
     }
 
-    container.appendChild(grid);
+    // Trigger animations for new/merged tiles
+    requestAnimationFrame(() => {
+      board.querySelectorAll('.tile.new, .tile.merged').forEach(t => {
+        t.classList.remove('new', 'merged');
+      });
+    });
+  }
+
+  function getTileColor(value) {
+    const variantColors = TILE_COLORS[state.variant] || TILE_COLORS['2048'];
+    return variantColors[value] || variantColors[0];
   }
 
   function formatNumber(num) {
-    if (num >= 10000) return (num / 1000).toFixed(1) + 'k';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 10000) return (num / 1000).toFixed(1) + 'K';
     if (num >= 1000) return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return num.toString();
   }
 
   function showWinModal() {
-    els.winModal.hidden = false;
-    els.gameStatus.textContent = `You reached ${VARIANTS[state.variant].targetTile}! 🎉`;
-    els.gameStatus.className = 'game-status win';
+    els.winModal.showModal();
+    els.statusBar.textContent = `TARGET ${VARIANTS[state.variant].targetTile} REACHED!`;
+    els.statusBar.className = 'status-bar win';
   }
 
   function gameOver() {
@@ -581,43 +743,42 @@
     const timeTaken = Math.round((Date.now() - state.startTime) / 1000);
     const won = state.hasWon;
 
-    // Update stats
     saveStats(won, timeTaken);
 
-    // Show game over modal
-    els.modalTitle.textContent = won ? 'You Won!' : 'Game Over!';
+    els.modalTitle.textContent = won ? 'VICTORY' : 'GAME OVER';
     els.finalScore.textContent = state.score;
     els.finalBestTile.textContent = state.bestTile;
     els.finalMoves.textContent = state.moves;
     els.finalTime.textContent = formatTime(timeTaken);
 
     if (state.isDaily) {
-      els.dailyResult.hidden = false;
+      els.dailyResult.classList.remove('hidden');
       const dailyStats = state.stats.daily || {};
       const today = new Date().toISOString().split('T')[0];
       const key = `${state.variant}-${state.gridSize}-${today}`;
       const isNewBest = !dailyStats[key] || state.score > dailyStats[key].score;
       els.dailyMessage.textContent = isNewBest
-        ? `🎉 New daily best! Score: ${state.score}`
-        : `Today's best: ${dailyStats[key]?.score || '—'}`;
+        ? `NEW DAILY BEST! SCORE: ${state.score}`
+        : `TODAY'S BEST: ${dailyStats[key]?.score || '—'}`;
     } else {
-      els.dailyResult.hidden = true;
+      els.dailyResult.classList.add('hidden');
     }
 
-    els.resultsModal.hidden = false;
+    els.resultModal.showModal();
     els.shareBtn.hidden = false;
     els.playAgainBtn.hidden = false;
-    els.gameStatus.textContent = won ? 'Congratulations! You won!' : 'No more moves. Game over!';
-    els.gameStatus.className = won ? 'game-status win' : 'game-status over';
+    els.statusBar.textContent = won ? 'CONGRATULATIONS — YOU WON!' : 'NO MOVES LEFT — GAME OVER';
+    els.statusBar.className = won ? 'status-bar win' : 'status-bar over';
   }
 
   function formatTime(seconds) {
-    if (seconds < 60) return `${seconds}s`;
+    if (seconds < 60) return `${seconds}S`;
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}m ${secs}s`;
+    return `${mins}M ${secs.toString().padStart(2, '0')}S`;
   }
 
+  // ===== Stats & Leaderboard =====
   function saveStats(won, time) {
     const variantKey = `${state.variant}-${state.gridSize}`;
 
@@ -693,22 +854,28 @@
 
     updateStatsDisplay();
     updateLeaderboard();
+    updateMiniStats();
   }
 
   function loadStats() {
-    // Already loaded in state init
+    // Load saved theme
+    const savedTheme = localStorage.getItem('numberPuzzleTheme');
+    if (savedTheme) {
+      els.themeSelect.value = savedTheme;
+      document.body.dataset.theme = savedTheme;
+    }
   }
 
   function updateStatsDisplay() {
     const variantKey = `${state.variant}-${state.gridSize}`;
     const s = state.stats[variantKey] || { bestTile: 0, bestScore: 0, gamesPlayed: 0, wins: 0, dailyWins: 0, streak: 0 };
 
-    els.bestTile.textContent = s.bestTile || 0;
-    els.bestScore.textContent = s.bestScore || 0;
-    els.gamesPlayed.textContent = s.gamesPlayed || 0;
-    els.winRate.textContent = s.gamesPlayed ? Math.round((s.wins / s.gamesPlayed) * 100) + '%' : '0%';
-    els.dailyWins.textContent = s.dailyWins || 0;
-    els.currentStreak.textContent = s.streak || 0;
+    els.statBestTile.textContent = s.bestTile || 0;
+    els.statBestScore.textContent = s.bestScore || 0;
+    els.statGamesPlayed.textContent = s.gamesPlayed || 0;
+    els.statWinRate.textContent = s.gamesPlayed ? Math.round((s.wins / s.gamesPlayed) * 100) + '%' : '0%';
+    els.statDailyWins.textContent = s.dailyWins || 0;
+    els.statStreak.textContent = s.streak || 0;
   }
 
   function updateLeaderboard() {
@@ -716,42 +883,34 @@
     const scores = state.leaderboard[variantKey] || [];
 
     if (scores.length === 0) {
-      els.leaderboard.innerHTML = '<div style="color:var(--muted);text-align:center;padding:1rem;">No scores yet</div>';
+      els.leaderboard.innerHTML = '<div class="lb-entry" style="grid-column:1/-1;text-align:center;color:var(--muted);">NO SCORES YET</div>';
       return;
     }
 
     els.leaderboard.innerHTML = scores.map((s, i) => `
-      <div class="leaderboard-entry">
-        <span class="rank">#${i+1}</span>
-        <span class="score">${s.score} (${s.bestTile})</span>
-        <span class="mode">${s.moves} moves • ${s.time}s • ${s.date}</span>
+      <div class="lb-entry ${s.won ? 'won' : ''}">
+        <span class="lb-rank">#${i + 1}</span>
+        <span class="lb-score">${s.score} <span style="color:var(--muted);font-weight:400;">(${s.bestTile})</span></span>
+        <span class="lb-meta">${s.moves} MOVES · ${formatTime(s.time)} · ${s.date}</span>
       </div>
     `).join('');
   }
 
+  // ===== Share =====
   function shareResult() {
     const variant = VARIANTS[state.variant].name;
     const size = `${state.gridSize}×${state.gridSize}`;
-    const text = `🔢 Number Puzzle (${variant}, ${size})
-Score: ${state.score} | Best Tile: ${state.bestTile}
-Moves: ${state.moves} | Time: ${formatTime(Math.round((Date.now() - state.startTime) / 1000))}
-${state.isDaily ? '📅 Daily Challenge' : ''}
+    const text = `🔢 NUMBER PUZZLE (${variant.toUpperCase()}, ${size})
+SCORE: ${state.score} | BEST TILE: ${state.bestTile}
+MOVES: ${state.moves} | TIME: ${formatTime(Math.round((Date.now() - state.startTime) / 1000))}
+${state.isDaily ? '📅 DAILY CHALLENGE' : ''}
 #KING_YOSEF_`;
 
     if (navigator.share) {
       navigator.share({ title: 'Number Puzzle Result', text });
     } else {
-      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
+      navigator.clipboard.writeText(text).then(() => showToast('COPIED TO CLIPBOARD'));
     }
-  }
-
-  function hashString(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return Math.abs(hash);
   }
 
   function showToast(message) {

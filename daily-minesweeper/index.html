@@ -5,128 +5,242 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 <title>Daily Minesweeper | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
 
-<header class="hero">
-  <h1 class="logo">Daily Minesweeper</h1>
-  <p class="tagline">New board every day, same for everyone. Classic gameplay with daily challenge mode, streak tracking, and local leaderboards. Can you clear today's board?</p>
+<header class="top-bar" role="banner">
+  <div class="top-bar-left">
+    <span class="callsign">TACTICAL-OPS</span>
+    <span class="divider">//</span>
+    <h1 class="title">DAILY MINEFIELD</h1>
+  </div>
+  <div class="top-bar-right">
+    <span class="sys-time" id="sys-time">00:00:00 ZULU</span>
+    <span class="divider">|</span>
+    <span class="theme-indicator" id="theme-indicator">CLASSIC</span>
+  </div>
 </header>
 
-<main class="container">
-  <section class="panel input-panel" aria-labelledby="controls-heading">
-    <h2 id="controls-heading">Game Controls</h2>
+<main class="main-grid" role="main">
+  <aside class="side-panel left-panel" aria-labelledby="config-heading">
+    <header class="panel-header">
+      <h2 id="config-heading">MISSION CONFIG</h2>
+      <span class="panel-accent"></span>
+    </header>
 
-    <div class="field">
-      <label>Difficulty</label>
-      <div class="difficulty-tabs" role="tablist">
-        <button class="diff-tab active" role="tab" data-diff="beginner" aria-selected="true">🟢 Beginner (9×9, 10)</button>
-        <button class="diff-tab" role="tab" data-diff="intermediate" aria-selected="false">🟡 Intermediate (16×16, 40)</button>
-        <button class="diff-tab" role="tab" data-diff="expert" aria-selected="false">🔴 Expert (30×16, 99)</button>
-        <button class="diff-tab" role="tab" data-diff="custom" aria-selected="false">⚙️ Custom</button>
+    <section class="config-section">
+      <label class="config-label" for="difficulty-select">DIFFICULTY</label>
+      <select id="difficulty-select" class="config-select">
+        <option value="beginner">BEGINNER (9×9, 10)</option>
+        <option value="intermediate">INTERMEDIATE (16×16, 40)</option>
+        <option value="expert">EXPERT (30×16, 99)</option>
+        <option value="custom">CUSTOM PARAMETERS</option>
+      </select>
+    </section>
+
+    <section class="config-section custom-fields" id="custom-fields" hidden>
+      <div class="custom-grid">
+        <div class="custom-field">
+          <label class="config-label" for="custom-width">WIDTH <span class="unit">[5-50]</span></label>
+          <input type="number" id="custom-width" min="5" max="50" value="16" class="config-input">
+        </div>
+        <div class="custom-field">
+          <label class="config-label" for="custom-height">HEIGHT <span class="unit">[5-30]</span></label>
+          <input type="number" id="custom-height" min="5" max="30" value="16" class="config-input">
+        </div>
+        <div class="custom-field">
+          <label class="config-label" for="custom-mines">MINES <span class="unit">[1-500]</span></label>
+          <input type="number" id="custom-mines" min="1" max="500" value="40" class="config-input">
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="field custom-fields" id="custom-fields" hidden>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
-        <div>
-          <label for="custom-width">Width (5-50)</label>
-          <input type="number" id="custom-width" min="5" max="50" value="16">
-        </div>
-        <div>
-          <label for="custom-height">Height (5-30)</label>
-          <input type="number" id="custom-height" min="5" max="30" value="16">
-        </div>
-        <div>
-          <label for="custom-mines">Mines (1-500)</label>
-          <input type="number" id="custom-mines" min="1" max="500" value="40">
-        </div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Mode</label>
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-          <input type="radio" name="mode" value="daily" checked> 📅 Daily Challenge
+    <section class="config-section">
+      <label class="config-label">OPERATION MODE</label>
+      <div class="mode-toggle">
+        <label class="mode-option">
+          <input type="radio" name="mode" value="daily" checked>
+          <span class="mode-btn">
+            <span class="mode-icon">▣</span>
+            <span class="mode-text">DAILY OP</span>
+          </span>
         </label>
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-          <input type="radio" name="mode" value="classic"> 🎲 Classic (Random)
+        <label class="mode-option">
+          <input type="radio" name="mode" value="classic">
+          <span class="mode-btn">
+            <span class="mode-icon">◈</span>
+            <span class="mode-text">FREE PLAY</span>
+          </span>
         </label>
       </div>
+      <p class="mode-hint" id="mode-hint">IDENTICAL BOARD FOR ALL OPERATORS</p>
+    </section>
+
+    <section class="config-section">
+      <label class="config-label">THEME PROFILE</label>
+      <select id="theme-select" class="config-select">
+        <option value="classic">CLASSIC TERMINAL</option>
+        <option value="dark">STEALTH OPS</option>
+        <option value="retro">RETRO CRT</option>
+        <option value="high-contrast">HIGH VISIBILITY</option>
+      </select>
+    </section>
+
+    <section class="config-section">
+      <label class="config-label">MISSION DATE</label>
+      <div class="date-display" id="mission-date">LOADING...</div>
+    </section>
+
+    <div class="action-row">
+      <button class="tactical-btn primary" id="btn-new-mission" aria-label="New Mission">
+        <span class="btn-icon">▶</span>
+        <span class="btn-text">NEW MISSION</span>
+      </button>
+      <button class="tactical-btn danger" id="btn-abort" aria-label="Abort Mission">
+        <span class="btn-icon">✕</span>
+        <span class="btn-text">ABORT</span>
+      </button>
     </div>
 
-    <div class="field">
-      <label>Today's Date</label>
-      <div id="daily-date" class="daily-date"></div>
-      <span class="field-hint" id="daily-hint">Same board for everyone worldwide</span>
+    <section class="intel-section" aria-labelledby="intel-heading">
+      <header class="panel-header">
+        <h3 id="intel-heading">OPERATOR INTEL</h3>
+        <span class="panel-accent"></span>
+      </header>
+      <div class="intel-grid">
+        <div class="intel-card">
+          <span class="intel-label">CURRENT STREAK</span>
+          <span class="intel-value" id="intel-streak">0</span>
+        </div>
+        <div class="intel-card">
+          <span class="intel-label">BEST STREAK</span>
+          <span class="intel-value" id="intel-best-streak">0</span>
+        </div>
+        <div class="intel-card">
+          <span class="intel-label">MISSIONS WON</span>
+          <span class="intel-value" id="intel-wins">0</span>
+        </div>
+        <div class="intel-card">
+          <span class="intel-label">SUCCESS RATE</span>
+          <span class="intel-value" id="intel-winrate">0%</span>
+        </div>
+      </div>
+    </section>
+  </aside>
+
+  <section class="game-panel" aria-labelledby="game-heading">
+    <header class="panel-header">
+      <h2 id="game-heading">MINEFIELD</h2>
+      <span class="panel-accent"></span>
+    </header>
+
+    <div class="hud" role="status" aria-live="polite">
+      <div class="hud-item">
+        <span class="hud-label">MINES</span>
+        <span class="hud-value" id="hud-mines">010</span>
+      </div>
+      <button class="command-btn" id="command-btn" aria-label="Reset Field" title="Reset Field">
+        <span class="cmd-face" id="cmd-face">◆</span>
+      </button>
+      <div class="hud-item">
+        <span class="hud-label">TIME</span>
+        <span class="hud-value" id="hud-time">000</span>
+      </div>
     </div>
 
-    <div class="actions">
-      <button class="btn primary" id="btn-new-game">🎮 New Game</button>
-      <button class="btn secondary" id="btn-give-up">🏳️ Give Up</button>
+    <div class="field-container">
+      <div id="minefield" class="minefield" role="grid" aria-label="Minefield grid"></div>
     </div>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Current Streak</div>
-        <div class="stat-value" id="stat-streak">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Best Streak</div>
-        <div class="stat-value" id="stat-best-streak">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Games Won</div>
-        <div class="stat-value" id="stat-wins">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Win Rate</div>
-        <div class="stat-value" id="stat-winrate">0%</div>
-      </div>
+    <div class="status-display" id="status-display" aria-live="assertive" role="status">
+      <span class="status-text">AWAITING DEPLOYMENT</span>
     </div>
+
+    <section class="leaderboard-section" aria-labelledby="lb-heading">
+      <header class="panel-header">
+        <h3 id="lb-heading">LEADERBOARD — FASTEST CLEARANCE</h3>
+        <span class="panel-accent"></span>
+      </header>
+      <div class="lb-tabs" role="tablist">
+        <button class="lb-tab active" role="tab" data-lb="beginner" aria-selected="true">BEGINNER</button>
+        <button class="lb-tab" role="tab" data-lb="intermediate" aria-selected="false">INTERMEDIATE</button>
+        <button class="lb-tab" role="tab" data-lb="expert" aria-selected="false">EXPERT</button>
+        <button class="lb-tab" role="tab" data-lb="daily" aria-selected="false">DAILY OP</button>
+      </div>
+      <div class="leaderboard" id="leaderboard" role="list"></div>
+    </section>
+
+    <section class="transmission-section" aria-labelledby="tx-heading">
+      <header class="panel-header">
+        <h3 id="tx-heading">TRANSMISSION</h3>
+        <span class="panel-accent"></span>
+      </header>
+      <button class="tactical-btn transmit" id="btn-transmit" aria-label="Transmit Results">
+        <span class="btn-icon">↑</span>
+        <span class="btn-text">TRANSMIT REPORT</span>
+      </button>
+      <pre class="transmission-log" id="transmission-log" aria-label="Transmission preview" hidden></pre>
+    </section>
   </section>
 
-  <section class="panel results-panel" aria-labelledby="game-heading">
-    <h2 id="game-heading">Minesweeper</h2>
+  <aside class="side-panel right-panel" aria-labelledby="sys-heading">
+    <header class="panel-header">
+      <h2 id="sys-heading">SYSTEM STATUS</h2>
+      <span class="panel-accent"></span>
+    </header>
 
-    <div class="game-header">
-      <div class="game-timer" id="game-timer">000</div>
-      <button class="face-btn" id="face-btn" aria-label="Restart game">😊</button>
-      <div class="game-mines" id="game-mines">010</div>
-    </div>
+    <section class="sys-section">
+      <h4 class="sys-subheader">KEYBINDINGS</h4>
+      <dl class="keybind-list">
+        <dt><kbd>L-CLICK</kbd></dt><dd>PROBE SECTOR</dd>
+        <dt><kbd>R-CLICK</kbd></dt><dd>MARK CONTACT</dd>
+        <dt><kbd>LONG PRESS</kbd></dt><dd>MARK CONTACT (MOBILE)</dd>
+        <dt><kbd>SPACE</kbd></dt><dd>CHORD CLEAR</dd>
+        <dt><kbd>R / N</kbd></dt><dd>NEW MISSION</dd>
+        <dt><kbd>T</kbd></dt><dd>TRANSMIT REPORT</dd>
+        <dt><kbd>ESC</kbd></dt><dd>ABORT MISSION</dd>
+      </dl>
+    </section>
 
-    <div class="board-container">
-      <div id="board" class="board" role="grid" aria-label="Minesweeper board"></div>
-    </div>
+    <section class="sys-section">
+      <h4 class="sys-subheader">SECTOR LEGEND</h4>
+      <dl class="legend-list">
+        <dt><span class="legend-swatch num-1"></span></dt><dd>1 ADJACENT</dd>
+        <dt><span class="legend-swatch num-2"></span></dt><dd>2 ADJACENT</dd>
+        <dt><span class="legend-swatch num-3"></span></dt><dd>3 ADJACENT</dd>
+        <dt><span class="legend-swatch num-4"></span></dt><dd>4 ADJACENT</dd>
+        <dt><span class="legend-swatch num-5"></span></dt><dd>5 ADJACENT</dd>
+        <dt><span class="legend-swatch num-6"></span></dt><dd>6 ADJACENT</dd>
+        <dt><span class="legend-swatch mine"></span></span></dt><dd>CONFIRMED MINE</dd>
+        <dt><span class="legend-swatch flag"></span></dt><dd>MARKED CONTACT</dd>
+      </dl>
+    </section>
 
-    <div class="game-status" id="game-status" aria-live="polite"></div>
+    <section class="sys-section">
+      <h4 class="sys-subheader">PROTOCOL</h4>
+      <p class="protocol-text">DAILY OP generates identical minefield for all operators using date-seeded PRNG. FREE PLAY uses entropy source. Streak increments only on DAILY OP victory. Leaderboards persist locally.</p>
+    </section>
 
-    <div class="leaderboard-section">
-      <h3>🏆 Local Leaderboard (Best Times)</h3>
-      <div class="leaderboard-tabs" role="tablist">
-        <button class="lb-tab active" role="tab" data-lb="beginner" aria-selected="true">Beginner</button>
-        <button class="lb-tab" role="tab" data-lb="intermediate" aria-selected="false">Intermediate</button>
-        <button class="lb-tab" role="tab" data-lb="expert" aria-selected="false">Expert</button>
-        <button class="lb-tab" role="tab" data-lb="daily" aria-selected="false">Daily</button>
-      </div>
-      <div class="leaderboard" id="leaderboard"></div>
-    </div>
-
-    <div class="share-section">
-      <button class="btn" id="btn-share">📋 Share Result</button>
-      <div id="share-preview" class="share-preview" hidden></div>
-    </div>
-  </section>
+    <section class="sys-section about-section">
+      <a href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener" class="about-link">
+        <span class="about-icon">◢</span>
+        <span class="about-text">OPERATOR DOSSIER</span>
+      </a>
+    </section>
+  </aside>
 </main>
 
-<footer>
-  Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+<footer class="footer" role="contentinfo">
+  <span class="footer-text">COMPILED WITH <span class="heart">◆</span> BY <strong>KING_YOSEF_</strong></span>
+  <span class="footer-divider">|</span>
+  <span class="footer-version">V1.0.0 — TACTICAL BUILD</span>
 </footer>
+
+<div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
 <script src="script.js"></script>
 </body>

@@ -3,26 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Image Converter | KING_YOSEF_</title>
+<title>Image Converter Pro | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23d4a843' rx='6' width='32' height='32'/%3E%3Cpath d='M8 20l4-6 4 4 5-7 4 9' stroke='%230a0a0c' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<a href="#main" class="skip-link">Skip to main content</a>
 
 <header class="hero">
-  <h1 class="logo">Image Converter</h1>
-  <p class="tagline">Convert images to Base64, WebP, AVIF. Resize, compress, strip EXIF. Batch processing with ZIP download.</p>
+  <div class="hero-content">
+    <div class="hero-badge">Photo Studio · 10 Tools</div>
+    <h1>Image Converter Pro</h1>
+    <p class="tagline">Professional image processing suite — <strong>10 tools</strong> in one: Base64, WebP, AVIF, JPEG, PNG, resize, compress, EXIF strip, orientation fix, and batch ZIP download.</p>
+  </div>
 </header>
 
-<main class="container">
+<main class="container" id="main">
   <aside class="panel config-panel" aria-labelledby="config-heading">
-    <h2 id="config-heading">Converter</h2>
+    <div class="panel-header">
+      <h2 id="config-heading">Controls</h2>
+    </div>
 
     <div class="field">
       <label>Output Format</label>
-      <div class="format-tabs" role="tablist">
+      <div class="format-tabs" role="tablist" aria-label="Output format">
         <button class="format-tab active" role="tab" data-format="base64" aria-selected="true">Base64</button>
         <button class="format-tab" role="tab" data-format="webp" aria-selected="false">WebP</button>
         <button class="format-tab" role="tab" data-format="avif" aria-selected="false">AVIF</button>
@@ -36,25 +43,25 @@
       <div class="field checkbox-row">
         <label class="checkbox-label">
           <input type="checkbox" id="base64DataUri" checked>
-          <span>Data URI prefix (data:image/...;base64,)</span>
+          <span>Data URI prefix (<code>data:image/...;base64,</code>)</span>
         </label>
       </div>
       <div class="field checkbox-row">
         <label class="checkbox-label">
           <input type="checkbox" id="base64CssBg">
-          <span>CSS background-image format</span>
+          <span>CSS <code>background-image</code> format</span>
         </label>
       </div>
       <div class="field checkbox-row">
         <label class="checkbox-label">
           <input type="checkbox" id="base64Markdown">
-          <span>Markdown image format</span>
+          <span>Markdown <code>![alt](data:...)</code> format</span>
         </label>
       </div>
       <div class="field checkbox-row">
         <label class="checkbox-label">
           <input type="checkbox" id="base64HtmlImg">
-          <span>HTML <img> tag format</span>
+          <span>HTML <code><img></code> tag format</span>
         </label>
       </div>
     </div>
@@ -62,8 +69,11 @@
     <!-- WebP Options -->
     <div class="options-panel" id="options-webp" hidden>
       <div class="field">
-        <label>Quality: <span id="webpQualityValue">80</span>%</label>
-        <input type="range" id="webpQuality" min="1" max="100" value="80">
+        <div class="label-row">
+          <label for="webpQuality">Quality</label>
+          <span class="label-value" id="webpQualityValue">80%</span>
+        </div>
+        <input type="range" id="webpQuality" min="1" max="100" value="80" aria-label="WebP quality">
       </div>
       <div class="field checkbox-row">
         <label class="checkbox-label">
@@ -80,7 +90,7 @@
       <div class="field checkbox-row">
         <label class="checkbox-label">
           <input type="checkbox" id="webpAlphaQuality">
-          <span>Alpha quality (separate)</span>
+          <span>Separate alpha quality</span>
         </label>
       </div>
     </div>
@@ -88,12 +98,18 @@
     <!-- AVIF Options -->
     <div class="options-panel" id="options-avif" hidden>
       <div class="field">
-        <label>Quality: <span id="avifQualityValue">50</span>%</label>
-        <input type="range" id="avifQuality" min="1" max="100" value="50">
+        <div class="label-row">
+          <label for="avifQuality">Quality</label>
+          <span class="label-value" id="avifQualityValue">50%</span>
+        </div>
+        <input type="range" id="avifQuality" min="1" max="100" value="50" aria-label="AVIF quality">
       </div>
       <div class="field">
-        <label>Speed (1=slow/best, 10=fast): <span id="avifSpeedValue">5</span></label>
-        <input type="range" id="avifSpeed" min="1" max="10" value="5">
+        <div class="label-row">
+          <label for="avifSpeed">Speed (1=slow/best, 10=fast)</label>
+          <span class="label-value" id="avifSpeedValue">5</span>
+        </div>
+        <input type="range" id="avifSpeed" min="1" max="10" value="5" aria-label="AVIF encoding speed">
       </div>
       <div class="field checkbox-row">
         <label class="checkbox-label">
@@ -103,7 +119,7 @@
       </div>
       <div class="field checkbox-row">
         <label class="checkbox-label">
-          <input type="checkbox" id="avifChromaSubsampling">
+          <input type="checkbox" id="avifChromaSubsampling" checked>
           <span>4:2:0 chroma subsampling</span>
         </label>
       </div>
@@ -112,19 +128,22 @@
     <!-- JPEG Options -->
     <div class="options-panel" id="options-jpeg" hidden>
       <div class="field">
-        <label>Quality: <span id="jpegQualityValue">85</span>%</label>
-        <input type="range" id="jpegQuality" min="1" max="100" value="85">
+        <div class="label-row">
+          <label for="jpegQuality">Quality</label>
+          <span class="label-value" id="jpegQualityValue">85%</span>
+        </div>
+        <input type="range" id="jpegQuality" min="1" max="100" value="85" aria-label="JPEG quality">
       </div>
       <div class="field checkbox-row">
         <label class="checkbox-label">
           <input type="checkbox" id="jpegProgressive">
-          <span>Progressive</span>
+          <span>Progressive encoding</span>
         </label>
       </div>
       <div class="field checkbox-row">
         <label class="checkbox-label">
           <input type="checkbox" id="jpegMozjpeg">
-          <span>MozJPEG optimization (if available)</span>
+          <span>MozJPEG optimization (when available)</span>
         </label>
       </div>
     </div>
@@ -145,11 +164,13 @@
       </div>
     </div>
 
-    <!-- Common Options -->
+    <div class="section-divider"></div>
+
+    <!-- Resize Options -->
     <div class="field">
       <label>Resize</label>
       <div class="resize-options">
-        <select id="resizeMode">
+        <select id="resizeMode" aria-label="Resize mode">
           <option value="none">No resize</option>
           <option value="max">Max dimension</option>
           <option value="width">Fixed width</option>
@@ -158,83 +179,108 @@
           <option value="percentage">Percentage</option>
         </select>
         <div class="resize-inputs" id="resizeInputs" hidden>
-          <input type="number" id="resizeWidth" placeholder="Width" min="1" max="10000">
-          <span>×</span>
-          <input type="number" id="resizeHeight" placeholder="Height" min="1" max="10000">
+          <input type="number" id="resizeWidth" placeholder="Width" min="1" max="10000" aria-label="Width in pixels">
+          <span class="resize-separator" aria-hidden="true">×</span>
+          <input type="number" id="resizeHeight" placeholder="Height" min="1" max="10000" aria-label="Height in pixels">
         </div>
         <div class="resize-inputs" id="resizePercentage" hidden>
-          <input type="number" id="resizePercent" placeholder="%" min="1" max="500" value="100">
-          <span>%</span>
+          <input type="number" id="resizePercent" placeholder="%" min="1" max="500" value="100" aria-label="Percentage">
+          <span class="resize-separator" aria-hidden="true">%</span>
         </div>
       </div>
     </div>
 
     <div class="field checkbox-row">
       <label class="checkbox-label">
-        <input type="checkbox" id="stripExif" checked>
-        <span>Strip EXIF/metadata</span>
-      </label>
-    </div>
-    <div class="field checkbox-row">
-      <label class="checkbox-label">
-        <input type="checkbox" id="fixOrientation">
-        <span>Auto-rotate from EXIF orientation</span>
-      </label>
-    </div>
-    <div class="field checkbox-row">
-      <label class="checkbox-label">
-        <input type="checkbox" id="maintainAspect">
+        <input type="checkbox" id="maintainAspect" checked>
         <span>Maintain aspect ratio</span>
       </label>
     </div>
 
+    <div class="section-divider"></div>
+
+    <!-- Processing Options -->
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="stripExif" checked>
+        <span>Strip EXIF/metadata (Task 8)</span>
+      </label>
+    </div>
+    <div class="field checkbox-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="fixOrientation" checked>
+        <span>Auto-rotate from EXIF orientation (Task 9)</span>
+      </label>
+    </div>
+
+    <div class="section-divider"></div>
+
     <div class="actions">
-      <button class="btn primary" id="convertBtn">Convert All</button>
-      <button class="btn" id="clearBtn">Clear Queue</button>
+      <button class="btn primary" id="convertBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16a4 4 0 0 1-4-4V5a4 4 0 0 1 4-4h3"/><path d="M17 8a4 4 0 0 1 4 4v11a4 4 0 0 1-4 4h-3"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        Convert All
+      </button>
+      <button class="btn secondary" id="clearBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Clear Queue
+      </button>
     </div>
 
     <div class="field">
-      <label>Queue (<span id="queueCount">0</span> files)</label>
-      <div id="fileQueue" class="file-queue" role="list"></div>
+      <div class="label-row">
+        <label for="fileQueue">Queue</label>
+        <span class="label-value" id="queueCount">0 files</span>
+      </div>
+      <div id="fileQueue" class="file-queue" role="list" aria-label="File queue"></div>
     </div>
   </aside>
 
   <section class="panel preview-panel" aria-labelledby="preview-heading">
-    <h2 id="preview-heading">Preview & Results</h2>
+    <div class="panel-header">
+      <h2 id="preview-heading">Preview & Results</h2>
+    </div>
 
     <div class="drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Drop images here or click to select">
-      <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+      <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
       </svg>
       <p>Drag & drop images here, or <span class="clickable">click to select</span></p>
-      <p class="hint">Supports: JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, SVG • Multiple files • Paste from clipboard (Ctrl+V)</p>
+      <p class="hint">Supports: JPG, PNG, WebP, AVIF, GIF, BMP, TIFF, SVG · Multiple files · Paste from clipboard (Ctrl/Cmd+V)</p>
       <input type="file" id="fileInput" multiple accept="image/*" hidden>
     </div>
 
     <div class="results" id="results" hidden>
       <div class="results-header">
-        <h3>Converted (<span id="resultCount">0</span>)</h3>
+        <h3>Converted <span id="resultCount">0</span></h3>
         <div class="results-actions">
-          <button class="btn" id="downloadAllBtn">Download ZIP</button>
-          <button class="btn" id="copyAllBtn">Copy All Base64</button>
-          <button class="btn" id="clearResultsBtn">Clear Results</button>
+          <button class="btn secondary" id="downloadAllBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download ZIP
+          </button>
+          <button class="btn secondary" id="copyAllBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy All Base64
+          </button>
+          <button class="btn ghost" id="clearResultsBtn">Clear Results</button>
         </div>
       </div>
       <div class="results-grid" id="resultsGrid" role="list"></div>
     </div>
 
     <div class="comparison" id="comparison" hidden>
-      <h3>Compare: Original vs Converted</h3>
+      <h3 style="margin-bottom: 1rem; font-family: var(--font-display);">Compare: Original vs Converted</h3>
       <div class="compare-grid">
         <div class="compare-pane">
           <h4>Original</h4>
           <div class="compare-info" id="originalInfo"></div>
-          <img id="originalImg" alt="Original">
+          <img id="originalImg" alt="Original image">
         </div>
         <div class="compare-pane">
           <h4>Converted</h4>
           <div class="compare-info" id="convertedInfo"></div>
-          <img id="convertedImg" alt="Converted">
+          <img id="convertedImg" alt="Converted image">
         </div>
       </div>
       <div class="compare-stats" id="compareStats"></div>
@@ -243,9 +289,16 @@
 </main>
 
 <footer>
-  Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+  <div class="footer-content">
+    <div class="footer-brand">
+      <span>Made with 💖 by</span>
+      <strong>KING_YOSEF_</strong>
+      <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">About Me</a>
+    </div>
+    <p class="footer-note">Image Converter Pro — 10 professional image processing tools in your browser. No uploads, all local processing.</p>
+  </div>
 </footer>
+
 <script src="script.js"></script>
 </body>
 </html>

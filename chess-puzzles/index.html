@@ -5,15 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chess Puzzles | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<!-- Decorative page corners -->
+<div class="page-corner tl" aria-hidden="true"></div>
+<div class="page-corner tr" aria-hidden="true"></div>
+<div class="page-corner bl" aria-hidden="true"></div>
+<div class="page-corner br" aria-hidden="true"></div>
 
 <header class="hero">
+  <div class="hero-crest" aria-hidden="true">
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="24" r="20" stroke-width="1.5"/>
+      <path d="M24 10 L20 18 L28 18 Z" stroke-width="1.5"/>
+      <path d="M24 38 L20 30 L28 30 Z" stroke-width="1.5"/>
+      <path d="M10 24 L18 20 L18 28 Z" stroke-width="1.5"/>
+      <path d="M38 24 L30 20 L30 28 Z" stroke-width="1.5"/>
+      <circle cx="24" cy="24" r="8" stroke-width="1.5"/>
+      <path d="M24 18 L24 30 M18 24 L30 24" stroke-width="1"/>
+    </svg>
+  </div>
   <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
-  <p class="tagline">Solve tactical puzzles: mate in 1/2/3, forks, pins, skewers. Daily challenge with Stockfish evaluation.</p>
+  <p class="tagline">Master the art of tactics — Mate in 1, 2, 3 • Forks, Pins, Skewers, Discoveries, Sacrifices • Daily Challenges</p>
 </header>
 
 <main class="container">
@@ -23,25 +38,25 @@
     <div class="field">
       <label>Difficulty</label>
       <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" role="tab" data-difficulty="easy" aria-selected="true">Easy</button>
-        <button class="mode-tab" role="tab" data-difficulty="medium" aria-selected="false">Medium</button>
-        <button class="mode-tab" role="tab" data-difficulty="hard" aria-selected="false">Hard</button>
-        <button class="mode-tab" role="tab" data-difficulty="mixed" aria-selected="false">Mixed</button>
+        <button class="mode-tab active" role="tab" data-difficulty="easy" aria-selected="true"><span>Beginner</span></button>
+        <button class="mode-tab" role="tab" data-difficulty="medium" aria-selected="false"><span>Intermediate</span></button>
+        <button class="mode-tab" role="tab" data-difficulty="hard" aria-selected="false"><span>Advanced</span></button>
+        <button class="mode-tab" role="tab" data-difficulty="expert" aria-selected="false"><span>Expert</span></button>
       </div>
     </div>
 
     <div class="field">
-      <label>Theme</label>
+      <label>Tactical Theme</label>
       <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
-        <button class="mode-tab theme-tab active" role="tab" data-theme="all" aria-selected="true">All</button>
-        <button class="mode-tab theme-tab" role="tab" data-theme="mate1" aria-selected="false">Mate in 1</button>
-        <button class="mode-tab theme-tab" role="tab" data-theme="mate2" aria-selected="false">Mate in 2</button>
-        <button class="mode-tab theme-tab" role="tab" data-theme="mate3" aria-selected="false">Mate in 3</button>
-        <button class="mode-tab theme-tab" role="tab" data-theme="fork" aria-selected="false">Fork</button>
-        <button class="mode-tab theme-tab" role="tab" data-theme="pin" aria-selected="false">Pin</button>
-        <button class="mode-tab theme-tab" role="tab" data-theme="skewer" aria-selected="false">Skewer</button>
-        <button class="mode-tab theme-tab" role="tab" data-theme="discovery" aria-selected="false">Discovery</button>
-        <button class="mode-tab theme-tab" role="tab" data-theme="sacrifice" aria-selected="false">Sacrifice</button>
+        <button class="mode-tab theme-tab active" role="tab" data-theme="all" aria-selected="true"><span>All</span></button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="mate1" aria-selected="false"><span>Mate in 1</span></button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="mate2" aria-selected="false"><span>Mate in 2</span></button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="mate3" aria-selected="false"><span>Mate in 3</span></button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="fork" aria-selected="false"><span>Forks</span></button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="pin" aria-selected="false"><span>Pins</span></button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="skewer" aria-selected="false"><span>Skewers</span></button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="discovery" aria-selected="false"><span>Discoveries</span></button>
+        <button class="mode-tab theme-tab" role="tab" data-theme="sacrifice" aria-selected="false"><span>Sacrifices</span></button>
       </div>
     </div>
 
@@ -49,7 +64,7 @@
       <label>Daily Challenge</label>
       <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
         <button class="btn primary" id="dailyBtn" style="flex:1;">Play Today's Puzzle</button>
-        <span id="dailyDate" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--muted);"></span>
+        <span id="dailyDate" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--fg-muted);"></span>
       </div>
     </div>
 
@@ -107,7 +122,10 @@
     <div class="game-header">
       <div class="puzzle-info">
         <span class="puzzle-label" id="puzzleLabel">Practice Mode</span>
-        <span class="puzzle-meta" id="puzzleMeta">Easy • All Themes</span>
+        <span class="puzzle-meta" id="puzzleMeta">
+          <span class="difficulty-badge difficulty-easy" id="difficultyBadge">Beginner</span>
+          <span class="theme-badge" id="themeBadge">All Themes</span>
+        </span>
       </div>
       <div class="timer-display">
         <span class="timer-label">Time</span>
@@ -116,7 +134,7 @@
     </div>
 
     <div class="game-status" id="gameStatus">
-      Click "New Puzzle" or "Daily Challenge" to start
+      Click "New Puzzle" or "Daily Challenge" to begin
     </div>
 
     <div class="board-container" id="boardContainer" role="region" aria-label="Chess board">
@@ -133,6 +151,7 @@
       <button class="btn secondary" id="flipBoardBtn">Flip Board</button>
       <button class="btn secondary" id="copyFenBtn">Copy FEN</button>
       <button class="btn secondary" id="copyPgnBtn" hidden>Copy PGN</button>
+      <button class="btn secondary" id="exportBtn" hidden>Export PGN</button>
     </div>
 
     <div class="game-footer">
@@ -140,7 +159,7 @@
       <button class="btn primary" id="playAgainBtn" hidden>Next Puzzle</button>
     </div>
 
-    <div id="resultsModal" class="modal" hidden>
+    <div id="resultsModal" class="modal-overlay" hidden>
       <div class="modal-content">
         <h2 id="modalTitle">Puzzle Complete!</h2>
         <div class="results-grid">
@@ -162,7 +181,7 @@
           </div>
         </div>
         <div class="daily-result" id="dailyResult" hidden>
-          <h3>Daily Challenge Result</h3>
+          <h3>Daily Challenge</h3>
           <p id="dailyMessage"></p>
         </div>
         <div class="solution-display" id="solutionDisplay" hidden>

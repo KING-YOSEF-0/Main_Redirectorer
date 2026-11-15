@@ -1,256 +1,282 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Blob Generator | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<div class="ambient-orbs" aria-hidden="true">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
 
-<header class="hero">
-  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
-  <p class="tagline">Generate organic blob shapes with adjustable complexity, smoothness, and color schemes. Perfect for backgrounds, illustrations, and design elements. Export as SVG, PNG, or CSS.</p>
-</header>
+<main class="main-layout">
+  <aside class="control-panel" aria-label="Controls">
+    <header style="margin-bottom: 24px; text-align: center;">
+      <h1 style="font-size: 28px; font-weight: 700; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em;">BLOB GEN</h1>
+      <p style="color: var(--fg-secondary); font-size: 13px; margin-top: 6px; max-width: 280px; margin-left: auto; margin-right: auto;">Generative organic shapes for design, backgrounds & creative coding</p>
+    </header>
 
-<main class="container">
-  <aside class="panel config-panel">
-    <h2>Blob Generator</h2>
-
-    <div class="field">
-      <label>Generation Mode</label>
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" role="tab" data-mode="single" aria-selected="true">Single Blob</button>
-        <button class="mode-tab" role="tab" data-mode="multiple" aria-selected="false">Multiple Blobs</button>
-        <button class="mode-tab" role="tab" data-mode="animated" aria-selected="false">Animated Blob</button>
+    <section class="panel-section" aria-labelledby="modeTitle">
+      <h2 class="section-title" id="modeTitle">Generation Mode</h2>
+      <div class="tab-group" role="tablist" aria-label="Blob generation mode">
+        <button class="tab-btn active" role="tab" data-mode="single" aria-selected="true"><span>Single</span></button>
+        <button class="tab-btn" role="tab" data-mode="multiple" aria-selected="false"><span>Multiple</span></button>
+        <button class="tab-btn" role="tab" data-mode="animated" aria-selected="false"><span>Animated</span></button>
       </div>
-    </div>
+    </section>
 
-    <div class="field" id="singleOptions">
-      <label>Complexity (Points)</label>
-      <input type="range" id="complexity" min="3" max="20" value="8">
-      <span id="complexityValue">8</span> points
-
-      <label style="margin-top:1rem;">Smoothness</label>
-      <input type="range" id="smoothness" min="0" max="1" step="0.05" value="0.5">
-      <span id="smoothnessValue">0.50</span>
-
-      <label style="margin-top:1rem;">Variation</label>
-      <input type="range" id="variation" min="0" max="1" step="0.05" value="0.3">
-      <span id="variationValue">0.30</span>
-
-      <label style="margin-top:1rem;">Rotation</label>
-      <input type="range" id="rotation" min="0" max="360" value="0">
-      <span id="rotationValue">0</span>°
-    </div>
-
-    <div class="field" id="multipleOptions" hidden>
-      <label>Blob Count</label>
-      <input type="range" id="blobCount" min="1" max="20" value="5">
-      <span id="blobCountValue">5</span> blobs
-
-      <label style="margin-top:1rem;">Min Size</label>
-      <input type="range" id="minSize" min="10" max="100" value="30">
-      <span id="minSizeValue">30</span>%
-
-      <label style="margin-top:1rem;">Max Size</label>
-      <input type="range" id="maxSize" min="20" max="200" value="80">
-      <span id="maxSizeValue">80</span>%
-
-      <label style="margin-top:1rem;">Overlap</label>
-      <input type="range" id="overlap" min="0" max="1" step="0.1" value="0.3">
-      <span id="overlapValue">0.3</span>
-    </div>
-
-    <div class="field" id="animatedOptions" hidden>
-      <label>Animation Speed</label>
-      <input type="range" id="animSpeed" min="0.1" max="3" step="0.1" value="1">
-      <span id="animSpeedValue">1.0</span>x
-
-      <label style="margin-top:1rem;">Morph Intensity</label>
-      <input type="range" id="morphIntensity" min="0" max="1" step="0.05" value="0.4">
-      <span id="morphIntensityValue">0.40</span>
-
-      <label style="margin-top:1rem;">Auto Rotate</label>
-      <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="autoRotate" checked> Enable</label>
-    </div>
-
-    <div class="field">
-      <label>Color Scheme</label>
-      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
-        <button class="mode-tab color-tab active" role="tab" data-color="solid" aria-selected="true">Solid</button>
-        <button class="mode-tab color-tab" role="tab" data-color="gradient" aria-selected="false">Gradient</button>
-        <button class="mode-tab color-tab" role="tab" data-color="multi" aria-selected="false">Multi-color</button>
-        <button class="mode-tab color-tab" role="tab" data-color="palette" aria-selected="false">Palette</button>
+    <section class="panel-section" id="singleOptions" aria-labelledby="singleTitle">
+      <h2 class="section-title" id="singleTitle">Single Blob</h2>
+      <div class="control-group">
+        <label class="control-label">Complexity <span class="value-display" id="complexityValue">8</span></label>
+        <input type="range" class="input-field" id="complexity" min="3" max="20" value="8" aria-label="Blob complexity">
       </div>
-    </div>
-
-    <div class="field" id="solidColorOptions">
-      <label>Color</label>
-      <input type="color" id="solidColor" value="#ff4fa3">
-    </div>
-
-    <div class="field" id="gradientColorOptions" hidden>
-      <label>Gradient Type</label>
-      <select id="gradientType">
-        <option value="linear">Linear</option>
-        <option value="radial">Radial</option>
-        <option value="conic">Conic</option>
-      </select>
-      <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
-        <input type="color" id="gradColor1" value="#ff4fa3">
-        <input type="color" id="gradColor2" value="#35c3ff">
+      <div class="control-group">
+        <label class="control-label">Smoothness <span class="value-display" id="smoothnessValue">0.50</span></label>
+        <input type="range" class="input-field" id="smoothness" min="0" max="1" step="0.05" value="0.5" aria-label="Edge smoothness">
       </div>
-      <label style="margin-top:0.5rem;">Angle</label>
-      <input type="range" id="gradAngle" min="0" max="360" value="45">
-      <span id="gradAngleValue">45</span>°
-    </div>
-
-    <div class="field" id="multiColorOptions" hidden>
-      <label>Colors (comma-separated hex)</label>
-      <input type="text" id="multiColors" value="#ff4fa3,#ff9f1c,#2ee6a6,#35c3ff,#9b5cff">
-    </div>
-
-    <div class="field" id="paletteColorOptions" hidden>
-      <label>Preset Palette</label>
-      <select id="presetPalette">
-        <option value="sunset">Sunset</option>
-        <option value="ocean">Ocean</option>
-        <option value="forest">Forest</option>
-        <option value="candy">Candy</option>
-        <option value="neon">Neon</option>
-        <option value="pastel">Pastel</option>
-        <option value="mono">Monochrome</option>
-        <option value="custom">Custom</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>Canvas Size</label>
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab size-tab active" role="tab" data-size="square" aria-selected="true">Square (500×500)</button>
-        <button class="mode-tab size-tab" role="tab" data-size="wide" aria-selected="false">Wide (800×400)</button>
-        <button class="mode-tab size-tab" role="tab" data-size="tall" aria-selected="false">Tall (400×800)</button>
-        <button class="mode-tab size-tab" role="tab" data-size="custom" aria-selected="false">Custom</button>
+      <div class="control-group">
+        <label class="control-label">Variation <span class="value-display" id="variationValue">0.30</span></label>
+        <input type="range" class="input-field" id="variation" min="0" max="1" step="0.05" value="0.3" aria-label="Shape variation">
       </div>
-    </div>
-
-    <div class="field" id="customSizeOptions" hidden>
-      <label style="display:flex;gap:1rem;">
-        <div><label>Width</label><input type="number" id="customWidth" value="500" min="100" max="2000"></div>
-        <div><label>Height</label><input type="number" id="customHeight" value="500" min="100" max="2000"></div>
-      </label>
-    </div>
-
-    <div class="field">
-      <label>Background</label>
-      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
-        <button class="mode-tab bg-tab active" role="tab" data-bg="transparent" aria-selected="true">Transparent</button>
-        <button class="mode-tab bg-tab" role="tab" data-bg="color" aria-selected="false">Solid Color</button>
-        <button class="mode-tab bg-tab" role="tab" data-bg="checker" aria-selected="false">Checkerboard</button>
+      <div class="control-group">
+        <label class="control-label">Rotation <span class="value-display" id="rotationValue">0</span>°</label>
+        <input type="range" class="input-field" id="rotation" min="0" max="360" value="0" aria-label="Rotation angle">
       </div>
-    </div>
+    </section>
 
-    <div class="field" id="bgColorOptions" hidden>
-      <label>Background Color</label>
-      <input type="color" id="bgColor" value="#0f0f14">
-    </div>
-
-    <div class="actions">
-      <button class="btn primary" id="generateBtn">Generate Blob</button>
-      <button class="btn secondary" id="randomizeBtn">Randomize</button>
-    </div>
-
-    <div class="stats-panel">
-      <h3>Statistics</h3>
-      <div class="stat-row">
-        <span class="stat-label">Blobs Generated</span>
-        <span class="stat-value" id="blobsGenerated">0</span>
+    <section class="panel-section" id="multipleOptions" hidden aria-labelledby="multipleTitle">
+      <h2 class="section-title" id="multipleTitle">Multiple Blobs</h2>
+      <div class="control-group">
+        <label class="control-label">Blob Count <span class="value-display" id="blobCountValue">5</span></label>
+        <input type="range" class="input-field" id="blobCount" min="1" max="20" value="5" aria-label="Number of blobs">
       </div>
-      <div class="stat-row">
-        <span class="stat-label">SVG Exports</span>
-        <span class="stat-value" id="svgExports">0</span>
+      <div class="control-group">
+        <label class="control-label">Min Size <span class="value-display" id="minSizeValue">30</span>%</label>
+        <input type="range" class="input-field" id="minSize" min="10" max="100" value="30" aria-label="Minimum blob size">
       </div>
-      <div class="stat-row">
-        <span class="stat-label">PNG Exports</span>
-        <span class="stat-value" id="pngExports">0</span>
+      <div class="control-group">
+        <label class="control-label">Max Size <span class="value-display" id="maxSizeValue">80</span>%</label>
+        <input type="range" class="input-field" id="maxSize" min="20" max="200" value="80" aria-label="Maximum blob size">
       </div>
+      <div class="control-group">
+        <label class="control-label">Overlap <span class="value-display" id="overlapValue">0.3</span></label>
+        <input type="range" class="input-field" id="overlap" min="0" max="1" step="0.1" value="0.3" aria-label="Blob overlap factor">
+      </div>
+    </section>
+
+    <section class="panel-section" id="animatedOptions" hidden aria-labelledby="animatedTitle">
+      <h2 class="section-title" id="animatedTitle">Animated Blob</h2>
+      <div class="control-group">
+        <label class="control-label">Speed <span class="value-display" id="animSpeedValue">1.0</span>x</label>
+        <input type="range" class="input-field" id="animSpeed" min="0.1" max="3" step="0.1" value="1" aria-label="Animation speed">
+      </div>
+      <div class="control-group">
+        <label class="control-label">Morph Intensity <span class="value-display" id="morphIntensityValue">0.40</span></label>
+        <input type="range" class="input-field" id="morphIntensity" min="0" max="1" step="0.05" value="0.4" aria-label="Morphing intensity">
+      </div>
+      <div class="control-group">
+        <label class="control-label" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+          <input type="checkbox" id="autoRotate" checked style="width: 20px; height: 20px; accent-color: var(--accent-primary);">
+          <span>Auto Rotate</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="panel-section" aria-labelledby="colorTitle">
+      <h2 class="section-title" id="colorTitle">Color Scheme</h2>
+      <div class="tab-group" role="tablist" aria-label="Color scheme">
+        <button class="tab-btn color-tab active" role="tab" data-color="solid" aria-selected="true"><span>Solid</span></button>
+        <button class="tab-btn color-tab" role="tab" data-color="gradient" aria-selected="false"><span>Gradient</span></button>
+        <button class="tab-btn color-tab" role="tab" data-color="multi" aria-selected="false"><span>Multi</span></button>
+        <button class="tab-btn color-tab" role="tab" data-color="palette" aria-selected="false"><span>Palettes</span></button>
+      </div>
+
+      <div class="control-group" id="solidColorOptions">
+        <label class="control-label">Color</label>
+        <input type="color" class="input-field" id="solidColor" value="#ff2d75" aria-label="Solid color">
+      </div>
+
+      <div class="control-group" id="gradientColorOptions" hidden>
+        <label class="control-label">Gradient Type</label>
+        <select class="select-field" id="gradientType" aria-label="Gradient type">
+          <option value="linear">Linear</option>
+          <option value="radial">Radial</option>
+          <option value="conic">Conic</option>
+        </select>
+        <div class="control-row" style="margin-top: 12px; gap: 8px;">
+          <input type="color" class="input-field" id="gradColor1" value="#ff2d75" aria-label="Gradient start color" style="flex: 1;">
+          <input type="color" class="input-field" id="gradColor2" value="#00e5a0" aria-label="Gradient end color" style="flex: 1;">
+        </div>
+        <label class="control-label" style="margin-top: 12px;">Angle <span class="value-display" id="gradAngleValue">45</span>°</label>
+        <input type="range" class="input-field" id="gradAngle" min="0" max="360" value="45" aria-label="Gradient angle" style="margin-top: 8px;">
+      </div>
+
+      <div class="control-group" id="multiColorOptions" hidden>
+        <label class="control-label">Colors (comma-separated hex)</label>
+        <input type="text" class="input-field" id="multiColors" value="#ff2d75,#ff6b35,#00e5a0,#7c4dff,#ffd700" placeholder="#ff2d75, #00e5a0, #7c4dff" aria-label="Multi colors">
+      </div>
+
+      <div class="control-group" id="paletteColorOptions" hidden>
+        <label class="control-label">Preset Palette</label>
+        <select class="select-field" id="presetPalette" aria-label="Preset color palette">
+          <option value="aurora">Aurora</option>
+          <option value="sunset">Sunset</option>
+          <option value="ocean">Ocean</option>
+          <option value="forest">Forest</option>
+          <option value="candy">Candy</option>
+          <option value="neon">Neon</option>
+          <option value="pastel">Pastel</option>
+          <option value="mono">Monochrome</option>
+          <option value="vapor">Vaporwave</option>
+          <option value="cyber">Cyberpunk</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="panel-section" aria-labelledby="sizeTitle">
+      <h2 class="section-title" id="sizeTitle">Canvas Size</h2>
+      <div class="tab-group" role="tablist" aria-label="Canvas size">
+        <button class="tab-btn size-tab active" role="tab" data-size="square" aria-selected="true"><span>Square</span></button>
+        <button class="tab-btn size-tab" role="tab" data-size="wide" aria-selected="false"><span>Wide</span></button>
+        <button class="tab-btn size-tab" role="tab" data-size="tall" aria-selected="false"><span>Tall</span></button>
+        <button class="tab-btn size-tab" role="tab" data-size="custom" aria-selected="false"><span>Custom</span></button>
+      </div>
+
+      <div class="control-group" id="customSizeOptions" hidden>
+        <div class="control-row" style="gap: 12px;">
+          <div style="flex: 1;">
+            <label class="control-label">Width</label>
+            <input type="number" class="input-field" id="customWidth" value="500" min="100" max="2000" aria-label="Custom width">
+          </div>
+          <div style="flex: 1;">
+            <label class="control-label">Height</label>
+            <input type="number" class="input-field" id="customHeight" value="500" min="100" max="2000" aria-label="Custom height">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel-section" aria-labelledby="bgTitle">
+      <h2 class="section-title" id="bgTitle">Background</h2>
+      <div class="tab-group" role="tablist" aria-label="Background type">
+        <button class="tab-btn bg-tab active" role="tab" data-bg="transparent" aria-selected="true"><span>Transparent</span></button>
+        <button class="tab-btn bg-tab" role="tab" data-bg="color" aria-selected="false"><span>Solid</span></button>
+        <button class="tab-btn bg-tab" role="tab" data-bg="checker" aria-selected="false"><span>Checker</span></button>
+      </div>
+
+      <div class="control-group" id="bgColorOptions" hidden>
+        <label class="control-label">Background Color</label>
+        <input type="color" class="input-field" id="bgColor" value="#0a0a0f" aria-label="Background color">
+      </div>
+    </section>
+
+    <div class="action-group">
+      <button class="btn btn-primary" id="generateBtn">Generate</button>
+      <button class="btn btn-secondary" id="randomizeBtn">Randomize</button>
     </div>
 
-    <div class="theme-selector">
-      <label>UI Theme</label>
-      <select id="uiTheme">
+    <section class="panel-section preset-gallery" aria-labelledby="galleryTitle">
+      <h2 class="section-title" id="galleryTitle">Preset Gallery</h2>
+      <div class="gallery-grid" id="presetGallery" role="listbox" aria-label="Preset blob designs"></div>
+    </section>
+
+    <section class="panel-section" aria-labelledby="statsTitle">
+      <h2 class="section-title" id="statsTitle">Statistics</h2>
+      <div class="stats-bar" style="padding: 0; background: none; border: none;">
+        <div class="stat-item">
+          <span class="stat-value" id="blobsGenerated">0</span>
+          <span class="stat-label">Generated</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="svgExports">0</span>
+          <span class="stat-label">SVG Exports</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="pngExports">0</span>
+          <span class="stat-label">PNG Exports</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel-section" aria-labelledby="themeTitle">
+      <h2 class="section-title" id="themeTitle">UI Theme</h2>
+      <select class="select-field" id="uiTheme" aria-label="UI theme">
         <option value="dark">Dark</option>
         <option value="light">Light</option>
       </select>
-    </div>
+    </section>
   </aside>
 
-  <section class="panel game-panel">
-    <div class="game-header">
-      <div class="puzzle-info">
-        <span class="puzzle-label" id="puzzleLabel">Blob Generator</span>
-        <span class="puzzle-meta" id="puzzleMeta">Ready to generate</span>
+  <section class="canvas-area" aria-label="Canvas">
+    <header class="canvas-header">
+      <div>
+        <div class="canvas-title" id="canvasTitle">Blob Generator</div>
+        <div class="canvas-meta" id="canvasMeta">Ready to generate</div>
       </div>
+      <button class="btn btn-ghost" id="themeToggle" aria-label="Toggle theme" style="padding: 8px 12px; font-size: 13px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="canvas-wrapper checkerboard" id="canvasWrapper">
+      <svg id="blobCanvas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
     </div>
 
-    <div class="game-status" id="gameStatus">
-      Configure options and click "Generate Blob"
+    <div class="export-bar" id="exportBar" hidden>
+      <button class="export-btn" id="copySvgBtn" aria-label="Copy SVG to clipboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy SVG
+      </button>
+      <button class="export-btn" id="downloadSvgBtn" aria-label="Download SVG">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download SVG
+      </button>
+      <button class="export-btn" id="downloadPngBtn" aria-label="Download PNG">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Download PNG
+      </button>
+      <button class="export-btn" id="downloadCssBtn" aria-label="Download CSS">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 18 2 12 8 6"/></svg>
+        Get CSS
+      </button>
     </div>
 
-    <div class="preview-area" id="previewArea">
-      <svg id="blobSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet"></svg>
-    </div>
-
-    <div class="controls-row">
-      <button class="btn secondary" id="copySvgBtn" hidden>Copy SVG</button>
-      <button class="btn secondary" id="downloadSvgBtn" hidden>Download SVG</button>
-      <button class="btn secondary" id="downloadPngBtn" hidden>Download PNG</button>
-      <button class="btn secondary" id="downloadCssBtn" hidden>Download CSS</button>
-    </div>
-
-    <div class="game-footer">
-      <button class="btn secondary" id="shareBtn" hidden>Share</button>
-      <button class="btn primary" id="newBlobBtn" hidden>New Blob</button>
-    </div>
-
-    <div id="resultsModal" class="modal" hidden>
-      <div class="modal-content">
-        <h2 id="modalTitle">Blob Generated!</h2>
-        <div class="results-grid">
-          <div class="result-card">
-            <span class="result-label">Mode</span>
-            <span class="result-value" id="resultMode">Single</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Points</span>
-            <span class="result-value" id="resultPoints">8</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Color Scheme</span>
-            <span class="result-value" id="resultColorScheme">Solid</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Size</span>
-            <span class="result-value" id="resultSize">500×500</span>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn secondary" id="shareBtnModal">Share</button>
-          <button class="btn primary" id="downloadBtnModal">Download SVG</button>
-          <button class="btn primary" id="newBlobBtnModal">Create Another</button>
-        </div>
+    <div class="stats-bar" id="canvasStats" style="padding: 16px 24px; background: linear-gradient(90deg, rgba(255,45,117,0.08), rgba(0,229,160,0.08), rgba(124,77,255,0.08)); border-top: 1px solid var(--border-subtle);">
+      <div class="stat-item">
+        <span class="stat-value" id="statMode">—</span>
+        <span class="stat-label">Mode</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="statComplexity">—</span>
+        <span class="stat-label">Points</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="statColors">—</span>
+        <span class="stat-label">Colors</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value" id="statSize">—</span>
+        <span class="stat-label">Size</span>
       </div>
     </div>
   </section>
 </main>
 
-<footer>
-  Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+<footer class="site-footer">
+  Made with <span style="color: var(--accent-primary);">♥</span> by <strong>KING_YOSEF_</strong>
+  <a class="footer-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">About Me</a>
 </footer>
 
 <script src="script.js"></script>

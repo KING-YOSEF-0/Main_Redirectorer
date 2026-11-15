@@ -34,7 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AudioConverter = void 0;
-const ffmpeg = __importStar(require("fluent-ffmpeg"));
+const ffmpeg = require('fluent-ffmpeg');
 const path = __importStar(require("path"));
 class AudioConverter {
     static async extractAudio(inputPath, options = {}) {
@@ -69,22 +69,11 @@ class AudioConverter {
         const base = path.basename(inputPath, ext);
         const outputPath = path.join(dir, base + '_boosted.' + outFormat);
         return new Promise((resolve, reject) => {
-            const command = ffmpeg(inputPath)
-                .audioFilter('volume=' + options.gainDb + 'dB');
-            command
+            ffmpeg(inputPath)
+                .audioFilter('volume=' + options.gainDb + 'dB')
                 .on('error', (err) => reject(err))
                 .on('end', () => resolve(outputPath))
                 .save(outputPath);
-        });
-    }
-    static async getDuration(filePath) {
-        return new Promise((resolve, reject) => {
-            ffmpeg.ffprobe(filePath, (err, metadata) => {
-                if (err)
-                    reject(err);
-                else
-                    resolve(metadata.format.duration || 0);
-            });
         });
     }
 }

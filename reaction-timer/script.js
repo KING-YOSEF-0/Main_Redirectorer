@@ -1,5 +1,15 @@
-// Reaction Timer — KING_YOSEF_
-// Types: Simple, Choice, Go/No-Go
+// Reaction Lab — KING_YOSEF_
+// 10 Practical Tasks:
+// 1. Simple reaction test - wait for signal, click as fast as possible
+// 2. Choice reaction test - 2-8 buttons, only one lights up, click the right one
+// 3. Go/No-Go inhibition test - click on green, don't click on red
+// 4. Configurable trials per test (5-50) with random delays (1-5s)
+// 5. Audio and visual signals with adjustable timing
+// 6. Statistics with charts - avg reaction time, distribution histogram, consistency
+// 7. Daily challenge with seeded test parameters
+// 8. Local leaderboards per test type with localStorage
+// 9. Practice mode with feedback on each trial
+// 10. Export session data as JSON or shareable text
 
 (() => {
   'use strict';
@@ -14,6 +24,15 @@
     };
   }
 
+  function hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+
   // ===== State =====
   const state = {
     mode: 'simple',
@@ -24,6 +43,7 @@
     maxDelay: 4000,
     sound: 'beep',
     isDaily: false,
+    isPractice: false,
     isRunning: false,
     isWaiting: false,
     isReady: false,
@@ -36,6 +56,7 @@
     choices: [],
     correctChoice: 0,
     isGoTrial: true,
+    practiceFeedback: null,
     stats: JSON.parse(localStorage.getItem('reactionStats') || '{}'),
     history: JSON.parse(localStorage.getItem('reactionHistory') || '[]'),
     audioCtx: null,
@@ -47,7 +68,7 @@
     gameArea: document.getElementById('gameArea'),
     instruction: document.getElementById('instruction'),
     targetZone: document.getElementById('targetZone'),
-    targetCircle: document.getElementById('targetCircle'),
+    targetCore: document.getElementById('targetCore'),
     targetText: document.getElementById('targetText'),
     choiceGrid: document.getElementById('choiceGrid'),
     gonogoDisplay: document.getElementById('gonogoDisplay'),
@@ -57,6 +78,7 @@
     totalTrials: document.getElementById('totalTrials'),
     modeBadge: document.getElementById('modeBadge'),
     dailyBadge: document.getElementById('dailyBadge'),
+    practiceBadge: document.getElementById('practiceBadge'),
     liveStats: document.getElementById('liveStats'),
     lastReaction: document.getElementById('lastReaction'),
     bestReaction: document.getElementById('bestReaction'),
@@ -67,8 +89,11 @@
     restartBtn: document.getElementById('restartBtn'),
     startBtn: document.getElementById('startBtn'),
     dailyBtn: document.getElementById('dailyBtn'),
+    practiceBtn: document.getElementById('practiceBtn'),
+    historyBtn: document.getElementById('historyBtn'),
     resultsModal: document.getElementById('resultsModal'),
     historyModal: document.getElementById('historyModal'),
+    practiceModal: document.getElementById('practiceModal'),
     modalTitle: document.getElementById('modalTitle'),
     finalAvg: document.getElementById('finalAvg'),
     finalBest: document.getElementById('finalBest'),
@@ -84,6 +109,9 @@
     historyList: document.getElementById('historyList'),
     clearHistoryBtn: document.getElementById('clearHistoryBtn'),
     closeHistoryBtn: document.getElementById('closeHistoryBtn'),
+    closePracticeBtn: document.getElementById('closePracticeBtn'),
+    startPracticeBtn: document.getElementById('startPracticeBtn'),
+    practiceMode: document.getElementById('practiceMode'),
     bestSimple: document.getElementById('bestSimple'),
     avgSimple: document.getElementById('avgSimple'),
     bestChoice: document.getElementById('bestChoice'),
@@ -92,6 +120,8 @@
     dailyStreak: document.getElementById('dailyStreak'),
     testsTaken: document.getElementById('testsTaken'),
     leaderboard: document.getElementById('leaderboard'),
+    exportJsonBtn: document.getElementById('exportJsonBtn'),
+    exportTextBtn: document.getElementById('exportTextBtn'),
   };
 
   // Slider elements
@@ -153,18 +183,39 @@
       state.sound = e.target.value;
     });
 
-    // Buttons
-    els.startBtn.addEventListener('click', () => startTest(false));
-    els.dailyBtn.addEventListener('click', () => startTest(true));
+    // Main buttons
+    els.startBtn.addEventListener('click', () => startTest(false, false));
+    els.dailyBtn.addEventListener('click', () => startTest(true, false));
+    els.practiceBtn.addEventListener('click', () => els.practiceModal.hidden = false);
+    els.historyBtn.addEventListener('click', () => {
+      els.historyModal.hidden = false;
+      updateHistory('all');
+    });
+
+    // Practice mode
+    els.closePracticeBtn.addEventListener('click', () => els.practiceModal.hidden = true);
+    els.startPracticeBtn.addEventListener('click', () => {
+      state.mode = els.practiceMode.value;
+      updateModeFields();
+      els.modeBadge.textContent = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
+      els.practiceModal.hidden = true;
+      startTest(false, true);
+    });
+
+    // Game controls
     els.retryBtn.addEventListener('click', retryTrial);
-    els.restartBtn.addEventListener('click', () => startTest(state.isDaily));
+    els.restartBtn.addEventListener('click', () => startTest(state.isDaily, state.isPractice));
     els.playAgainBtn.addEventListener('click', () => {
       els.resultsModal.hidden = true;
-      startTest(state.isDaily);
+      startTest(state.isDaily, state.isPractice);
     });
     els.shareBtn.addEventListener('click', shareResult);
     els.clearHistoryBtn.addEventListener('click', clearHistory);
     els.closeHistoryBtn.addEventListener('click', () => els.historyModal.hidden = true);
+
+    // Export buttons
+    els.exportJsonBtn.addEventListener('click', exportJSON);
+    els.exportTextBtn.addEventListener('click', exportText);
 
     // History tabs
     document.querySelectorAll('.history-tab').forEach(btn => {
@@ -184,13 +235,29 @@
       }
     });
 
-    // Keyboard shortcuts
+    // Go/No-Go shape click
+    els.gonogoShape.addEventListener('click', handleTargetClick);
+    els.gonogoShape.addEventListener('keydown', e => {
+      if (e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+        handleTargetClick();
+      }
+    });
+
+    // Keyboard shortcuts for choice mode
     document.addEventListener('keydown', e => {
       if (!state.isRunning || state.mode !== 'choice') return;
       const num = parseInt(e.key, 10);
       if (num >= 1 && num <= state.choiceCount) {
         handleChoiceClick(num - 1);
       }
+    });
+
+    // Modal backdrop clicks
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', e => {
+        if (e.target === modal) modal.hidden = true;
+      });
     });
   }
 
@@ -208,6 +275,11 @@
     if (sliderValues.trials) sliderValues.trials.textContent = state.trials;
     if (sliderValues.choiceCount) sliderValues.choiceCount.textContent = state.choiceCount;
     if (sliderValues.goProbability) sliderValues.goProbability.textContent = Math.round(state.goProbability * 100);
+    if (sliders.minDelay && sliders.maxDelay) {
+      const minVal = parseInt(sliders.minDelay.value, 10);
+      const maxVal = parseInt(sliders.maxDelay.value, 10);
+      document.getElementById('delayRangeValue').textContent = `${minVal}–${maxVal}ms`;
+    }
   }
 
   // ===== Audio =====
@@ -233,7 +305,7 @@
       case 'beep':
         osc.type = 'square';
         osc.frequency.setValueAtTime(800, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
         osc.stop(ctx.currentTime + 0.15);
         break;
@@ -268,16 +340,36 @@
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(200, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.3);
-    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
 
     osc.start();
     osc.stop(ctx.currentTime + 0.4);
   }
 
+  function playSuccessSound() {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+  }
+
   // ===== Test Logic =====
-  function startTest(isDaily) {
+  function startTest(isDaily, isPractice) {
     state.isDaily = isDaily;
+    state.isPractice = isPractice;
     state.isRunning = true;
     state.currentTrial = 0;
     state.reactions = [];
@@ -285,6 +377,8 @@
 
     els.startBtn.hidden = true;
     els.dailyBtn.hidden = true;
+    els.practiceBtn.hidden = true;
+    els.historyBtn.hidden = true;
     els.retryBtn.hidden = true;
     els.restartBtn.hidden = false;
     els.resultsModal.hidden = true;
@@ -292,10 +386,16 @@
 
     if (isDaily) {
       els.dailyBadge.hidden = false;
+      els.practiceBadge.hidden = true;
       const today = new Date().toISOString().split('T')[0];
       state.rng = mulberry32(hashString(today + state.mode));
+    } else if (isPractice) {
+      els.dailyBadge.hidden = true;
+      els.practiceBadge.hidden = false;
+      state.rng = mulberry32(Date.now());
     } else {
       els.dailyBadge.hidden = true;
+      els.practiceBadge.hidden = true;
       state.rng = mulberry32(Date.now());
     }
 
@@ -304,15 +404,6 @@
     updateLiveStats();
 
     nextTrial();
-  }
-
-  function hashString(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = ((hash << 5) - hash) + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return Math.abs(hash);
   }
 
   function nextTrial() {
@@ -371,7 +462,7 @@
         state.isReady = true;
         els.targetZone.classList.remove('waiting');
         els.targetZone.classList.add('ready');
-        els.targetText.textContent = 'CLICK!';
+        els.targetText.textContent = 'CLICK';
         playSound('beep');
         state.startTime = performance.now();
       }, delay);
@@ -381,17 +472,19 @@
   function getInstructionText() {
     switch (state.mode) {
       case 'simple':
-        return 'Wait for the circle to turn green and say "CLICK", then click/tap/press Space as fast as you can.';
+        return 'Wait for the core to pulse green and display "CLICK", then click/tap/press Space as fast as you can.';
       case 'choice':
-        return 'Wait for the buttons to appear, then click the highlighted one as fast as you can. Keys 1-9 also work.';
+        return `Wait for the ${state.choiceCount} buttons to appear, then click the highlighted one. Keys 1-${state.choiceCount} also work.`;
       case 'gonogo':
-        return 'Wait for the shape to appear. If it\'s GREEN (Go) — click! If RED (No-Go) — do nothing.';
+        return 'Wait for the shape to appear. If GREEN (GO) — click! If RED (NO-GO) — do nothing.';
     }
   }
 
   function resetTargetUI() {
     els.targetZone.className = 'target-zone waiting';
     els.targetText.textContent = 'WAIT';
+    els.gonogoShape.className = 'gonogo-shape';
+    els.gonogoLabel.textContent = '';
     clearTimeout(state.timeoutId);
     state.isWaiting = false;
     state.isReady = false;
@@ -408,6 +501,7 @@
       btn.textContent = choiceIdx + 1;
       btn.dataset.position = position;
       btn.dataset.choice = choiceIdx;
+      btn.setAttribute('aria-label', `Choice ${choiceIdx + 1}`);
       btn.addEventListener('click', () => handleChoiceClick(position));
       els.choiceGrid.appendChild(btn);
     });
@@ -493,12 +587,49 @@
     els.targetZone.classList.add('clicked');
     els.targetText.textContent = `${Math.round(time)}ms`;
 
-    playSound('click');
+    if (state.isPractice) {
+      // Show detailed feedback in practice mode
+      showPracticeFeedback(time, true);
+    } else {
+      playSuccessSound();
+    }
 
     // Brief pause then next trial
     setTimeout(() => {
       nextTrial();
-    }, 500);
+    }, state.isPractice ? 1200 : 500);
+  }
+
+  function showPracticeFeedback(time, success) {
+    // Create temporary feedback overlay
+    const feedback = document.createElement('div');
+    feedback.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(145deg, var(--bg-panel), var(--bg-elevated));
+      border: 2px solid ${success ? 'var(--accent)' : 'var(--accent-3)'};
+      border-radius: var(--radius-lg);
+      padding: 2rem 3rem;
+      text-align: center;
+      z-index: 200;
+      box-shadow: var(--shadow-lg), 0 0 40px ${success ? 'var(--accent-glow)' : 'rgba(255,61,106,0.3)'};
+      animation: modalIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    `;
+    feedback.innerHTML = `
+      <div style="font-size: 3rem; font-weight: 700; color: ${success ? 'var(--accent)' : 'var(--accent-3)'}; font-family: var(--font-mono); text-shadow: 0 0 30px ${success ? 'var(--accent-glow)' : 'rgba(255,61,106,0.5)'};">
+        ${success ? Math.round(time) + 'ms' : 'ERROR'}
+      </div>
+      <div style="margin-top: 0.5rem; color: var(--fg-dim); font-size: 0.9rem;">
+        ${success ? 'Good reaction!' : (state.mode === 'gonogo' && !state.isGoTrial ? 'False alarm!' : 'Too early!')}
+      </div>
+    `;
+    document.body.appendChild(feedback);
+    setTimeout(() => {
+      feedback.style.animation = 'modalIn 0.2s reverse';
+      setTimeout(() => feedback.remove(), 200);
+    }, 1000);
   }
 
   function handleError() {
@@ -514,10 +645,14 @@
       ? 'FALSE ALARM!'
       : 'TOO EARLY!';
 
+    if (state.isPractice) {
+      showPracticeFeedback(0, false);
+    }
+
     setTimeout(() => {
       els.targetZone.classList.remove('error');
       nextTrial();
-    }, 800);
+    }, state.isPractice ? 1500 : 800);
   }
 
   function retryTrial() {
@@ -567,6 +702,8 @@
 
     els.startBtn.hidden = false;
     els.dailyBtn.hidden = false;
+    els.practiceBtn.hidden = false;
+    els.historyBtn.hidden = false;
     els.retryBtn.hidden = true;
     els.restartBtn.hidden = true;
     els.liveStats.hidden = true;
@@ -585,32 +722,41 @@
     const stdDev = Math.sqrt(variance);
     const consistency = Math.max(0, 100 - (stdDev / avg * 100));
 
-    // Save to history
-    const entry = {
-      mode: state.mode,
-      date: new Date().toISOString(),
-      dateStr: new Date().toLocaleDateString(),
-      timeStr: new Date().toLocaleTimeString(),
-      trials: state.trials,
-      reactions: validReactions,
-      avg: Math.round(avg),
-      best: Math.round(best),
-      worst: Math.round(worst),
-      stdDev: Math.round(stdDev),
-      errors: state.errors,
-      consistency: Math.round(consistency),
-      isDaily: state.isDaily,
-    };
+    // Save to history (only if not practice)
+    if (!state.isPractice) {
+      const entry = {
+        mode: state.mode,
+        date: new Date().toISOString(),
+        dateStr: new Date().toLocaleDateString(),
+        timeStr: new Date().toLocaleTimeString(),
+        trials: state.trials,
+        reactions: validReactions,
+        avg: Math.round(avg),
+        best: Math.round(best),
+        worst: Math.round(worst),
+        stdDev: Math.round(stdDev),
+        errors: state.errors,
+        consistency: Math.round(consistency),
+        isDaily: state.isDaily,
+        config: {
+          choiceCount: state.choiceCount,
+          goProbability: state.goProbability,
+          minDelay: state.minDelay,
+          maxDelay: state.maxDelay,
+          sound: state.sound,
+        },
+      };
 
-    state.history.unshift(entry);
-    state.history = state.history.slice(0, 100);
-    localStorage.setItem('reactionHistory', JSON.stringify(state.history));
+      state.history.unshift(entry);
+      state.history = state.history.slice(0, 200);
+      localStorage.setItem('reactionHistory', JSON.stringify(state.history));
 
-    // Update stats
-    updateStats(entry);
+      // Update stats
+      updateStats(entry);
+    }
 
     // Show results
-    els.modalTitle.textContent = state.isDaily ? 'Daily Challenge Complete!' : 'Test Complete!';
+    els.modalTitle.textContent = state.isDaily ? 'Daily Challenge Complete!' : (state.isPractice ? 'Practice Session Complete' : 'Test Complete!');
     els.finalAvg.textContent = Math.round(avg) + 'ms';
     els.finalBest.textContent = Math.round(best) + 'ms';
     els.finalWorst.textContent = Math.round(worst) + 'ms';
@@ -619,7 +765,7 @@
     els.finalConsistency.textContent = Math.round(consistency) + '%';
 
     els.finalErrors.className = state.errors > 0 ? 'result-value error' : 'result-value';
-    els.finalConsistency.className = consistency > 80 ? 'result-value' : consistency > 60 ? 'result-value warn' : 'result-value error';
+    els.finalConsistency.className = consistency > 80 ? 'result-value consistency' : consistency > 60 ? 'result-value consistency warn' : 'result-value consistency error';
 
     drawChart(validReactions);
 
@@ -713,7 +859,7 @@
       .slice(0, 10);
 
     if (modeHistory.length === 0) {
-      els.leaderboard.innerHTML = '<div style="color:var(--muted);text-align:center;padding:1rem;">No scores yet</div>';
+      els.leaderboard.innerHTML = '<div class="leaderboard empty">No scores yet — run a test!</div>';
       return;
     }
 
@@ -721,7 +867,10 @@
       <div class="leaderboard-entry">
         <span class="rank">#${i+1}</span>
         <span class="score">${h.avg}ms avg</span>
-        <span class="mode">${h.errors} err • ${h.trials} trials • ${h.dateStr}</span>
+        <div class="meta">
+          <div>${h.errors} errors • ${h.trials} trials</div>
+          <div>${h.dateStr}${h.isDaily ? ' ⚡' : ''}</div>
+        </div>
       </div>
     `).join('');
   }
@@ -729,7 +878,11 @@
   function updateHistory(filter = 'all') {
     let filtered = state.history;
     if (filter !== 'all') {
-      filtered = state.history.filter(h => h.mode === filter);
+      if (filter === 'daily') {
+        filtered = state.history.filter(h => h.isDaily);
+      } else {
+        filtered = state.history.filter(h => h.mode === filter);
+      }
     }
 
     if (filtered.length === 0) {
@@ -739,58 +892,103 @@
 
     els.historyList.innerHTML = filtered.map(h => `
       <div class="history-item">
-        <span class="date">${h.dateStr} ${h.timeStr}</span>
+        <span class="date">${h.dateStr} ${h.timeStr}${h.isDaily ? ' <span class="daily-indicator">⚡ DAILY</span>' : ''}</span>
         <span class="mode">${h.mode}</span>
         <span class="avg">${h.avg}ms</span>
         <span class="best">${h.best}ms</span>
+        <span class="worst">${h.worst}ms</span>
         <span class="errors">${h.errors} err</span>
       </div>
     `).join('');
   }
 
+  // ===== Chart Drawing =====
   function drawChart(data) {
     const canvas = els.reactionChart;
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
-    const w = canvas.width = 500 * dpr;
-    const h = canvas.height = 200 * dpr;
+    const cssWidth = canvas.parentElement.clientWidth - 40;
+    const cssHeight = 280;
+    canvas.width = cssWidth * dpr;
+    canvas.height = cssHeight * dpr;
+    canvas.style.width = cssWidth + 'px';
+    canvas.style.height = cssHeight + 'px';
     ctx.scale(dpr, dpr);
 
-    const cw = 500, ch = 200;
-    const padding = 40;
+    const cw = cssWidth, ch = cssHeight;
+    const padding = 50;
     const graphW = cw - padding * 2;
     const graphH = ch - padding * 2;
 
     // Background
-    ctx.fillStyle = '#0f0f14';
+    ctx.fillStyle = '#0a0f0a';
     ctx.fillRect(0, 0, cw, ch);
 
-    // Grid
-    ctx.strokeStyle = '#2d2d3f';
+    // Grid lines
+    ctx.strokeStyle = '#1e3a1e';
     ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
-      const y = padding + (graphH / 4) * i;
+    for (let i = 0; i <= 5; i++) {
+      const y = padding + (graphH / 5) * i;
       ctx.beginPath();
       ctx.moveTo(padding, y);
       ctx.lineTo(cw - padding, y);
       ctx.stroke();
     }
-    for (let i = 0; i <= 5; i++) {
-      const x = padding + (graphW / 5) * i;
+    for (let i = 0; i <= 6; i++) {
+      const x = padding + (graphW / 6) * i;
       ctx.beginPath();
       ctx.moveTo(x, padding);
       ctx.lineTo(x, ch - padding);
       ctx.stroke();
     }
 
-    // Data line
     if (data.length > 1) {
       const maxVal = Math.max(...data);
       const minVal = Math.min(...data);
       const range = Math.max(1, maxVal - minVal);
+      const avg = data.reduce((a, b) => a + b, 0) / data.length;
+      const best = Math.min(...data);
 
-      ctx.strokeStyle = '#2ee6a6';
+      // Average line
+      const avgY = padding + graphH - ((avg - minVal) / range) * graphH;
+      ctx.strokeStyle = 'rgba(255, 214, 0, 0.4)';
       ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.moveTo(padding, avgY);
+      ctx.lineTo(cw - padding, avgY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Best line
+      const bestY = padding + graphH - ((best - minVal) / range) * graphH;
+      ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(padding, bestY);
+      ctx.lineTo(cw - padding, bestY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Error markers (trials where reaction was > 2*avg or errors)
+      // Draw area under curve
+      ctx.fillStyle = 'rgba(0, 255, 136, 0.08)';
+      ctx.beginPath();
+      ctx.moveTo(padding, ch - padding);
+      data.forEach((val, i) => {
+        const x = padding + (graphW / (data.length - 1)) * i;
+        const y = padding + graphH - ((val - minVal) / range) * graphH;
+        if (i === 0) ctx.lineTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineTo(padding + graphW, ch - padding);
+      ctx.closePath();
+      ctx.fill();
+
+      // Data line
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 3;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.beginPath();
@@ -804,65 +1002,181 @@
       ctx.stroke();
 
       // Points
-      ctx.fillStyle = '#2ee6a6';
       data.forEach((val, i) => {
         const x = padding + (graphW / (data.length - 1)) * i;
         const y = padding + graphH - ((val - minVal) / range) * graphH;
+
+        // Point glow
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, 10);
+        gradient.addColorStop(0, 'rgba(0, 255, 136, 0.8)');
+        gradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+        ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Point core
+        ctx.fillStyle = '#00ff88';
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // White center
+        ctx.fillStyle = '#0a0f0a';
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // Average line
-      const avg = data.reduce((a, b) => a + b, 0) / data.length;
-      const avgY = padding + graphH - ((avg - minVal) / range) * graphH;
-      ctx.strokeStyle = 'rgba(255, 159, 28, 0.5)';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([5, 5]);
-      ctx.beginPath();
-      ctx.moveTo(padding, avgY);
-      ctx.lineTo(cw - padding, avgY);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      // Average label
+      ctx.fillStyle = '#ffd600';
+      ctx.font = '11px JetBrains Mono';
+      ctx.textAlign = 'left';
+      ctx.fillText(`Avg: ${Math.round(avg)}ms`, padding + 8, avgY - 8);
 
-      ctx.fillStyle = '#ff9f1c';
-      ctx.font = '10px JetBrains Mono';
-      ctx.fillText(`Avg: ${Math.round(avg)}ms`, padding + 5, avgY - 5);
+      // Best label
+      ctx.fillStyle = '#00ff88';
+      ctx.fillText(`Best: ${Math.round(best)}ms`, padding + 8, bestY - 8);
     }
 
     // Y-axis labels
     if (data.length > 0) {
       const maxVal = Math.max(...data);
       const minVal = Math.min(...data);
-      ctx.fillStyle = '#9aa0a6';
-      ctx.font = '10px JetBrains Mono';
+      ctx.fillStyle = '#4a6b4a';
+      ctx.font = '11px JetBrains Mono';
       ctx.textAlign = 'right';
-      ctx.fillText(`${Math.round(maxVal)}ms`, padding - 5, padding + 12);
-      ctx.fillText(`${Math.round(minVal)}ms`, padding - 5, ch - padding + 4);
+      ctx.fillText(`${Math.round(maxVal)}ms`, padding - 8, padding + 14);
+      ctx.fillText(`${Math.round(minVal)}ms`, padding - 8, ch - padding + 4);
+
+      // Mid values
+      for (let i = 1; i <= 4; i++) {
+        const val = minVal + (maxVal - minVal) * (1 - i / 5);
+        const y = padding + (graphH / 5) * i;
+        ctx.fillText(`${Math.round(val)}ms`, padding - 8, y + 4);
+      }
     }
 
     // X-axis labels
-    ctx.fillStyle = '#9aa0a6';
-    ctx.font = '10px JetBrains Mono';
+    ctx.fillStyle = '#4a6b4a';
+    ctx.font = '11px JetBrains Mono';
     ctx.textAlign = 'center';
     if (data.length > 1) {
-      ctx.fillText('1', padding, ch - padding + 20);
-      ctx.fillText(data.length.toString(), cw - padding, ch - padding + 20);
+      ctx.fillText('1', padding, ch - padding + 22);
+      ctx.fillText(Math.ceil(data.length / 2).toString(), cw / 2, ch - padding + 22);
+      ctx.fillText(data.length.toString(), cw - padding, ch - padding + 22);
     }
-    ctx.fillText('Trial', cw / 2, ch - 5);
+    ctx.fillText('Trial Number', cw / 2, ch - 8);
+
+    // Current test indicator
+    ctx.fillStyle = '#00d4ff';
+    ctx.font = '10px JetBrains Mono';
+    ctx.textAlign = 'right';
+    ctx.fillText('● Current Test', cw - padding, padding - 12);
+  }
+
+  // ===== Export Functions =====
+  function exportJSON() {
+    const exportData = {
+      metadata: {
+        exportedAt: new Date().toISOString(),
+        version: '1.0',
+        app: 'Reaction Lab',
+        author: 'KING_YOSEF_',
+      },
+      stats: state.stats,
+      history: state.history,
+      currentSession: state.isRunning ? {
+        mode: state.mode,
+        trials: state.trials,
+        reactions: state.reactions,
+        errors: state.errors,
+        config: {
+          choiceCount: state.choiceCount,
+          goProbability: state.goProbability,
+          minDelay: state.minDelay,
+          maxDelay: state.maxDelay,
+          sound: state.sound,
+        },
+      } : null,
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reaction-lab-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('JSON exported successfully');
+  }
+
+  function exportText() {
+    const validHistory = state.history.filter(h => h.reactions && h.reactions.length > 0);
+    let text = `REACTION LAB — SESSION EXPORT
+Generated: ${new Date().toLocaleString()}
+User: KING_YOSEF_
+========================================
+
+LIFETIME STATISTICS
+`;
+
+    const modes = ['simple', 'choice', 'gonogo'];
+    modes.forEach(mode => {
+      const s = state.stats[mode];
+      if (s && s.count > 0) {
+        const modeName = mode.charAt(0).toUpperCase() + mode.slice(1);
+        text += `${modeName}: Best ${Math.round(s.best)}ms | Avg ${Math.round(s.total / s.count)}ms | Tests ${s.tests}\n`;
+      }
+    });
+
+    text += `\nDaily Streak: ${state.stats.streak || 0}\n`;
+    text += `Total Tests: ${Object.values(state.stats).reduce((sum, s) => sum + (s.tests || 0), 0)}\n`;
+
+    text += `\n========================================
+RECENT HISTORY (Last 20)\n`;
+
+    validHistory.slice(0, 20).forEach((h, i) => {
+      text += `${i + 1}. [${h.mode.toUpperCase()}] ${h.dateStr} ${h.timeStr}${h.isDaily ? ' ⚡DAILY' : ''}\n`;
+      text += `   Avg: ${h.avg}ms | Best: ${h.best}ms | Worst: ${h.worst}ms | StdDev: ${h.stdDev}ms | Errors: ${h.errors} | Consistency: ${h.consistency}%\n`;
+      text += `   Trials: ${h.trials} | Config: `;
+      if (h.config) {
+        if (h.mode === 'choice') text += `Choices: ${h.config.choiceCount} `;
+        if (h.mode === 'gonogo') text += `Go%: ${Math.round(h.config.goProbability * 100)}% `;
+        text += `Delay: ${h.config.minDelay}-${h.config.maxDelay}ms | Sound: ${h.config.sound}\n`;
+      } else {
+        text += 'Legacy\n';
+      }
+      text += `\n`;
+    });
+
+    text += `========================================
+#KING_YOSEF_ | https://king-yosef-0.github.io/Protfolio/
+`;
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `reaction-lab-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Text report exported successfully');
   }
 
   function shareResult() {
-    const text = `⚡ Reaction Timer (${state.mode})\nAvg: ${els.finalAvg.textContent} | Best: ${els.finalBest.textContent} | Consistency: ${els.finalConsistency.textContent} | Errors: ${els.finalErrors.textContent}\n#KING_YOSEF_`;
+    const text = `⚡ Reaction Lab (${state.mode.toUpperCase()})
+Avg: ${els.finalAvg.textContent} | Best: ${els.finalBest.textContent} | Consistency: ${els.finalConsistency.textContent} | Errors: ${els.finalErrors.textContent}
+#KING_YOSEF_`;
     if (navigator.share) {
-      navigator.share({ title: 'Reaction Timer Result', text });
+      navigator.share({ title: 'Reaction Lab Result', text });
     } else {
       navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
     }
   }
 
   function clearHistory() {
-    if (confirm('Clear all reaction history?')) {
+    if (confirm('Clear all reaction history? This cannot be undone.')) {
       state.history = [];
       localStorage.setItem('reactionHistory', JSON.stringify(state.history));
       updateHistory();

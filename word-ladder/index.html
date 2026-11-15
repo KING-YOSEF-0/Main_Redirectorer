@@ -3,80 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Word Ladder Daily | KING_YOSEF_</title>
+<title>Word Ladder | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
 
-<header class="hero">
+<header>
   <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
   <p class="tagline">Transform the start word into the end word, one letter at a time. New puzzle every day.</p>
 </header>
 
-<main class="container">
-  <aside class="panel config-panel">
+<main>
+  <aside class="panel">
     <h2>Game Setup</h2>
 
     <div class="field">
       <label>Mode</label>
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" role="tab" data-mode="daily" aria-selected="true">Daily Challenge</button>
-        <button class="mode-tab" role="tab" data-mode="practice" aria-selected="false">Practice</button>
+      <div class="tab-group" role="tablist">
+        <button class="tab-btn active" role="tab" data-mode="daily" aria-selected="true">Daily Challenge</button>
+        <button class="tab-btn" role="tab" data-mode="practice" aria-selected="false">Practice</button>
       </div>
     </div>
 
     <div class="field" id="practiceFields" hidden>
       <label>Word Length</label>
-      <div class="size-tabs" role="tablist">
-        <button class="size-tab" role="tab" data-length="4" aria-selected="false">4</button>
-        <button class="size-tab active" role="tab" data-length="5" aria-selected="true">5</button>
-        <button class="size-tab" role="tab" data-length="6" aria-selected="false">6</button>
+      <div class="tab-group" role="tablist">
+        <button class="tab-btn" role="tab" data-length="4" aria-selected="false">4 Letters</button>
+        <button class="tab-btn active" role="tab" data-length="5" aria-selected="true">5 Letters</button>
+        <button class="tab-btn" role="tab" data-length="6" aria-selected="false">6 Letters</button>
       </div>
     </div>
 
     <div class="field" id="customFields" hidden>
       <label>Custom Puzzle</label>
-      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-        <input type="text" id="customStart" placeholder="Start word" maxlength="6" style="flex:1;min-width:100px;padding:0.7rem;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-family:var(--font-mono);text-transform:uppercase;">
-        <input type="text" id="customEnd" placeholder="End word" maxlength="6" style="flex:1;min-width:100px;padding:0.7rem;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-family:var(--font-mono);text-transform:uppercase;">
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+        <input type="text" id="customStart" placeholder="Start word" maxlength="6" style="flex:1;min-width:100px;padding:0.75rem;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-elevated);color:var(--fg);font-family:var(--font-mono);text-transform:uppercase;">
+        <input type="text" id="customEnd" placeholder="End word" maxlength="6" style="flex:1;min-width:100px;padding:0.75rem;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-elevated);color:var(--fg);font-family:var(--font-mono);text-transform:uppercase;">
       </div>
-      <button class="btn secondary" id="customStartBtn" style="margin-top:0.5rem;width:100%;">Generate Puzzle</button>
+      <button class="btn btn-secondary" id="customStartBtn" style="width:100%;">Generate Puzzle</button>
     </div>
 
     <div class="actions">
-      <button class="btn primary" id="newBtn">New Puzzle</button>
-      <button class="btn secondary" id="hintBtn">Hint</button>
+      <button class="btn btn-primary" id="newBtn">New Puzzle</button>
+      <button class="btn btn-secondary" id="hintBtn">Hint</button>
     </div>
 
-    <div class="stats-panel">
-      <h3>Statistics</h3>
-      <div class="stat-row">
-        <span class="stat-label">Daily Solved</span>
-        <span class="stat-value" id="dailySolved">—</span>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="dailySolved">—</div>
+        <div class="stat-label">Daily Solved</div>
       </div>
-      <div class="stat-row">
-        <span class="stat-label">Current Streak</span>
-        <span class="stat-value" id="currentStreak">0</span>
+      <div class="stat-card">
+        <div class="stat-value" id="currentStreak">0</div>
+        <div class="stat-label">Current Streak</div>
       </div>
-      <div class="stat-row">
-        <span class="stat-label">Best Streak</span>
-        <span class="stat-value" id="bestStreak">0</span>
+      <div class="stat-card">
+        <div class="stat-value" id="bestStreak">0</div>
+        <div class="stat-label">Best Streak</div>
       </div>
-      <div class="stat-row">
-        <span class="stat-label">Avg Steps</span>
-        <span class="stat-value" id="avgSteps">—</span>
+      <div class="stat-card">
+        <div class="stat-value" id="avgSteps">—</div>
+        <div class="stat-label">Avg Steps</div>
       </div>
-      <div class="stat-row">
-        <span class="stat-label">Practice Solved</span>
-        <span class="stat-value" id="practiceSolved">0</span>
+      <div class="stat-card" style="grid-column: span 2;">
+        <div class="stat-value" id="practiceSolved">0</div>
+        <div class="stat-label">Practice Solved</div>
       </div>
     </div>
 
-    <div class="leaderboard-section">
-      <h3>Leaderboard (Local)</h3>
+    <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">
+      <h3>Local Leaderboard</h3>
       <div id="leaderboard" class="leaderboard"></div>
     </div>
   </aside>
@@ -88,15 +87,14 @@
         <span class="puzzle-date" id="puzzleDate"></span>
       </div>
       <div class="step-counter">
-        <span class="step-label">Step</span>
-        <span class="step-value" id="currentStep">0</span>
+        <span class="step-current" id="currentStep">0</span>
         <span class="step-separator">/</span>
         <span class="step-target" id="targetSteps">0</span>
       </div>
     </div>
 
-    <div class="game-status" id="gameStatus">
-      Press "New Puzzle" or "Daily Challenge" to start
+    <div class="game-status active" id="gameStatus" aria-live="polite">
+      Press "New Puzzle" to start
     </div>
 
     <div class="ladder-container" id="ladderContainer" role="region" aria-label="Word ladder">
@@ -104,33 +102,33 @@
     </div>
 
     <div class="input-area">
-      <div class="current-word-display" id="currentWordDisplay">
+      <div class="current-word" id="currentWordDisplay">
         <span class="word-label">Current:</span>
-        <span class="word-value" id="currentWord">—</span>
+        <span class="word-display" id="currentWord">—</span>
       </div>
       <div class="keyboard" id="keyboard" role="application" aria-label="On-screen keyboard">
         <!-- Generated by JS -->
       </div>
-      <div class="input-row">
-        <input type="text" id="letterInput" maxlength="1" placeholder="Type a letter" autocomplete="off" spellcheck="false">
-        <button class="btn primary" id="submitBtn">Submit</button>
-        <button class="btn secondary" id="undoBtn">Undo</button>
-        <button class="btn secondary" id="clearBtn">Clear</button>
+      <div class="input-controls">
+        <input type="text" id="letterInput" maxlength="1" placeholder="Type a letter" autocomplete="off" spellcheck="false" aria-label="Letter input">
+        <button class="btn btn-primary" id="submitBtn">Submit</button>
+        <button class="btn btn-secondary" id="undoBtn">Undo</button>
+        <button class="btn btn-secondary" id="clearBtn">Clear</button>
       </div>
     </div>
 
-    <div class="hint-area" id="hintArea" hidden>
-      <div class="hint-content" id="hintContent"></div>
-      <button class="btn secondary" id="closeHintBtn">Dismiss</button>
+    <div class="hint-panel" id="hintArea" hidden>
+      <div class="hint-text" id="hintContent"></div>
+      <button class="btn btn-ghost" id="closeHintBtn">Dismiss</button>
     </div>
 
     <div class="game-footer">
-      <button class="btn secondary" id="shareBtn" hidden>Share Result</button>
-      <button class="btn primary" id="playAgainBtn" hidden>Play Again</button>
+      <button class="btn btn-secondary" id="shareBtn" hidden>Share Result</button>
+      <button class="btn btn-primary" id="playAgainBtn" hidden>Play Again</button>
     </div>
 
-    <div id="resultsModal" class="modal" hidden>
-      <div class="modal-content">
+    <div id="resultsModal" class="modal-overlay" hidden>
+      <div class="modal">
         <h2 id="modalTitle">Puzzle Complete!</h2>
         <div class="results-grid">
           <div class="result-card">
@@ -150,17 +148,17 @@
             <span class="result-value" id="finalTime">0s</span>
           </div>
         </div>
-        <div class="daily-result" id="dailyResult" hidden>
-          <h3>Daily Challenge Result</h3>
+        <div class="daily-badge" id="dailyResult" hidden>
+          <h3>Daily Challenge</h3>
           <p id="dailyMessage"></p>
         </div>
-        <div class="solution-display" id="solutionDisplay" hidden>
+        <div class="solution-panel" id="solutionDisplay" hidden>
           <h3>Optimal Solution</h3>
           <div class="solution-path" id="solutionPath"></div>
         </div>
         <div class="modal-actions">
-          <button class="btn secondary" id="shareBtnModal">Share Result</button>
-          <button class="btn primary" id="playAgainBtnModal">Play Again</button>
+          <button class="btn btn-secondary" id="shareBtnModal">Share Result</button>
+          <button class="btn btn-primary" id="playAgainBtnModal">Play Again</button>
         </div>
       </div>
     </div>
@@ -169,7 +167,7 @@
 
 <footer>
   Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">About Me</a>
 </footer>
 
 <script src="script.js"></script>

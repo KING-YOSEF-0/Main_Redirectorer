@@ -3,251 +3,303 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CSS Shadow & Filter Playground | KING_YOSEF_</title>
+<title>CSS Shadow Studio | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<div class="bg-grid" aria-hidden="true"></div>
+<div class="bg-glow" aria-hidden="true"></div>
 
-<header class="hero">
-  <h1 class="logo">CSS Shadow & Filter Playground</h1>
-  <p class="tagline">Visual editors for box-shadow, text-shadow, filter, and backdrop-filter. Live preview on multiple elements. Export CSS, Tailwind, or CSS custom properties.</p>
+<header class="studio-header">
+  <div class="header-inner">
+    <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" stroke-width="2"/>
+        <path d="M8 12h16M8 16h12M8 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="22" cy="22" r="4" fill="currentColor"/>
+      </svg>
+      <span class="brand-name">CSS Shadow Studio</span>
+    </div>
+    <p class="studio-tagline">Professional visual editors for shadows, filters & backdrop effects</p>
+  </div>
 </header>
 
-<main class="container">
-  <aside class="panel config-panel" aria-labelledby="config-heading">
-    <h2 id="config-heading">Editor</h2>
+<main class="studio-main">
+  <aside class="studio-sidebar" aria-labelledby="sidebar-title">
+    <h2 id="sidebar-title" class="sidebar-title">Controls</h2>
 
-    <div class="field">
-      <label>Editor Mode</label>
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" role="tab" data-editor="box-shadow" aria-selected="true">Box Shadow</button>
-        <button class="mode-tab" role="tab" data-editor="text-shadow" aria-selected="false">Text Shadow</button>
-        <button class="mode-tab" role="tab" data-editor="filter" aria-selected="false">Filter</button>
-        <button class="mode-tab" role="tab" data-editor="backdrop-filter" aria-selected="false">Backdrop Filter</button>
+    <nav class="editor-tabs" role="tablist" aria-label="Editor modes">
+      <button class="editor-tab active" role="tab" data-editor="box-shadow" aria-selected="true" aria-controls="panel-box-shadow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor"/><path d="M9 9h6M9 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Box Shadow
+      </button>
+      <button class="editor-tab" role="tab" data-editor="text-shadow" aria-selected="false" aria-controls="panel-text-shadow">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h12M4 17h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Text Shadow
+      </button>
+      <button class="editor-tab" role="tab" data-editor="filter" aria-selected="false" aria-controls="panel-filter">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" stroke="currentColor" stroke-width="1.5"/></svg>
+        Filters
+      </button>
+      <button class="editor-tab" role="tab" data-editor="backdrop-filter" aria-selected="false" aria-controls="panel-backdrop-filter">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor"/><path d="M4 10h16M8 14h12M12 18h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Backdrop
+      </button>
+    </nav>
+
+    <div class="editor-panels">
+      <!-- Box Shadow Panel -->
+      <div class="editor-panel active" id="panel-box-shadow" role="tabpanel" aria-labelledby="tab-box-shadow">
+        <div class="control-group">
+          <label class="control-label">Layers <span class="layer-count" id="boxLayerCount">3</span></label>
+          <input type="range" class="slider" id="boxLayerSlider" min="1" max="10" value="3" aria-label="Number of shadow layers">
+        </div>
+        <div class="layer-list" id="boxLayerList"></div>
+        <div class="control-row">
+          <button class="btn btn-primary" id="addBoxLayer" type="button">Add Layer</button>
+          <button class="btn btn-secondary" id="removeBoxLayer" type="button">Remove</button>
+        </div>
+        <div class="control-group checkbox-group">
+          <input type="checkbox" id="boxInsetGlobal" class="checkbox">
+          <label for="boxInsetGlobal">Apply inset to all layers</label>
+        </div>
+      </div>
+
+      <!-- Text Shadow Panel -->
+      <div class="editor-panel" id="panel-text-shadow" role="tabpanel" aria-labelledby="tab-text-shadow" hidden>
+        <div class="control-group">
+          <label class="control-label">Layers <span class="layer-count" id="textLayerCount">2</span></label>
+          <input type="range" class="slider" id="textLayerSlider" min="1" max="8" value="2" aria-label="Number of text shadow layers">
+        </div>
+        <div class="layer-list" id="textLayerList"></div>
+        <div class="control-row">
+          <button class="btn btn-primary" id="addTextLayer" type="button">Add Layer</button>
+          <button class="btn btn-secondary" id="removeTextLayer" type="button">Remove</button>
+        </div>
+      </div>
+
+      <!-- Filter Panel -->
+      <div class="editor-panel" id="panel-filter" role="tabpanel" aria-labelledby="tab-filter" hidden>
+        <div class="function-list" id="filterFunctionList"></div>
+        <div class="control-row">
+          <button class="btn btn-primary" id="addFilterFn" type="button">Add Function</button>
+          <button class="btn btn-secondary" id="removeFilterFn" type="button">Remove</button>
+        </div>
+        <div class="control-group checkbox-group">
+          <input type="checkbox" id="filterAnimateHue" class="checkbox">
+          <label for="filterAnimateHue">Animate hue-rotate</label>
+        </div>
+      </div>
+
+      <!-- Backdrop Filter Panel -->
+      <div class="editor-panel" id="panel-backdrop-filter" role="tabpanel" aria-labelledby="tab-backdrop-filter" hidden>
+        <div class="function-list" id="backdropFunctionList"></div>
+        <div class="control-row">
+          <button class="btn btn-primary" id="addBackdropFn" type="button">Add Function</button>
+          <button class="btn btn-secondary" id="removeBackdropFn" type="button">Remove</button>
+        </div>
+        <div class="control-group">
+          <label class="control-label">Preview Background</label>
+          <select id="backdropBgSelect" class="select">
+            <option value="grid">Grid Pattern</option>
+            <option value="gradient">Gradient</option>
+            <option value="image">Unsplash Image</option>
+            <option value="animated">Animated Gradient</option>
+            <option value="noise">Noise Texture</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <!-- Box Shadow Editor -->
-    <div class="editor-panel" id="editor-box-shadow">
-      <div class="field">
-        <label>Number of Layers</label>
-        <input type="range" id="shadowLayers" min="1" max="10" value="3">
-        <span id="shadowLayersValue">3</span> layers
-      </div>
-
-      <div id="shadowLayersContainer"></div>
-
-      <div class="actions">
-        <button class="btn primary" id="addShadowLayer">Add Layer</button>
-        <button class="btn" id="removeShadowLayer">Remove Last</button>
-      </div>
-
-      <div class="field checkbox-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="shadowInset" checked>
-          <span>Apply inset to all layers</span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Text Shadow Editor -->
-    <div class="editor-panel" id="editor-text-shadow" hidden>
-      <div class="field">
-        <label>Number of Layers</label>
-        <input type="range" id="textShadowLayers" min="1" max="8" value="2">
-        <span id="textShadowLayersValue">2</span> layers
-      </div>
-
-      <div id="textShadowLayersContainer"></div>
-
-      <div class="actions">
-        <button class="btn primary" id="addTextShadowLayer">Add Layer</button>
-        <button class="btn" id="removeTextShadowLayer">Remove Last</button>
-      </div>
-    </div>
-
-    <!-- Filter Editor -->
-    <div class="editor-panel" id="editor-filter" hidden>
-      <div class="field">
-        <label>Filter Functions</label>
-        <div id="filterFunctionsContainer"></div>
-      </div>
-
-      <div class="actions">
-        <button class="btn primary" id="addFilterFunction">Add Function</button>
-        <button class="btn" id="removeFilterFunction">Remove Last</button>
-      </div>
-
-      <div class="field checkbox-row">
-        <label class="checkbox-label">
-          <input type="checkbox" id="filterHueRotateAnim">
-          <span>Animate hue-rotate</span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Backdrop Filter Editor -->
-    <div class="editor-panel" id="editor-backdrop-filter" hidden>
-      <div class="field">
-        <label>Backdrop Filter Functions</label>
-        <div id="backdropFilterContainer"></div>
-      </div>
-
-      <div class="actions">
-        <button class="btn primary" id="addBackdropFilter">Add Function</button>
-        <button class="btn" id="removeBackdropFilter">Remove Last</button>
-      </div>
-
-      <div class="field">
-        <label>Preview Background</label>
-        <select id="backdropBg">
-          <option value="gradient">Gradient</option>
-          <option value="image">Image</option>
-          <option value="video">Animated Gradient</option>
-          <option value="noise">Noise Pattern</option>
-        </select>
-      </div>
-    </div>
+    <div class="section-divider"></div>
 
     <!-- Presets -->
-    <div class="field" style="margin-top: 1.5rem;">
-      <label>Presets</label>
-      <div class="preset-buttons" id="presetButtons"></div>
+    <section class="preset-section">
+      <h3 class="section-title">Presets</h3>
+      <div class="preset-grid" id="presetGrid"></div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Actions -->
+    <div class="action-row">
+      <button class="btn btn-accent" id="randomizeBtn" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="1.5"/></svg>
+        Randomize
+      </button>
+      <button class="btn btn-ghost" id="resetBtn" type="button">Reset</button>
     </div>
 
-    <div class="actions">
-      <button class="btn primary" id="randomizeBtn">Surprise Me!</button>
-      <button class="btn" id="resetBtn">Reset</button>
-    </div>
+    <div class="section-divider"></div>
 
     <!-- Export -->
-    <div class="field" style="margin-top: 1.5rem;">
-      <label>Export</label>
-      <div class="mode-tabs" role="tablist" style="flex-wrap: wrap; gap: 0.5rem;">
-        <button class="mode-tab export-tab active" role="tab" data-export="css" aria-selected="true">Raw CSS</button>
-        <button class="mode-tab export-tab" role="tab" data-export="tailwind" aria-selected="false">Tailwind</button>
-        <button class="mode-tab export-tab" role="tab" data-export="custom-props" aria-selected="false">CSS Props</button>
+    <section class="export-section">
+      <h3 class="section-title">Export</h3>
+      <div class="export-tabs" role="tablist" aria-label="Export formats">
+        <button class="export-tab active" role="tab" data-export="css" aria-selected="true">Raw CSS</button>
+        <button class="export-tab" role="tab" data-export="tailwind" aria-selected="false">Tailwind</button>
+        <button class="export-tab" role="tab" data-export="custom-props" aria-selected="false">CSS Variables</button>
       </div>
-    </div>
-
-    <div class="field">
-      <label>Export Output</label>
-      <textarea id="exportOutput" rows="6" readonly placeholder="Select an export format..."></textarea>
-    </div>
-
-    <div class="actions">
-      <button class="btn primary" id="copyExport">Copy</button>
-      <button class="btn" id="downloadExport">Download</button>
-    </div>
+      <label class="control-label visually-hidden" for="exportOutput">Export output</label>
+      <textarea id="exportOutput" class="code-output" rows="8" readonly aria-label="Generated code output"></textarea>
+      <div class="control-row">
+        <button class="btn btn-primary" id="copyExport" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="1.5"/></svg>
+          Copy
+        </button>
+        <button class="btn btn-secondary" id="downloadExport" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="1.5"/></svg>
+          Download
+        </button>
+      </div>
+    </section>
   </aside>
 
-  <section class="panel preview-panel" aria-labelledby="preview-heading">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-      <h2 id="preview-heading">Live Preview</h2>
-      <div class="preview-controls">
-        <label class="checkbox-label" style="font-size: 0.8rem;">
-          <input type="checkbox" id="previewSync" checked>
-          <span>Sync all previews</span>
-        </label>
-      </div>
+  <section class="studio-canvas" aria-labelledby="canvas-title">
+    <div class="canvas-header">
+      <h2 id="canvas-title" class="canvas-title">Live Preview</h2>
+      <label class="sync-toggle">
+        <input type="checkbox" id="syncPreviews" checked>
+        <span class="sync-slider"></span>
+        <span class="sync-label">Sync All</span>
+      </label>
     </div>
 
     <div class="preview-grid" id="previewGrid">
       <!-- Card Preview -->
-      <div class="preview-item">
-        <h3>Card</h3>
+      <article class="preview-card-wrapper">
+        <header class="preview-card-header">
+          <h3 class="preview-card-title">Card Component</h3>
+          <span class="preview-badge">box-shadow + backdrop-filter</span>
+        </header>
         <div class="preview-card" id="previewCard">
-          <div class="card-content">
-            <h4>Preview Card</h4>
-            <p>This card shows box-shadow and backdrop-filter effects.</p>
-            <button class="preview-btn">Button</button>
+          <div class="card-inner">
+            <h4 class="card-title">Shadow Studio Card</h4>
+            <p class="card-desc">Real-time box-shadow and backdrop-filter preview with multiple layers.</p>
+            <div class="card-actions">
+              <button class="btn-preview btn-preview-primary">Primary Action</button>
+              <button class="btn-preview btn-preview-secondary">Secondary</button>
+            </div>
           </div>
         </div>
-      </div>
+      </article>
 
       <!-- Button Preview -->
-      <div class="preview-item">
-        <h3>Button</h3>
-        <div class="preview-btn-container">
-          <button class="preview-btn primary" id="previewBtnPrimary">Primary Button</button>
-          <button class="preview-btn secondary" id="previewBtnSecondary">Secondary</button>
-          <button class="preview-btn ghost" id="previewBtnGhost">Ghost</button>
+      <article class="preview-card-wrapper">
+        <header class="preview-card-header">
+          <h3 class="preview-card-title">Button Variants</h3>
+          <span class="preview-badge">box-shadow</span>
+        </header>
+        <div class="preview-button-group" id="previewButtons">
+          <button class="btn-preview btn-preview-primary" id="previewBtnPrimary">Primary</button>
+          <button class="btn-preview btn-preview-secondary" id="previewBtnSecondary">Secondary</button>
+          <button class="btn-preview btn-preview-ghost" id="previewBtnGhost">Ghost</button>
+          <button class="btn-preview btn-preview-danger" id="previewBtnDanger">Danger</button>
         </div>
-      </div>
+      </article>
 
       <!-- Text Preview -->
-      <div class="preview-item">
-        <h3>Text</h3>
+      <article class="preview-card-wrapper">
+        <header class="preview-card-header">
+          <h3 class="preview-card-title">Typography</h3>
+          <span class="preview-badge">text-shadow</span>
+        </header>
         <div class="preview-text" id="previewText">
-          <h1 class="text-h1">Heading 1</h1>
-          <h2 class="text-h2">Heading 2</h2>
-          <p class="text-p">Paragraph text with text-shadow applied. The quick brown fox jumps over the lazy dog.</p>
-          <code class="text-code">code.example()</code>
+          <h1 class="text-display">Display Heading</h1>
+          <h2 class="text-heading">Heading Level 2</h2>
+          <p class="text-body">Body text with text-shadow applied. The quick brown fox jumps over the lazy dog. Multiple shadow layers create depth and visual interest.</p>
+          <code class="text-code">const shadow = "0 4px 20px rgba(0,0,0,0.3)";</code>
         </div>
-      </div>
+      </article>
 
-      <!-- Image Preview -->
-      <div class="preview-item">
-        <h3>Image / Media</h3>
-        <div class="preview-image" id="previewImage">
-          <div class="image-placeholder"></div>
+      <!-- Image/Media Preview -->
+      <article class="preview-card-wrapper">
+        <header class="preview-card-header">
+          <h3 class="preview-card-title">Image & Media</h3>
+          <span class="preview-badge">filter</span>
+        </header>
+        <div class="preview-media" id="previewMedia">
+          <div class="media-placeholder" aria-hidden="true"></div>
         </div>
-      </div>
+      </article>
 
-      <!-- Input Preview -->
-      <div class="preview-item">
-        <h3>Form Input</h3>
-        <div class="preview-input">
-          <input type="text" class="preview-input-field" placeholder="Text input">
-          <textarea class="preview-input-field" placeholder="Textarea"></textarea>
-          <select class="preview-input-field">
-            <option>Select option</option>
-            <option>Option 1</option>
-            <option>Option 2</option>
+      <!-- Form Preview -->
+      <article class="preview-card-wrapper">
+        <header class="preview-card-header">
+          <h3 class="preview-card-title">Form Controls</h3>
+          <span class="preview-badge">box-shadow + filter</span>
+        </header>
+        <div class="preview-form">
+          <input type="text" class="form-control" placeholder="Text input" id="previewInput">
+          <textarea class="form-control" placeholder="Textarea" id="previewTextarea"></textarea>
+          <select class="form-control" id="previewSelect">
+            <option>Select an option</option>
+            <option value="1">Option One</option>
+            <option value="2">Option Two</option>
+            <option value="3">Option Three</option>
           </select>
         </div>
-      </div>
+      </article>
 
       <!-- Badge/Chip Preview -->
-      <div class="preview-item">
-        <h3>Badges & Chips</h3>
-        <div class="preview-badges">
-          <span class="preview-badge default">Default</span>
-          <span class="preview-badge primary">Primary</span>
-          <span class="preview-badge success">Success</span>
-          <span class="preview-badge warning">Warning</span>
-          <span class="preview-badge danger">Danger</span>
+      <article class="preview-card-wrapper">
+        <header class="preview-card-header">
+          <h3 class="preview-card-title">Badges & Chips</h3>
+          <span class="preview-badge">box-shadow</span>
+        </header>
+        <div class="preview-chips">
+          <span class="chip chip-default">Default</span>
+          <span class="chip chip-primary">Primary</span>
+          <span class="chip chip-success">Success</span>
+          <span class="chip chip-warning">Warning</span>
+          <span class="chip chip-danger">Danger</span>
+          <span class="chip chip-info">Info</span>
         </div>
-      </div>
+      </article>
     </div>
 
-    <!-- Generated CSS -->
-    <div class="field" style="margin-top: 1.5rem;">
-      <label>Generated CSS (box-shadow)</label>
-      <textarea id="generatedCss" rows="4" readonly></textarea>
-    </div>
-    <div class="field">
-      <label>Generated CSS (text-shadow)</label>
-      <textarea id="generatedTextCss" rows="3" readonly></textarea>
-    </div>
-    <div class="field">
-      <label>Generated CSS (filter)</label>
-      <textarea id="generatedFilterCss" rows="3" readonly></textarea>
-    </div>
-    <div class="field">
-      <label>Generated CSS (backdrop-filter)</label>
-      <textarea id="generatedBackdropCss" rows="3" readonly></textarea>
+    <!-- Generated CSS Reference -->
+    <div class="css-reference" id="cssReference">
+      <div class="css-ref-item">
+        <div class="css-ref-header">
+          <code class="css-ref-property">box-shadow</code>
+          <button class="btn-copy-ref" data-target="genBoxShadow" aria-label="Copy box-shadow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+        </div>
+        <pre class="css-ref-value" id="genBoxShadow"></pre>
+      </div>
+      <div class="css-ref-item">
+        <div class="css-ref-header">
+          <code class="css-ref-property">text-shadow</code>
+          <button class="btn-copy-ref" data-target="genTextShadow" aria-label="Copy text-shadow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+        </div>
+        <pre class="css-ref-value" id="genTextShadow"></pre>
+      </div>
+      <div class="css-ref-item">
+        <div class="css-ref-header">
+          <code class="css-ref-property">filter</code>
+          <button class="btn-copy-ref" data-target="genFilter" aria-label="Copy filter"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+        </div>
+        <pre class="css-ref-value" id="genFilter"></pre>
+      </div>
+      <div class="css-ref-item">
+        <div class="css-ref-header">
+          <code class="css-ref-property">backdrop-filter</code>
+          <button class="btn-copy-ref" data-target="genBackdropFilter" aria-label="Copy backdrop-filter"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>
+        </div>
+        <pre class="css-ref-value" id="genBackdropFilter"></pre>
+      </div>
     </div>
   </section>
 </main>
 
-<footer>
-  Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+<footer class="studio-footer">
+  <p>Made with <span class="heart">♥</span> by <strong>KING_YOSEF_</strong></p>
+  <a href="https://king-yosef-0.github.io/Protfolio/" class="footer-link" target="_blank" rel="noopener">About Me</a>
 </footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="script.js"></script>
 </body>

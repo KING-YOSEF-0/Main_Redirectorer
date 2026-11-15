@@ -1,11 +1,210 @@
-body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #ddd; font-family: sans-serif; }
-.calculator { width: 350px; background: #c0c0c0; padding: 20px; border-radius: 20px; border: 5px solid #888; }
-.screen-area { background: #d0d8d0; padding: 15px; border-radius: 5px; border: 3px solid #666; margin-bottom: 20px; }
-.display { height: 60px; font-size: 24px; text-align: right; color: #333; }
-.button-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-.btn { padding: 12px 5px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; background: #eee; }
-.btn:active { transform: translateY(1px); }
-.op-orange { background: #ff9900; color: white; }
-.op-equals { background: #444; color: white; grid-row: span 1; }
-.shift { background: #999; }
-.alpha { background: #999; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #e6e6e6;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.calculator {
+    position: relative;
+    width: 420px;
+    background: linear-gradient(to bottom, #d4d4d4, #a8a8a8);
+    padding: 26px 24px;
+    border-radius: 34px;
+    border: 5px solid #8f8f8f;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.4);
+}
+
+/* Dark blue rubber grip on the left side */
+.grip {
+    position: absolute;
+    left: -8px;
+    top: 45px;
+    bottom: 45px;
+    width: 26px;
+    background: #3a4a6a;
+    border-radius: 16px;
+    box-shadow: inset -3px 0 6px rgba(0,0,0,0.4);
+}
+
+/* Top branding */
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 16px;
+}
+
+.brand {
+    font-size: 26px;
+    font-weight: 900;
+    color: #1f3a8a;
+    letter-spacing: 1px;
+}
+
+.solar-panel {
+    width: 76px;
+    height: 34px;
+    background: repeating-linear-gradient(90deg, #5a3a2a, #5a3a2a 16px, #7a4a3a 16px, #7a4a3a 32px);
+    border: 2px solid #444;
+    border-radius: 4px;
+}
+
+.twopower {
+    font-size: 8px;
+    color: #444;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+/* Screen area */
+.screen-area {
+    background: #c8d4c8;
+    padding: 16px;
+    border-radius: 8px;
+    border: 3px solid #6b6b6b;
+    margin-bottom: 18px;
+}
+
+.model {
+    font-size: 13px;
+    color: #2a5a8a;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.vpam {
+    font-size: 9px;
+    color: #2a5a8a;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.display {
+    height: 60px;
+    background: #b8c8b8;
+    border: 2px solid #555;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 32px;
+    font-family: "Courier New", monospace;
+    text-align: right;
+    color: #1a1a1a;
+    overflow: hidden;
+    line-height: 1.1;
+}
+
+/* Button rows using flexbox */
+.row {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin-bottom: 7px;
+}
+
+/* Button base */
+.btn {
+    padding: 12px 8px;
+    border: 1px solid #b0b0b0;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.05s, filter 0.05s;
+}
+
+.btn:active {
+    transform: translateY(1px);
+    filter: brightness(0.85);
+}
+
+/* Navigation buttons */
+.nav {
+    flex: 1;
+    background: #9aa0b0;
+    color: #fff;
+    font-size: 11px;
+    border: 1px solid #5a5a6a;
+}
+
+.on {
+    background: #9aa0b0;
+    color: #fff;
+    font-size: 12px;
+    border: 1px solid #5a5a6a;
+}
+
+/* Circular REPLAY pad */
+.replay-pad {
+    flex: 0 0 64px;
+    height: 64px;
+    background: #8a90a0;
+    border-radius: 50%;
+    border: 1px solid #5a5a6a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.replay-center {
+    font-size: 8px;
+    color: #fff;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.1;
+}
+
+/* Scientific buttons */
+.sci {
+    flex: 1;
+    background: #3a3a3a;
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    border: 1px solid #1a1a1a;
+}
+
+/* Numpad */
+.num {
+    flex: 1;
+    background: #f0f0f0;
+    color: #000;
+    font-size: 17px;
+    font-weight: bold;
+    border: 1px solid #b0b0b0;
+}
+
+.op {
+    flex: 1;
+    background: #f0f0f0;
+    color: #000;
+    font-size: 19px;
+    font-weight: bold;
+    border: 1px solid #b0b0b0;
+}
+
+.op-orange {
+    flex: 1;
+    background: #ff9900;
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    border: 1px solid #cc7700;
+}
+
+.op-equals {
+    flex: 2;
+    background: #444;
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    border: 1px solid #222;
+}

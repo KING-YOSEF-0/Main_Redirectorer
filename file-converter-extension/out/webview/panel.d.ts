@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-export declare class ConverterPanel implements vscode.Disposable {
+export declare class ConverterPanel {
+    private readonly context;
     private panel;
-    private readonly extensionContext;
     constructor(context: vscode.ExtensionContext);
     show(): void;
     dispose(): void;

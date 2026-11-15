@@ -1,5 +1,6 @@
 // Simon Sequence — KING_YOSEF_
-// Modes: Classic, Reverse, Speed, Dual
+// Dark Neon Rhythm Game Theme
+// 10 Practical Tasks: Classic, Reverse, Speed, Dual, Button Count, Color-blind, Sound-only, Daily Challenge, Streak/Leaderboard, Statistics
 
 (() => {
   'use strict';
@@ -27,16 +28,19 @@
     isWatching: false,
     isPlayerTurn: false,
     sequence: [],
+    dualSequence: [],
     playerSequence: [],
     currentLevel: 1,
     currentStep: 0,
     showIndex: 0,
+    currentSpeed: 800,
     stats: JSON.parse(localStorage.getItem('simonStats') || '{}'),
     highScores: JSON.parse(localStorage.getItem('simonScores') || '{}'),
     audioCtx: null,
     speedMs: { slow: 1200, normal: 800, fast: 500, insane: 300 },
     patterns: ['slash', 'dots', 'lines', 'cross', 'tri', 'square', 'diamond', 'ring', 'wave', 'grid'],
     rng: mulberry32(Date.now()),
+    lastDailyDate: null,
   };
 
   // ===== DOM Elements =====
@@ -69,6 +73,9 @@
     leaderboard: document.getElementById('leaderboard'),
     colorblindToggle: document.getElementById('colorblindToggle'),
     soundOnlyToggle: document.getElementById('soundOnlyToggle'),
+    speedField: document.getElementById('speedField'),
+    keyboardHint: document.getElementById('keyboardHint'),
+    particles: document.getElementById('particles'),
   };
 
   // ===== Initialize =====
@@ -77,6 +84,8 @@
     updateStatsDisplay();
     updateLeaderboard();
     generateButtons();
+    spawnBackgroundParticles();
+    checkDailyChallenge();
   }
 
   function setupEventListeners() {
@@ -121,6 +130,7 @@
     els.soundOnlyToggle.addEventListener('change', e => {
       state.soundOnly = e.target.checked;
       generateButtons();
+      els.simonGrid.classList.toggle('sound-only', state.soundOnly);
     });
 
     // Buttons
@@ -143,19 +153,23 @@
         if (idx < state.buttonCount) handlePlayerInput(idx);
       }
     });
+
+    // Show keyboard hint on first interaction
+    document.addEventListener('click', () => {
+      if (els.keyboardHint) els.keyboardHint.style.opacity = '0.7';
+    }, { once: true });
   }
 
   function updateSpeedField() {
-    const speedField = document.getElementById('speedField');
-    speedField.hidden = state.mode !== 'speed';
+    els.speedField.hidden = state.mode !== 'speed';
   }
 
   function generateButtons() {
     const grid = els.simonGrid;
     grid.innerHTML = '';
     grid.dataset.count = state.buttonCount;
+    grid.classList.toggle('sound-only', state.soundOnly);
 
-    // Assign colors and patterns to buttons
     const colors = [
       '--simon-0', '--simon-1', '--simon-2', '--simon-3',
       '--simon-4', '--simon-5', '--simon-6', '--simon-7', '--simon-8'
@@ -169,21 +183,27 @@
       btn.style.background = `var(${colors[i % colors.length]})`;
       btn.style.color = `var(${colors[i % colors.length]})`;
 
+      // Add number label for sound-only mode
+      const numberSpan = document.createElement('span');
+      numberSpan.className = 'btn-number';
+      numberSpan.textContent = i + 1;
+      btn.appendChild(numberSpan);
+
       if (state.colorblind) {
         btn.dataset.pattern = state.patterns[i % state.patterns.length];
       }
 
       if (state.soundOnly) {
-        btn.style.opacity = '0.3';
+        btn.style.opacity = '0.2';
       }
 
       btn.addEventListener('click', () => handlePlayerInput(i));
-      btn.addEventListener('mousedown', () => btn.classList.add('active'));
+      btn.addEventListener('mousedown', () => { if (!btn.disabled) btn.classList.add('active'); });
       btn.addEventListener('mouseup', () => btn.classList.remove('active'));
       btn.addEventListener('mouseleave', () => btn.classList.remove('active'));
       btn.addEventListener('touchstart', e => {
         e.preventDefault();
-        btn.classList.add('active');
+        if (!btn.disabled) btn.classList.add('active');
       }, { passive: false });
       btn.addEventListener('touchend', e => {
         e.preventDefault();
@@ -191,6 +211,24 @@
       }, { passive: false });
 
       grid.appendChild(btn);
+    }
+  }
+
+  function spawnBackgroundParticles() {
+    const container = els.particles;
+    if (!container) return;
+    const count = 15;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.width = p.style.height = (Math.random() * 4 + 2) + 'px';
+      p.style.background = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)', 'var(--accent-4)', 'var(--accent-5)'][Math.floor(Math.random() * 5)];
+      p.style.opacity = '0';
+      p.style.setProperty('--dx', (Math.random() - 0.5) * 200 + 'px');
+      p.style.animationDelay = Math.random() * 15 + 's';
+      p.style.animationDuration = (Math.random() * 10 + 15) + 's';
+      container.appendChild(p);
     }
   }
 
@@ -206,12 +244,11 @@
     const ctx = getAudioContext();
     if (ctx.state === 'suspended') ctx.resume();
 
-    // Frequencies for each theme
     const themes = {
-      pentatonic: [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98], // C major pentatonic
-      major: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33], // C major scale
-      chromatic: [261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30], // Chromatic
-      synth: [220, 330, 440, 550, 660, 880, 1100, 1320, 1760], // Harmonic series
+      pentatonic: [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98],
+      major: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25, 587.33],
+      chromatic: [261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30],
+      synth: [220, 330, 440, 550, 660, 880, 1100, 1320, 1760],
     };
 
     const freq = themes[state.soundTheme][index % themes[state.soundTheme].length];
@@ -273,11 +310,34 @@
     });
   }
 
+  function playLevelUpSound() {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    [392.00, 523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
+
+      const t = ctx.currentTime + i * 0.06;
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+
+      osc.start(t);
+      osc.stop(t + 0.3);
+    });
+  }
+
   // ===== Game Logic =====
   function startGame(isDaily) {
     state.isDaily = isDaily;
     state.isRunning = true;
     state.sequence = [];
+    state.dualSequence = [];
     state.playerSequence = [];
     state.currentLevel = 1;
     state.currentStep = 0;
@@ -287,12 +347,13 @@
     els.replayBtn.hidden = true;
     els.restartBtn.hidden = false;
     els.resultsModal.hidden = true;
+    els.gameFooter.querySelectorAll('.btn').forEach(b => b.hidden = false);
 
     if (isDaily) {
       els.dailyBadge.hidden = false;
-      // Seed daily challenge with today's date
       const today = new Date().toISOString().split('T')[0];
       state.rng = mulberry32(hashString(today));
+      state.lastDailyDate = today;
     } else {
       els.dailyBadge.hidden = true;
       state.rng = mulberry32(Date.now());
@@ -323,10 +384,18 @@
     // Adjust speed for Speed mode
     if (state.mode === 'speed') {
       const baseSpeed = state.speedMs[state.speed];
-      const speedFactor = Math.max(0.3, 1 - (state.currentLevel - 1) * 0.05);
+      const speedFactor = Math.max(0.25, 1 - (state.currentLevel - 1) * 0.06);
       state.currentSpeed = baseSpeed * speedFactor;
     } else {
       state.currentSpeed = state.speedMs[state.speed];
+    }
+
+    // For Dual mode, generate second sequence
+    if (state.mode === 'dual') {
+      state.dualSequence = [];
+      for (let i = 0; i < state.currentLevel; i++) {
+        state.dualSequence.push(Math.floor(state.rng() * state.buttonCount));
+      }
     }
 
     showSequence();
@@ -335,18 +404,22 @@
   function showSequence() {
     state.isWatching = true;
     state.isPlayerTurn = false;
-    els.gameStatus.textContent = 'Watch...';
+    els.gameStatus.textContent = 'WATCH';
     els.gameStatus.className = 'game-status watching';
     disableButtons(true);
 
     let delay = 0;
-    state.sequence.forEach((btnIndex, i) => {
-      setTimeout(() => {
-        flashButton(btnIndex);
-        playTone(btnIndex, state.currentSpeed * 0.8);
-      }, delay);
-      delay += state.currentSpeed;
-    });
+    const showMainSequence = () => {
+      state.sequence.forEach((btnIndex, i) => {
+        setTimeout(() => {
+          flashButton(btnIndex);
+          playTone(btnIndex, state.currentSpeed * 0.75);
+        }, delay);
+        delay += state.currentSpeed;
+      });
+    };
+
+    showMainSequence();
 
     // For Reverse mode, also show reversed at the end
     if (state.mode === 'reverse') {
@@ -354,35 +427,30 @@
         [...state.sequence].reverse().forEach((btnIndex, i) => {
           setTimeout(() => {
             flashButton(btnIndex);
-            playTone(btnIndex, state.currentSpeed * 0.8);
+            playTone(btnIndex, state.currentSpeed * 0.75);
           }, i * state.currentSpeed);
         });
-      }, delay + 500);
-      delay += state.sequence.length * state.currentSpeed + 500;
+      }, delay + 400);
+      delay += state.sequence.length * state.currentSpeed + 400;
     }
 
     // For Dual mode, show second sequence
     if (state.mode === 'dual') {
-      state.dualSequence = [];
-      for (let i = 0; i < state.currentLevel; i++) {
-        state.dualSequence.push(Math.floor(state.rng() * state.buttonCount));
-      }
-
       setTimeout(() => {
         state.dualSequence.forEach((btnIndex, i) => {
           setTimeout(() => {
             flashButton(btnIndex);
-            playTone(btnIndex, state.currentSpeed * 0.8);
+            playTone(btnIndex, state.currentSpeed * 0.75);
           }, i * state.currentSpeed);
         });
-      }, delay + 500);
-      delay += state.dualSequence.length * state.currentSpeed + 500;
+      }, delay + 400);
+      delay += state.dualSequence.length * state.currentSpeed + 400;
     }
 
     setTimeout(() => {
       state.isWatching = false;
       state.isPlayerTurn = true;
-      els.gameStatus.textContent = 'Your Turn!';
+      els.gameStatus.textContent = 'YOUR TURN';
       els.gameStatus.className = 'game-status playing';
       disableButtons(false);
     }, delay);
@@ -392,7 +460,31 @@
     const btn = els.simonGrid.children[index];
     if (!btn) return;
     btn.classList.add('active');
-    setTimeout(() => btn.classList.remove('active'), state.currentSpeed * 0.7);
+    createBurstParticles(btn, index);
+    setTimeout(() => btn.classList.remove('active'), state.currentSpeed * 0.6);
+  }
+
+  function createBurstParticles(btn, index) {
+    const colors = ['var(--simon-0)', 'var(--simon-1)', 'var(--simon-2)', 'var(--simon-3)',
+      'var(--simon-4)', 'var(--simon-5)', 'var(--simon-6)', 'var(--simon-7)', 'var(--simon-8)'];
+    const color = colors[index % colors.length];
+
+    for (let i = 0; i < 8; i++) {
+      const p = document.createElement('div');
+      p.className = 'burst-particle';
+      const rect = btn.getBoundingClientRect();
+      const gridRect = els.simonGrid.getBoundingClientRect();
+      p.style.left = (rect.left - gridRect.left + rect.width / 2) + 'px';
+      p.style.top = (rect.top - gridRect.top + rect.height / 2) + 'px';
+      p.style.width = p.style.height = (Math.random() * 8 + 6) + 'px';
+      p.style.background = color;
+      const angle = (i / 8) * Math.PI * 2;
+      const distance = Math.random() * 60 + 40;
+      p.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+      p.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+      els.simonGrid.appendChild(p);
+      setTimeout(() => p.remove(), 800);
+    }
   }
 
   function disableButtons(disabled) {
@@ -405,7 +497,7 @@
   function handlePlayerInput(index) {
     if (!state.isPlayerTurn || state.isWatching) return;
 
-    playTone(index, 200);
+    playTone(index, 180);
 
     const expectedIndex = getExpectedIndex(state.currentStep);
 
@@ -413,19 +505,27 @@
       state.playerSequence.push(index);
       state.currentStep++;
 
+      // Visual feedback
+      const btn = els.simonGrid.children[index];
+      if (btn) {
+        btn.classList.add('active');
+        setTimeout(() => btn.classList.remove('active'), 100);
+      }
+
       if (state.currentStep >= getSequenceLength()) {
         // Round complete
         state.isPlayerTurn = false;
         disableButtons(true);
         playSuccessSound();
-        els.gameStatus.textContent = 'Correct! Next level...';
+        playLevelUpSound();
+        els.gameStatus.textContent = 'CORRECT!';
         els.gameStatus.className = 'game-status success';
         state.currentLevel++;
         updateLevelDisplay();
 
         setTimeout(() => {
           nextRound();
-        }, 1000);
+        }, 900);
       }
     } else {
       // Wrong!
@@ -462,17 +562,26 @@
     disableButtons(true);
 
     playErrorSound();
-    els.gameStatus.textContent = 'Game Over!';
+    els.gameStatus.textContent = 'GAME OVER';
     els.gameStatus.className = 'game-status error';
 
     // Screen shake
-    document.querySelector('.game-panel').classList.add('shake');
-    setTimeout(() => document.querySelector('.game-panel').classList.remove('shake'), 400);
+    const gamePanel = document.querySelector('.game-panel');
+    if (gamePanel) {
+      gamePanel.classList.add('shake');
+      setTimeout(() => gamePanel.classList.remove('shake'), 500);
+    }
 
     const finalLevel = state.currentLevel - 1;
     const sequenceLength = getSequenceLength();
+
+    // Calculate accuracy
+    let correctCount = 0;
+    for (let i = 0; i < state.playerSequence.length; i++) {
+      if (state.playerSequence[i] === getExpectedIndex(i)) correctCount++;
+    }
     const accuracy = state.playerSequence.length > 0
-      ? Math.round((state.playerSequence.filter((v, i) => v === getExpectedIndex(i)).length / state.playerSequence.length) * 100)
+      ? Math.round((correctCount / state.playerSequence.length) * 100)
       : 0;
 
     // Save stats
@@ -480,7 +589,7 @@
 
     // Show results
     setTimeout(() => {
-      els.modalTitle.textContent = state.isDaily ? 'Daily Challenge Complete!' : 'Game Over!';
+      els.modalTitle.textContent = state.isDaily ? 'DAILY CHALLENGE COMPLETE' : 'GAME OVER';
       els.finalLevel.textContent = finalLevel;
       els.finalMode.textContent = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
       els.finalLength.textContent = sequenceLength;
@@ -492,7 +601,7 @@
         const today = new Date().toISOString().split('T')[0];
         const isNewBest = !dailyStats[today] || finalLevel > dailyStats[today].level;
         els.dailyMessage.textContent = isNewBest
-          ? `🎉 New daily best! Level ${finalLevel}`
+          ? `🎉 NEW DAILY BEST! Level ${finalLevel}`
           : `Today's best: Level ${dailyStats[today]?.level || '—'}`;
       } else {
         els.dailyResult.hidden = true;
@@ -567,13 +676,13 @@
   function updateLeaderboard() {
     const scores = state.highScores[state.mode] || [];
     if (scores.length === 0) {
-      els.leaderboard.innerHTML = '<div style="color:var(--muted);text-align:center;padding:1rem;">No scores yet</div>';
+      els.leaderboard.innerHTML = '<div style="color:var(--muted);text-align:center;padding:1rem;">No scores yet — play a game!</div>';
       return;
     }
 
     els.leaderboard.innerHTML = scores.map((s, i) => `
       <div class="leaderboard-entry">
-        <span class="rank">#${i+1}</span>
+        <span class="rank">#${i + 1}</span>
         <span class="score">Level ${s.level}</span>
         <span class="mode">${s.accuracy}% • ${s.buttonCount}btn • ${s.date}</span>
       </div>
@@ -587,11 +696,11 @@
   function shareResult() {
     const level = els.finalLevel.textContent;
     const mode = state.mode;
-    const text = `🧠 Simon Sequence (${mode})\nLevel: ${level} | Length: ${els.finalLength.textContent} | Acc: ${els.finalAccuracy.textContent}\n#KING_YOSEF_`;
+    const text = `🧠 SIMON SEQUENCE (${mode.toUpperCase()})\nLevel: ${level} | Length: ${els.finalLength.textContent} | Acc: ${els.finalAccuracy.textContent}\n#KING_YOSEF_`;
     if (navigator.share) {
       navigator.share({ title: 'Simon Sequence Result', text });
     } else {
-      navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
+      navigator.clipboard.writeText(text).then(() => showToast('COPIED TO CLIPBOARD'));
     }
   }
 
@@ -605,6 +714,15 @@
     toast.textContent = message;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  function checkDailyChallenge() {
+    const today = new Date().toISOString().split('T')[0];
+    const daily = state.stats.daily || {};
+    if (daily[today]) {
+      // Already played today - could show a badge
+      els.dailyBtn.title = `Today's best: Level ${daily[today].level}`;
+    }
   }
 
   // ===== Init =====

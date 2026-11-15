@@ -3,231 +3,577 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Color Palette Extractor | KING_YOSEF_</title>
+<title>Palette Extractor | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<div id="grid-bg" aria-hidden="true"></div>
+<div class="orb orb-1" aria-hidden="true"></div>
+<div class="orb orb-2" aria-hidden="true"></div>
+<div class="orb orb-3" aria-hidden="true"></div>
 
 <header class="hero">
   <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
-  <p class="tagline">Extract color palettes from images and generate harmonious color schemes using advanced color theory.</p>
+  <p class="tagline">Professional color palette extractor with advanced algorithms, harmony generation, and design tools.</p>
 </header>
 
 <main class="container">
-  <aside class="panel config-panel">
-    <h2>Extractor Setup</h2>
+  <aside class="panel" id="sidebar">
+    <!-- Task 1: Image Upload & Extraction -->
+    <section id="task1-extraction">
+      <h2>Extract Colors</h2>
 
-    <div class="field">
-      <label>Image Source</label>
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" role="tab" data-source="upload" aria-selected="true">Upload Image</button>
-        <button class="mode-tab" role="tab" data-source="url" aria-selected="false">URL</button>
-        <button class="mode-tab" role="tab" data-source="camera" aria-selected="false">Camera</button>
-      </div>
-    </div>
-
-    <div class="field" id="uploadOptions" hidden>
-      <label>Upload</label>
-      <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg,.gif,.webp" hidden>
-      <div class="file-drop-zone" id="dropZone">
-        <p>Drag & drop an image here or click to select</p>
-        <p class="file-info">Supports: PNG, JPG, JPEG, GIF, WebP</p>
-      </div>
-    </div>
-
-    <div class="field" id="urlOptions" hidden>
-      <label>Image URL</label>
-      <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg">
-    </div>
-
-    <div class="field" id="cameraOptions" hidden>
-      <label>Webcam</label>
-      <video id="webcam" width="320" height="240" autoplay muted playsinline hidden></video>
-      <div class="camera-controls">
-        <button class="btn primary" id="captureBtn">Capture</button>
-        <button class="btn secondary" id="switchCameraBtn">Switch Camera</button>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Sampling Method</label>
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab sample-tab active" role="tab" data-sample="dominant" aria-selected="true">Dominant Colors</button>
-        <button class="mode-tab sample-tab" role="tab" data-sample="kmeans" aria-selected="false">K-Means</button>
-        <button class="mode-tab sample-tab" role="tab" data-sample="mediancut" aria-selected="false">Median Cut</button>
-        <button class="mode-tab sample-tab" role="tab" data-sample="histograms" aria-selected="false">Histogram</button>
-      </div>
-    rigs>
       <div class="field">
-        <label>Number of Colors</label>
-        <select id="colorCount">
-          <option value="3">3 Colors</option>
-          <option value="5">5 Colors</option>
-          <option value="7">7 Colors</option>
-          <option value="10">10 Colors</option>
-          <option value="15">15 Colors</option>
-        </select>
+        <label>Image Source</label>
+        <div class="tab-group" role="tablist" id="sourceTabs">
+          <button class="tab-btn active" role="tab" data-source="upload" aria-selected="true">Upload</button>
+          <button class="tab-btn" role="tab" data-source="url" aria-selected="false">URL</button>
+          <button class="tab-btn" role="tab" data-source="camera" aria-selected="false">Camera</button>
+        </div>
+      </div>
+
+      <div class="field" id="uploadOptions">
+        <label>Upload Image</label>
+        <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg,.gif,.webp,.bmp,.avif" hidden>
+        <div class="file-drop-zone" id="dropZone" tabindex="0" role="button" aria-label="Drop zone for image upload">
+          <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <p class="drop-text">Drag & drop image here or click to browse</p>
+          <p class="drop-hint">PNG, JPG, WebP, GIF, BMP, AVIF · Max 20MB</p>
+        </div>
+      </div>
+
+      <div class="field" id="urlOptions" hidden>
+        <label>Image URL</label>
+        <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" aria-label="Image URL">
+      </div>
+
+      <div class="field" id="cameraOptions" hidden>
+        <label>Camera Capture</label>
+        <video id="webcam" width="100%" autoplay muted playsinline hidden aria-label="Camera feed"></video>
+        <div class="actions" style="margin-top: 0.5rem;">
+          <button class="btn btn-primary" id="startCameraBtn" style="flex: 1;">Start Camera</button>
+          <button class="btn btn-secondary" id="captureBtn" style="flex: 1;" disabled>Capture</button>
+          <button class="btn btn-secondary" id="switchCameraBtn" style="flex: 1;" disabled>Switch</button>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="field">
+        <label>Extraction Algorithm</label>
+        <div class="tab-group" role="tablist" id="algoTabs">
+          <button class="tab-btn active" role="tab" data-algo="dominant" aria-selected="true">Dominant</button>
+          <button class="tab-btn" role="tab" data-algo="kmeans" aria-selected="false">K-Means</button>
+          <button class="tab-btn" role="tab" data-algo="mediancut" aria-selected="false">Median Cut</button>
+          <button class="tab-btn" role="tab" data-algo="histogram" aria-selected="false">Histogram</button>
+        </div>
       </div>
 
       <div class="field">
-        <label>Color Space</label>
-        <select id="colorSpace">
-          <option value="hsl">HSL</option>
-          <option value="rgb">RGB</option>
-          <option value="lab">Lab</option>
-          <option value="oklab">OKLab</option>
-        </select>
+        <label>Color Count</label>
+        <input type="number" id="colorCount" min="2" max="20" value="8" aria-label="Number of colors to extract">
       </div>
 
       <div class="actions">
-        <button class="btn primary" id="extractBtn">Extract Palette</button>
-        <button class="btn secondary" id="clearBtn">Clear</button>
+        <button class="btn btn-primary" id="extractBtn" style="flex: 1;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          Extract Palette
+        </button>
+        <button class="btn btn-secondary" id="clearBtn">Clear</button>
       </div>
 
-      <div class="stats-panel">
-        <h3>Statistics</h3>
-        <div class="stat-row">
-          <span class="stat-label">Images Processed</span>
-          <span class="stat-value" id="imagesProcessed">0</span>
+      <div class="section-divider"></div>
+
+      <div class="stat-grid" id="extractionStats" hidden>
+        <div class="stat-card">
+          <div class="stat-value" id="statColors">0</div>
+          <div class="stat-label">Colors Found</div>
         </div>
-        <div class="stat-row">
-          <span class="stat-label">Avg Colors per Image</span>
-          <span class="stat-value" id="avgColors">—</span>
+        <div class="stat-card">
+          <div class="stat-value" id="statTime">0ms</div>
+          <div class="stat-label">Process Time</div>
         </div>
-        <div class="stat-row">
-          <span class="stat-label">Dominant Themes</span>
-          <span class="stat-value" id="dominantThemes">—</span>
+        <div class="stat-card">
+          <div class="stat-value" id="statPixels">0</div>
+          <div class="stat-label">Pixels Analyzed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statAlgo">—</div>
+          <div class="stat-label">Algorithm</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Task 2: Harmony Schemes -->
+    <section id="task2-harmony">
+      <h2>Color Harmony</h2>
+
+      <div class="field">
+        <label>Base Color</label>
+        <div class="input-with-swatch">
+          <input type="color" id="harmonyBaseColor" value="#ff6b9d" aria-label="Base color for harmony">
+          <div class="color-swatch color-swatch-small" id="harmonyBaseSwatch" style="background: #ff6b9d;"></div>
         </div>
       </div>
 
-      <div class="leaderboard-section">
-        <h3>Recent Palettes</h3>
-        <div id="recentPalettes" class="leaderboard"></div>
+      <div class="field">
+        <label>Harmony Type</label>
+        <div class="tab-group" role="tablist" id="harmonyTabs">
+          <button class="tab-btn active" role="tab" data-harmony="complementary" aria-selected="true">Complementary</button>
+          <button class="tab-btn" role="tab" data-harmony="triadic" aria-selected="false">Triadic</button>
+          <button class="tab-btn" role="tab" data-harmony="analogous" aria-selected="false">Analogous</button>
+          <button class="tab-btn" role="tab" data-harmony="monochromatic" aria-selected="false">Monochromatic</button>
+          <button class="tab-btn" role="tab" data-harmony="square" aria-selected="false">Square</button>
+          <button class="tab-btn" role="tab" data-harmony="split" aria-selected="false">Split Comp.</button>
+        </div>
       </div>
 
-      <div class="theme-selector">
-        <label>Display Theme</label>
-        <select id="displayTheme">
-          <option value="default">Default</option>
-          <option value="compact">Compact</option>
-          <option value="detailed">Detailed</option>
+      <div class="field">
+        <label>Variation Count</label>
+        <input type="number" id="harmonyCount" min="3" max="12" value="5" aria-label="Number of harmony colors">
+      </div>
+
+      <div class="field">
+        <label>Generated Harmony</label>
+        <div class="palette-strip" id="harmonyPalette" role="list" aria-label="Harmony colors"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" id="harmonyToExtractor" style="flex: 1;">Use as Base</button>
+        <button class="btn btn-secondary" id="harmonySaveBtn" style="flex: 1;">Save to Library</button>
+      </div>
+    </section>
+
+    <!-- Task 3: Color Space Viewer -->
+    <section id="task3-colorspace">
+      <h2>Color Spaces</h2>
+
+      <div class="field">
+        <label>Inspect Color</label>
+        <div class="input-with-swatch">
+          <input type="color" id="csBaseColor" value="#ff6b9d" aria-label="Color to inspect">
+          <div class="color-swatch color-swatch-small" id="csBaseSwatch" style="background: #ff6b9d;"></div>
+        </div>
+      </div>
+
+      <div class="colorspace-tabs" role="tablist" id="colorspaceTabs">
+        <button class="colorspace-tab active" role="tab" data-space="rgb" aria-selected="true">RGB</button>
+        <button class="colorspace-tab" role="tab" data-space="hsl" aria-selected="false">HSL</button>
+        <button class="colorspace-tab" role="tab" data-space="hsv" aria-selected="false">HSV</button>
+        <button class="colorspace-tab" role="tab" data-space="lab" aria-selected="false">Lab</button>
+        <button class="colorspace-tab" role="tab" data-space="oklab" aria-selected="false">OKLab</button>
+        <button class="colorspace-tab" role="tab" data-space="xyz" aria-selected="false">XYZ</button>
+        <button class="colorspace-tab" role="tab" data-space="lch" aria-selected="false">LCH</button>
+        <button class="colorspace-tab" role="tab" data-space="hex" aria-selected="false">HEX</button>
+      </div>
+
+      <div class="colorspace-panel active" id="cs-rgb" role="tabpanel">
+        <div class="color-value-row"><span class="color-value-label">Red</span><div class="color-value-input"><input type="number" id="cs-r" min="0" max="255" step="1" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">Green</span><div class="color-value-input"><input type="number" id="cs-g" min="0" max="255" step="1" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">Blue</span><div class="color-value-input"><input type="number" id="cs-b" min="0" max="255" step="1" readonly></div></div>
+      </div>
+      <div class="colorspace-panel" id="cs-hsl" role="tabpanel">
+        <div class="color-value-row"><span class="color-value-label">Hue</span><div class="color-value-input"><input type="number" id="cs-h" min="0" max="360" step="0.1" readonly>°</div></div>
+        <div class="color-value-row"><span class="color-value-label">Saturation</span><div class="color-value-input"><input type="number" id="cs-s" min="0" max="100" step="0.1" readonly>%</div></div>
+        <div class="color-value-row"><span class="color-value-label">Lightness</span><div class="color-value-input"><input type="number" id="cs-l" min="0" max="100" step="0.1" readonly>%</div></div>
+      </div>
+      <div class="colorspace-panel" id="cs-hsv" role="tabpanel">
+        <div class="color-value-row"><span class="color-value-label">Hue</span><div class="color-value-input"><input type="number" id="cs-hsv-h" min="0" max="360" step="0.1" readonly>°</div></div>
+        <div class="color-value-row"><span class="color-value-label">Saturation</span><div class="color-value-input"><input type="number" id="cs-hsv-s" min="0" max="100" step="0.1" readonly>%</div></div>
+        <div class="color-value-row"><span class="color-value-label">Value</span><div class="color-value-input"><input type="number" id="cs-hsv-v" min="0" max="100" step="0.1" readonly>%</div></div>
+      </div>
+      <div class="colorspace-panel" id="cs-lab" role="tabpanel">
+        <div class="color-value-row"><span class="color-value-label">L*</span><div class="color-value-input"><input type="number" id="cs-lab-l" step="0.01" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">a*</span><div class="color-value-input"><input type="number" id="cs-lab-a" step="0.01" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">b*</span><div class="color-value-input"><input type="number" id="cs-lab-b" step="0.01" readonly></div></div>
+      </div>
+      <div class="colorspace-panel" id="cs-oklab" role="tabpanel">
+        <div class="color-value-row"><span class="color-value-label">L</span><div class="color-value-input"><input type="number" id="cs-oklab-l" step="0.001" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">a</span><div class="color-value-input"><input type="number" id="cs-oklab-a" step="0.001" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">b</span><div class="color-value-input"><input type="number" id="cs-oklab-b" step="0.001" readonly></div></div>
+      </div>
+      <div class="colorspace-panel" id="cs-xyz" role="tabpanel">
+        <div class="color-value-row"><span class="color-value-label">X</span><div class="color-value-input"><input type="number" id="cs-xyz-x" step="0.01" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">Y</span><div class="color-value-input"><input type="number" id="cs-xyz-y" step="0.01" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">Z</span><div class="color-value-input"><input type="number" id="cs-xyz-z" step="0.01" readonly></div></div>
+      </div>
+      <div class="colorspace-panel" id="cs-lch" role="tabpanel">
+        <div class="color-value-row"><span class="color-value-label">Lightness</span><div class="color-value-input"><input type="number" id="cs-lch-l" step="0.01" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">Chroma</span><div class="color-value-input"><input type="number" id="cs-lch-c" step="0.01" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">Hue</span><div class="color-value-input"><input type="number" id="cs-lch-h" min="0" max="360" step="0.1" readonly>°</div></div>
+      </div>
+      <div class="colorspace-panel" id="cs-hex" role="tabpanel">
+        <div class="color-value-row"><span class="color-value-label">HEX</span><div class="color-value-input"><input type="text" id="cs-hex" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">HEX (8-digit)</span><div class="color-value-input"><input type="text" id="cs-hex8" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">CSS rgb()</span><div class="color-value-input"><input type="text" id="cs-css-rgb" readonly></div></div>
+        <div class="color-value-row"><span class="color-value-label">CSS hsl()</span><div class="color-value-input"><input type="text" id="cs-css-hsl" readonly></div></div>
+      </div>
+
+      <div class="actions" style="margin-top: 1rem;">
+        <button class="btn btn-secondary" id="csCopyBtn" style="flex: 1;">Copy All</button>
+        <button class="btn btn-primary" id="csToExtractorBtn" style="flex: 1;">Use in Extractor</button>
+      </div>
+    </section>
+
+    <!-- Task 4: Export CSS Variables -->
+    <section id="task4-export-css">
+      <h2>Export CSS Variables</h2>
+
+      <div class="field">
+        <label>Prefix</label>
+        <input type="text" id="cssPrefix" value="--color" placeholder="--color" aria-label="CSS variable prefix">
+      </div>
+
+      <div class="field">
+        <label>Format</label>
+        <div class="tab-group" role="tablist" id="cssFormatTabs">
+          <button class="tab-btn active" role="tab" data-format="root" aria-selected="true">:root</button>
+          <button class="tab-btn" role="tab" data-format="selector" aria-selected="false">Selector</button>
+          <button class="tab-btn" role="tab" data-format="tailwind" aria-selected="false">Tailwind</button>
+        </div>
+      </div>
+
+      <div class="field" id="cssSelectorField" hidden>
+        <label>Selector</label>
+        <input type="text" id="cssSelector" value=".palette" placeholder=".palette, .theme-dark" aria-label="CSS selector">
+      </div>
+
+      <div class="field">
+        <label>Output</label>
+        <textarea id="cssOutput" rows="10" readonly aria-label="CSS variables output"></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="cssCopyBtn" style="flex: 1;">Copy to Clipboard</button>
+        <button class="btn btn-secondary" id="cssDownloadBtn" style="flex: 1;">Download .css</button>
+      </div>
+    </section>
+
+    <!-- Task 5: Export JSON -->
+    <section id="task5-export-json">
+      <h2>Export JSON</h2>
+
+      <div class="field">
+        <label>Include Metadata</label>
+        <div class="tab-group" role="tablist" id="jsonFormatTabs">
+          <button class="tab-btn active" role="tab" data-format="full" aria-selected="true">Full</button>
+          <button class="tab-btn" role="tab" data-format="minimal" aria-selected="false">Minimal</button>
+          <button class="tab-btn" role="tab" data-format="ase" aria-selected="false">ASE (Adobe)</button>
+          <button class="tab-btn" role="tab" data-format="gpl" aria-selected="false">GPL (GIMP)</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Output</label>
+        <textarea id="jsonOutput" rows="10" readonly aria-label="JSON output"></textarea>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="jsonCopyBtn" style="flex: 1;">Copy to Clipboard</button>
+        <button class="btn btn-secondary" id="jsonDownloadBtn" style="flex: 1;">Download .json</button>
+      </div>
+    </section>
+
+    <!-- Task 6: Shareable URL -->
+    <section id="task6-share">
+      <h2>Share Palette</h2>
+
+      <div class="field">
+        <label>Shareable Link</label>
+        <div class="input-with-swatch">
+          <input type="text" id="shareUrl" readonly aria-label="Shareable URL">
+          <button class="btn btn-secondary btn-sm" id="shareCopyBtn" aria-label="Copy share URL">Copy</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Options</label>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem;">
+            <input type="checkbox" id="shareIncludeHarmony" checked> Include harmony schemes
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem;">
+            <input type="checkbox" id="shareIncludeSpaces" checked> Include color spaces
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem;">
+            <input type="checkbox" id="shareShorten" checked> Shorten URL (base64)
+          </label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="shareGenerateBtn" style="flex: 1;">Generate Link</button>
+        <button class="btn btn-secondary" id="shareOpenBtn" style="flex: 1;">Open in New Tab</button>
+      </div>
+
+      <p style="font-size: 0.75rem; color: var(--fg-subtle); margin-top: 0.5rem; text-align: center;">Link encodes palette data directly — no server needed.</p>
+    </section>
+
+    <!-- Task 7: Canvas Color Picker -->
+    <section id="task7-picker">
+      <h2>Canvas Picker</h2>
+
+      <div class="field">
+        <label>Click on image to pick colors</label>
+        <div class="canvas-wrapper" id="pickerCanvasWrapper">
+          <canvas id="pickerCanvas" width="320" height="240" aria-label="Click to pick colors from image"></canvas>
+          <div class="tooltip" id="pickerTooltip" role="tooltip"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Picked Colors</label>
+        <div class="palette-strip" id="pickedColors" role="list" aria-label="Picked colors"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" id="pickerClearBtn" style="flex: 1;">Clear Picks</button>
+        <button class="btn btn-primary" id="pickerAddToPaletteBtn" style="flex: 1;">Add to Palette</button>
+      </div>
+    </section>
+
+    <!-- Task 8: Palette Library -->
+    <section id="task8-library">
+      <h2>Palette Library</h2>
+
+      <div class="actions" style="margin-bottom: 1rem;">
+        <button class="btn btn-primary" id="librarySaveCurrentBtn" style="flex: 1;">Save Current</button>
+        <button class="btn btn-secondary" id="libraryImportBtn" style="flex: 1;">Import</button>
+      </div>
+
+      <div class="field">
+        <label>Search</label>
+        <input type="text" id="librarySearch" placeholder="Search palettes..." aria-label="Search saved palettes">
+      </div>
+
+      <div class="library-list" id="libraryList" role="list" aria-label="Saved palettes"></div>
+
+      <p style="font-size: 0.75rem; color: var(--fg-subtle); text-align: center; margin-top: 0.5rem;">
+        <span id="libraryCount">0</span> palettes saved locally
+      </p>
+    </section>
+
+    <!-- Task 9: WCAG Contrast Checker -->
+    <section id="task9-contrast">
+      <h2>Contrast Checker</h2>
+
+      <div class="contrast-pair">
+        <div class="field">
+          <label>Foreground Color</label>
+          <div class="input-with-swatch">
+            <input type="color" id="contrastFg" value="#ffffff" aria-label="Foreground color">
+            <div class="color-swatch color-swatch-small" id="contrastFgSwatch" style="background: #ffffff;"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Background Color</label>
+          <div class="input-with-swatch">
+            <input type="color" id="contrastBg" value="#0d0d12" aria-label="Background color">
+            <div class="color-swatch color-swatch-small" id="contrastBgSwatch" style="background: #0d0d12;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contrast-result" id="contrastResult" role="region" aria-label="Contrast ratio result">
+        <div class="contrast-ratio" id="contrastRatio">—</div>
+        <div class="contrast-rating" id="contrastRating">Select colors</div>
+        <div class="contrast-details">
+          <span>AA: <span id="contrastAA">—</span></span>
+          <span>AAA: <span id="contrastAAA">—</span></span>
+          <span>AA Large: <span id="contrastAALarge">—</span></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Test with palette colors</label>
+        <div class="palette-strip" id="contrastPaletteColors" role="list" aria-label="Palette colors for contrast testing"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" id="contrastSwapBtn" style="flex: 1;">Swap Colors</button>
+        <button class="btn btn-primary" id="contrastSaveBtn" style="flex: 1;">Save Pair</button>
+      </div>
+    </section>
+
+    <!-- Task 10: Random Palette Generator -->
+    <section id="task10-random">
+      <h2>Random Generator</h2>
+
+      <div class="field">
+        <label>Count</label>
+        <input type="number" id="randomCount" min="2" max="20" value="6" aria-label="Number of random colors">
+      </div>
+
+      <div class="constraint-row">
+        <label>Hue Range</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="number" id="randomHueMin" min="0" max="360" value="0" style="width: 70px;">°
+          <span style="color: var(--fg-subtle);">to</span>
+          <input type="number" id="randomHueMax" min="0" max="360" value="360" style="width: 70px;">°
+        </div>
+      </div>
+
+      <div class="constraint-row">
+        <label>Saturation</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="number" id="randomSatMin" min="0" max="100" value="40" style="width: 70px;">%
+          <span style="color: var(--fg-subtle);">to</span>
+          <input type="number" id="randomSatMax" min="0" max="100" value="100" style="width: 70px;">%
+        </div>
+      </div>
+
+      <div class="constraint-row">
+        <label>Lightness</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="number" id="randomLightMin" min="0" max="100" value="30" style="width: 70px;">%
+          <span style="color: var(--fg-subtle);">to</span>
+          <input type="number" id="randomLightMax" min="0" max="100" value="80" style="width: 70px;">%
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Constraints</label>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem;">
+            <input type="checkbox" id="randomDistinct" checked> Ensure distinct colors (min ΔE)
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem;">
+            <input type="checkbox" id="randomHarmony"> Apply harmony rule
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem;">
+            <input type="checkbox" id="randomAvoidMuddy" checked> Avoid muddy colors
+          </label>
+        </div>
+      </div>
+
+      <div class="field" id="randomHarmonyField" hidden>
+        <label>Harmony Rule</label>
+        <select id="randomHarmonyType" aria-label="Harmony type for random generation">
+          <option value="complementary">Complementary</option>
+          <option value="triadic">Triadic</option>
+          <option value="analogous">Analogous</option>
+          <option value="monochromatic">Monochromatic</option>
+          <option value="square">Square</option>
         </select>
       </div>
-    </div>
+
+      <div class="field">
+        <label>Generated Palette</label>
+        <div class="palette-strip" id="randomPalette" role="list" aria-label="Randomly generated colors"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="randomGenerateBtn" style="flex: 1;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 1 1 2.12 9.36L1 14"/></svg>
+          Generate
+        </button>
+        <button class="btn btn-secondary" id="randomSaveBtn" style="flex: 1;">Save to Library</button>
+      </div>
+
+      <p style="font-size: 0.75rem; color: var(--fg-subtle); text-align: center; margin-top: 0.5rem;">
+        Seed: <span id="randomSeed">—</span> · <button class="btn btn-ghost btn-sm" id="randomCopySeedBtn">Copy Seed</button>
+      </p>
+    </section>
   </aside>
 
-  <section class="panel game-panel">
-    <div class="game-header">
-      <div class="puzzle-info">
-        <span class="puzzle-label" id="puzzleLabel">Palette Extractor</span>
-        <span class="puzzle-meta" id="puzzleMeta">Ready to extract</span>
-      </div>
+  <section class="panel" id="mainPanel">
+    <div class="canvas-wrapper" id="mainCanvasWrapper" style="aspect-ratio: 4/3; max-height: 500px;">
+      <canvas id="mainCanvas" aria-label="Image preview and color picker"></canvas>
+      <div class="tooltip" id="mainTooltip" role="tooltip"></div>
     </div>
 
-    <div class="view-container">
-      <div class="preview-area" id="previewArea">
-        <div class="preview-placeholder">
-          <h3>Image Preview Area</h3>
-          <p>Upload an image to generate color palettes</p>
-        </div>
-        <div class="palette-display" id="paletteDisplay" hidden>
-          <!-- Color palette boxes will be generated by JavaScript -->
-        </div>
-        <div class="color-info-panel" id="colorInfoPanel" hidden>
-          <!-- Detailed color information panels -->
-        </div>
-      </div>
+    <div class="palette-strip" id="mainPalette" role="list" aria-label="Extracted palette" style="margin-top: 1.5rem; justify-content: center;"></div>
 
-      <div class="palette-info" id="paletteInfo" hidden>
-        <h3>Generated Palette</h3>
-        <div class="palette-scheme-list" id="paletteSchemeList"></div>
-        <div class="palette-actions">
-          <button class="btn secondary" id="exportCssBtn">Export CSS</button>
-          <button class="btn secondary" id="exportJsonBtn">Export JSON</button>
-          <button class="btn secondary" id="shareBtn">Share Palette</button>
-        </div>
-
-        <div class="harmonic-section" id="harmonicSection" hidden>
-          <h3>Color Harmony Schemes</h3>
-          <div class="harmony-schemes" id="harmonySchemes"></div>
-        </div>
-      </div>
+    <div class="colorspace-tabs" id="mainColorspaceTabs" role="tablist" style="justify-content: center; margin-top: 1rem;">
+      <button class="colorspace-tab active" role="tab" data-main-space="palette" aria-selected="true">Palette</button>
+      <button class="colorspace-tab" role="tab" data-main-space="harmony" aria-selected="false">Harmony</button>
+      <button class="colorspace-tab" role="tab" data-main-space="picked" aria-selected="false">Picked</button>
+      <button class="colorspace-tab" role="tab" data-main-space="random" aria-selected="false">Random</button>
     </div>
 
-    <div class="game-footer">
-      <button class="btn secondary" id="sampleMultipleBtn" hidden>Extract Multiple</button>
-      <button class="btn primary" id="playAgainBtn" hidden>Start Over</button>
-    </div>
-
-    <div id="resultsModal" class="modal" hidden>
-      <div class="modal-content">
-        <h2 id="modalTitle">Palette Generated!</h2>
-        <div class="results-grid">
-          <div class="result-card">
-            <span class="result-label">Colors Extracted</span>
-            <span class="result-value" id="resultColorCount">0</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Image Size</span>
-            <span class="result-value" id="resultImageSize">—</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Dominant Theme</span>
-            <span class="result-value" id="resultTheme">—</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Similarity</span>
-            <span class="result-value" id="resultSimilarity">—</span>
-          </div>
-        </div>
-        <div class="daily-result" id="dailyResult" hidden>
-          <h3>Today's Dominant Color</h3>
-          <p id="dailyMessage"></p>
-        </div>
-        <div class="modal-actions">
-          <button class="btn secondary" id="shareBtnModal">Share</button>
-          <button class="btn primary" id="playAgainBtnModal">New Image</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="gameCompleteModal" class="modal" hidden>
-      <div class="modal-content">
-        <h2 id="finalTitle">Palettes Generated!</h2>
-        <div class="results-grid">
-          <div class="result-card">
-            <span class="result-label">Total Images</span>
-            <span class="result-value" id="finalTotalImages">0</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Avg Colors</span>
-            <span class="result-value" id="finalAvgColors">0</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Dominant Themes</span>
-            <span class="result-value" id="finalThemes">—</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Session</span>
-            <span class="result-value" id="finalSession">Active</span>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="btn secondary" id="shareFinalBtn">Share Results</button>
-          <button class="btn primary" id="playAgainFinalBtn">Start New Session</button>
-        </div>
-      </div>
+    <div class="export-options" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+      <button class="export-btn" id="exportCssBtn" type="button">
+        <svg class="export-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 18 2 12 8 6"/></svg>
+        <div><div class="export-title">Export CSS Variables</div><div class="export-desc">Copy or download :root variables</div></div>
+      </button>
+      <button class="export-btn" id="exportJsonBtn" type="button">
+        <svg class="export-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div><div class="export-title">Export JSON</div><div class="export-desc">Full palette data with metadata</div></div>
+      </button>
+      <button class="export-btn" id="exportShareBtn" type="button">
+        <svg class="export-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        <div><div class="export-title">Share Palette</div><div class="export-desc">Generate shareable URL link</div></div>
+      </button>
     </div>
   </section>
 </main>
 
 <footer>
   Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">About Me</a>
 </footer>
+
+<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Save Palette Modal -->
+<div class="modal" id="saveModal" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title" id="saveModalTitle">Save Palette</h2>
+      <button class="modal-close" id="saveModalClose" aria-label="Close modal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="field">
+      <label>Palette Name</label>
+      <input type="text" id="savePaletteName" placeholder="My Awesome Palette" aria-label="Palette name">
+    </div>
+    <div class="field">
+      <label>Tags (comma separated)</label>
+      <input type="text" id="savePaletteTags" placeholder="ui, dark, vibrant" aria-label="Tags">
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="saveModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="saveModalConfirm">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal" id="importModal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title" id="importModalTitle">Import Palette</h2>
+      <button class="modal-close" id="importModalClose" aria-label="Close modal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="field">
+      <label>Paste JSON or URL</label>
+      <textarea id="importData" rows="6" placeholder="Paste palette JSON, share URL, or CSS variables..."></textarea>
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="importModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="importModalConfirm">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Contrast Pair Saved Modal -->
+<div class="modal" id="contrastSaveModal" role="dialog" aria-modal="true" aria-labelledby="contrastSaveModalTitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title" id="contrastSaveModalTitle">Save Contrast Pair</h2>
+      <button class="modal-close" id="contrastSaveModalClose" aria-label="Close modal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="field">
+      <label>Pair Name</label>
+      <input type="text" id="contrastPairName" placeholder="Button Primary on Dark" aria-label="Contrast pair name">
+    </div>
+    <div class="actions">
+      <button class="btn btn-secondary" id="contrastSaveModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="contrastSaveModalConfirm">Save</button>
+    </div>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>

@@ -3,145 +3,298 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Time Zone Meeting Planner | KING_YOSEF_</title>
+<title>Global Meeting Planner | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
-
-<header class="hero">
-  <h1 class="logo">Time Zone Meeting Planner</h1>
-  <p class="tagline">Find the perfect meeting time across time zones. Visual timeline, overlap detection, shareable links, calendar exports.</p>
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">Global Meeting Planner</span>
+        <span class="brand-tagline">Cross-timezone scheduling</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a class="btn btn-ghost" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span>About Me</span>
+      </a>
+      <button class="btn btn-secondary" id="saveTemplateBtn" title="Save as template (localStorage)">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+          <polyline points="17 21 17 13 7 13 7 21"/>
+          <polyline points="7 3 7 8 15 8"/>
+        </svg>
+        <span>Save Template</span>
+      </button>
+      <button class="btn btn-secondary" id="loadTemplateBtn" title="Load template (localStorage)">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span>Load Template</span>
+      </button>
+    </div>
+  </div>
 </header>
 
-<main class="container">
-  <aside class="panel config-panel" aria-labelledby="config-heading">
-    <h2 id="config-heading">Planner</h2>
+<main class="main-layout" role="main">
+  <aside class="sidebar" aria-labelledby="sidebar-heading">
+    <h2 id="sidebar-heading" class="visually-hidden">Meeting Configuration</h2>
 
-    <div class="field">
-      <label>Date</label>
-      <input type="date" id="meetingDate" value="">
-    </div>
+    <section class="panel" aria-labelledby="date-heading">
+      <header class="panel-header">
+        <h3 class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Meeting Details
+        </h3>
+      </header>
 
-    <div class="field">
-      <label>Meeting Duration</label>
-      <div class="duration-control">
-        <input type="range" id="duration" min="15" max="240" step="15" value="60">
-        <span id="durationValue">60 min</span>
+      <div class="field">
+        <label class="field-label" for="meetingDate">Date</label>
+        <input type="date" id="meetingDate" class="input" aria-label="Meeting date">
       </div>
-    </div>
 
-    <div class="field">
-      <label>Recurrence</label>
-      <select id="recurrence">
-        <option value="none">One-time meeting</option>
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-        <option value="biweekly">Bi-weekly</option>
-        <option value="monthly">Monthly</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>Time Zones / Cities</label>
-      <div class="tz-search">
-        <input type="text" id="tzSearch" placeholder="Search city or timezone (e.g., New York, London, UTC+5)..." autocomplete="off">
-        <div id="tzSuggestions" class="suggestions" hidden></div>
-      </div>
-      <div id="selectedTimezones" class="selected-timezones" role="list"></div>
-      <div class="field-hint">Click a suggestion to add. Drag to reorder. Max 8 zones.</div>
-    </div>
-
-    <div class="field">
-      <label>Working Hours (default 9-17)</label>
-      <div class="working-hours">
-        <div class="wh-preset">
-          <label><input type="radio" name="whPreset" value="default" checked> 9:00–17:00</label>
-          <label><input type="radio" name="whPreset" value="extended"> 8:00–18:00</label>
-          <label><input type="radio" name="whPreset" value="custom"> Custom</label>
+      <div class="field">
+        <label class="field-label" for="duration">Duration</label>
+        <div class="duration-control">
+          <input type="range" id="duration" min="15" max="240" step="15" value="60" class="input" aria-label="Meeting duration in minutes">
+          <span id="durationValue" class="duration-value">60 min</span>
         </div>
-        <div class="wh-custom" hidden>
+        <p class="field-hint">15 min increments up to 4 hours</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="recurrence">Recurrence</label>
+        <select id="recurrence" class="select" aria-label="Meeting recurrence pattern">
+          <option value="none">One-time meeting</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="biweekly">Bi-weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="timezone-heading">
+      <header class="panel-header">
+        <h3 class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          Time Zones
+          <span class="panel-subtitle" id="zoneCount">0 added</span>
+        </h3>
+      </header>
+
+      <div class="field tz-search">
+        <label class="field-label" for="tzSearch">Search & Add</label>
+        <input type="text" id="tzSearch" class="input" placeholder="City, timezone, or UTC offset..." autocomplete="off" aria-label="Search for time zones" aria-autocomplete="list" aria-controls="tzSuggestions">
+        <button type="button" class="search-clear" id="tzClear" aria-label="Clear search" hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div id="tzSuggestions" class="suggestions" role="listbox" aria-label="Timezone suggestions" hidden></div>
+      </div>
+
+      <div class="field">
+        <div id="selectedTimezones" class="selected-zones" role="list" aria-label="Selected time zones"></div>
+        <p class="field-hint">Click a suggestion to add. Drag to reorder. Max 8 zones.</p>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="hours-heading">
+      <header class="panel-header">
+        <h3 class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          Working Hours
+        </h3>
+      </header>
+
+      <div class="field">
+        <label class="field-label">Preset</label>
+        <div class="wh-presets" role="radiogroup" aria-label="Working hours preset">
+          <label class="wh-preset"><input type="radio" name="whPreset" value="default" checked> 9:00–17:00</label>
+          <label class="wh-preset"><input type="radio" name="whPreset" value="extended"> 8:00–18:00</label>
+          <label class="wh-preset"><input type="radio" name="whPreset" value="custom"> Custom</label>
+        </div>
+      </div>
+
+      <div class="field wh-custom" id="whCustom" hidden>
+        <div class="input-row">
           <div class="wh-row">
-            <label>Start</label>
-            <input type="time" id="whStart" value="09:00">
+            <label class="field-label" for="whStart">Start</label>
+            <input type="time" id="whStart" class="input" value="09:00" step="900" aria-label="Work day start time">
           </div>
           <div class="wh-row">
-            <label>End</label>
-            <input type="time" id="whEnd" value="17:00">
+            <label class="field-label" for="whEnd">End</label>
+            <input type="time" id="whEnd" class="input" value="17:00" step="900" aria-label="Work day end time">
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="field checkbox-row">
-      <label class="checkbox-label">
-        <input type="checkbox" id="showWeekend" checked>
-        <span>Show weekends</span>
-      </label>
-    </div>
-    <div class="field checkbox-row">
-      <label class="checkbox-label">
-        <input type="checkbox" id="highlightOverlaps" checked>
-        <span>Highlight best overlaps</span>
-      </label>
-    </div>
-    <div class="field checkbox-row">
-      <label class="checkbox-label">
-        <input type="checkbox" id="compactMode">
-        <span>Compact mode (for embedding)</span>
-      </label>
-    </div>
+    <section class="panel" aria-labelledby="options-heading">
+      <header class="panel-header">
+        <h3 class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Display Options
+        </h3>
+      </header>
 
-    <div class="actions">
-      <button class="btn primary" id="findBestBtn">Find Best Slots</button>
-      <button class="btn" id="shareBtn">Share Link</button>
-    </div>
-
-    <div class="field">
-      <label>Export</label>
-      <div class="export-buttons">
-        <button class="btn" id="exportIcsBtn">.ics Calendar</button>
-        <button class="btn" id="exportSlackBtn">Slack Message</button>
-        <button class="btn" id="exportTextBtn">Plain Text</button>
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="showWeekend" checked>
+          <span>Include weekends</span>
+        </label>
       </div>
-    </div>
+
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="highlightOverlaps" checked>
+          <span>Highlight best overlaps</span>
+        </label>
+      </div>
+
+      <div class="field checkbox-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="compactMode">
+          <span>Compact timeline</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="actions-heading">
+      <header class="panel-header">
+        <h3 class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+            <line x1="19" y1="12" x2="5" y2="12"/>
+          </svg>
+          Actions
+        </h3>
+      </header>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="findBestBtn">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Find Best Slots
+        </button>
+        <button class="btn btn-secondary" id="shareBtn">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          Share Link
+        </button>
+      </div>
+
+      <div class="export-group">
+        <label class="field-label">Export</label>
+        <div class="export-buttons">
+          <button class="btn btn-secondary" id="exportIcsBtn">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <line x1="8" y1="14" x2="16" y2="14"/>
+              <line x1="10" y1="16" x2="10" y2="20"/>
+              <line x1="14" y1="16" x2="14" y2="20"/>
+            </svg>
+            .ics Calendar File
+          </button>
+          <button class="btn btn-secondary" id="exportSlackBtn">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+            Slack Message
+          </button>
+          <button class="btn btn-secondary" id="exportTextBtn">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            Plain Text
+          </button>
+        </div>
+      </div>
+    </section>
   </aside>
 
-  <section class="panel preview-panel" aria-labelledby="preview-heading">
-    <h2 id="preview-heading">Timeline</h2>
+  <section class="timeline-panel" aria-labelledby="timeline-heading">
+    <header class="timeline-header">
+      <div class="timeline-date" id="timelineDate">—</div>
+      <div class="timeline-legend" role="group" aria-label="Timeline legend">
+        <span class="legend-item"><span class="legend-dot work" aria-hidden="true"></span> Working hours</span>
+        <span class="legend-item"><span class="legend-dot overlap" aria-hidden="true"></span> Best overlap</span>
+        <span class="legend-item"><span class="legend-dot meeting" aria-hidden="true"></span> Meeting block</span>
+        <span class="legend-item"><span class="legend-dot current" aria-hidden="true"></span> Current hour</span>
+      </div>
+    </header>
 
-    <div id="timelineContainer">
-      <div class="empty-state" id="emptyState">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <p>Add time zones to see the timeline</p>
+    <div class="timeline-wrapper">
+      <div class="timeline-empty" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <p>No time zones added yet</p>
         <p class="hint">Search for cities like "New York", "London", "Tokyo" or timezones like "UTC+5"</p>
       </div>
 
-      <div id="timeline" hidden>
-        <div class="timeline-header">
-          <div class="timeline-date" id="timelineDate"></div>
-          <div class="timeline-legend">
-            <span class="legend-item"><span class="legend-color work"></span> Working hours</span>
-            <span class="legend-item"><span class="legend-color overlap"></span> Best overlap</span>
-            <span class="legend-item"><span class="legend-color meeting"></span> Meeting</span>
-          </div>
-        </div>
-        <div class="timeline-grid" id="timelineGrid" role="grid"></div>
-        <div class="best-slots" id="bestSlots" hidden>
-          <h3>🎯 Best Meeting Slots</h3>
-          <div class="slots-list" id="slotsList"></div>
-        </div>
-      </div>
+      <div class="timeline-grid" id="timelineGrid" role="grid" aria-label="24-hour availability timeline" hidden></div>
+    </div>
+
+    <div class="best-slots" id="bestSlots" hidden>
+      <header class="best-slots-header">
+        <h3 class="best-slots-title">Recommended Slots <span class="best-slots-count" id="slotsCount"></span></h3>
+      </header>
+      <div class="slots-list" id="slotsList"></div>
     </div>
   </section>
 </main>
 
-<footer>
+<footer class="site-footer" role="contentinfo">
   Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+  <a class="footer-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">About Me</a>
 </footer>
+
 <script src="script.js"></script>
 </body>
 </html>

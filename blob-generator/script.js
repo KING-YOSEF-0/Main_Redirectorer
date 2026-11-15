@@ -1,19 +1,24 @@
-// Blob Generator - Main Script
-(function() {
+// Blob Generator - Complete with 10 Practical Tasks
+// Vanilla JS, no frameworks, no build step
+(function () {
   'use strict';
 
   // ============================================
-  // PRESET PALETTES
+  // PRESET PALETTES (10+ palettes)
   // ============================================
 
   const PALETTES = {
-    sunset: ['#ff4fa3', '#ff9f1c', '#ff6b35', '#ff3d7f', '#ff8c42'],
+    aurora: ['#ff2d75', '#ff6b35', '#00e5a0', '#7c4dff', '#ffd700'],
+    sunset: ['#ff2d75', '#ff9f1c', '#ff6b35', '#ff3d7f', '#ff8c42'],
     ocean: ['#35c3ff', '#2ee6a6', '#00b4d8', '#0077b6', '#023e8a'],
     forest: ['#2ee6a6', '#4ade80', '#22c55e', '#16a34a', '#15803d'],
     candy: ['#ff4fa3', '#ff9f1c', '#35c3ff', '#9b5cff', '#f472b6'],
     neon: ['#ff00ff', '#00ffff', '#ffff00', '#ff4fa3', '#35c3ff'],
     pastel: ['#fbcfe8', '#fde68a', '#bbf7d0', '#bfdbfe', '#e9d5ff'],
-    mono: ['#1a1a2e', '#2d2d3f', '#3d3d5c', '#5a5a7a', '#8a8a9a']
+    mono: ['#1a1a2e', '#2d2d3f', '#3d3d5c', '#5a5a7a', '#8a8a9a'],
+    vapor: ['#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444'],
+    cyber: ['#06b6d4', '#14b8a6', '#f472b6', '#a855f7', '#ef4444'],
+    retro: ['#f97316', '#fbbf24', '#a3e635', '#22c55e', '#3b82f6'],
   };
 
   // ============================================
@@ -33,19 +38,20 @@
     animSpeed: 1,
     morphIntensity: 0.4,
     autoRotate: true,
+    rotationDirection: 1, // 1 = clockwise, -1 = counter-clockwise
     colorScheme: 'solid',
-    solidColor: '#ff4fa3',
+    solidColor: '#ff2d75',
     gradientType: 'linear',
-    gradColor1: '#ff4fa3',
-    gradColor2: '#35c3ff',
+    gradColor1: '#ff2d75',
+    gradColor2: '#00e5a0',
     gradAngle: 45,
-    multiColors: ['#ff4fa3', '#ff9f1c', '#2ee6a6', '#35c3ff', '#9b5cff'],
-    presetPalette: 'sunset',
+    multiColors: ['#ff2d75', '#ff6b35', '#00e5a0', '#7c4dff', '#ffd700'],
+    presetPalette: 'aurora',
     size: 'square',
     customWidth: 500,
     customHeight: 500,
     background: 'transparent',
-    bgColor: '#0f0f14',
+    bgColor: '#0a0a0f',
     uiTheme: 'dark',
     blobsGenerated: 0,
     svgExports: 0,
@@ -53,7 +59,9 @@
     blobPoints: [],
     blobs: [],
     animationFrame: null,
-    animationTime: 0
+    animationTime: 0,
+    isAnimating: false,
+    isColliding: false,
   };
 
   // ============================================
@@ -63,7 +71,7 @@
   const els = {};
   function cacheElements() {
     els.bubbles = document.getElementById('bubbles');
-    els.modeTabs = document.querySelectorAll('.mode-tab[data-mode]');
+    els.modeTabs = document.querySelectorAll('.mode-tab');
     els.colorTabs = document.querySelectorAll('.color-tab');
     els.bgTabs = document.querySelectorAll('.bg-tab');
     els.sizeTabs = document.querySelectorAll('.size-tab');
@@ -132,27 +140,38 @@
     els.pngExports = document.getElementById('pngExports');
     els.puzzleLabel = document.getElementById('puzzleLabel');
     els.puzzleMeta = document.getElementById('puzzleMeta');
+    els.canvasTitle = document.getElementById('canvasTitle');
+    els.canvasMeta = document.getElementById('canvasMeta');
+    els.canvasWrapper = document.getElementById('canvasWrapper');
+    els.canvasStats = document.getElementById('canvasStats');
+    els.exportBar = document.getElementById('exportBar');
+    els.themeToggle = document.getElementById('themeToggle');
+    els.themeIcon = document.getElementById('themeIcon');
+    els.toastContainer = document.getElementById('toastContainer');
+    els.presetGallery = document.getElementById('presetGallery');
   }
 
   // ============================================
   // UTILITIES
   // ============================================
 
-  function showToast(message) {
+  function showToast(message, type = 'info') {
     let toast = document.querySelector('.toast');
     if (!toast) {
       toast = document.createElement('div');
-      toast.className = 'toast';
+      toast.className = 'toast toast-' + type;
       document.body.appendChild(toast);
     }
     toast.textContent = message;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    setTimeout(() => toast.classList.remove('show'), 3500);
   }
 
-  function setActiveTab(tabs, value) {
+  function setActiveTab(tabs, value, dataAttr) {
     tabs.forEach(tab => {
-      const isActive = tab.dataset.mode === value || tab.dataset.color === value || tab.dataset.bg === value || tab.dataset.size === value;
+      const isActive = tab.dataset[dataAttr] === value;
       tab.classList.toggle('active', isActive);
       tab.setAttribute('aria-selected', isActive);
     });
@@ -188,12 +207,84 @@
     state.uiTheme = theme;
     els.uiTheme.value = theme;
     document.body.classList.toggle('light-theme', theme === 'light');
+    document.body.classList.toggle('dark-theme', theme === 'dark');
+    // Update theme icon
+    if (theme === 'light') {
+      els.themeIcon.innerHTML = `<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>`;
+    } else {
+      els.themeIcon.innerHTML = `<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>`;
+    }
   }
 
   function saveTheme(theme) {
     localStorage.setItem('blobGeneratorTheme', theme);
     state.uiTheme = theme;
     document.body.classList.toggle('light-theme', theme === 'light');
+    document.body.classList.toggle('dark-theme', theme === 'dark');
+    if (theme === 'light') {
+      els.themeIcon.innerHTML = `<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>`;
+    } else {
+      els.themeIcon.innerHTML = `<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>`;
+    }
+  }
+
+  // ============================================
+  // COLOR SCHEME HELPERS
+  // ============================================
+
+  function hexToHsl(hex) {
+    const num = parseInt(hex.slice(1), 16);
+    const r = (num >> 16) / 255;
+    const g = ((num >> 8) & 0x00FF) / 255;
+    const b = (num & 0x0000FF) / 255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+      h = s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+  }
+
+  function hslToHex(h, s, l) {
+    h = h / 360;
+    const a = s / 100;
+    const l2 = l / 100;
+    let r, g, b;
+    if (l2 <= 0.5) {
+      const q = l2 * (1 + a);
+      const p = l2 * (1 - a) + a * l2;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    } else {
+      const q = l2 * (1 - a) + a;
+      const p = l2 + a - a * l2;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+    const toHex = x => Math.round(x * 255).toString(16).padStart(2, '0');
+    return '#' + toHex(r) + toHex(g) + toHex(b);
+  }
+
+  function hue2rgb(p, q, t) {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
   }
 
   // ============================================
@@ -286,6 +377,127 @@
   }
 
   // ============================================
+  // MULTIPLE BLOBS WITH COLLISION AVOIDANCE
+  // ============================================
+
+  function generateMultipleBlobs() {
+    const width = state.size === 'custom' ? state.customWidth : (state.size === 'wide' ? 800 : state.size === 'tall' ? 400 : 500);
+    const height = state.size === 'custom' ? state.customHeight : (state.size === 'wide' ? 400 : state.size === 'tall' ? 800 : 500);
+    const baseRadius = Math.min(width, height) * 0.35;
+
+    state.blobs = [];
+
+    for (let i = 0; i < state.blobCount; i++) {
+      // Random position with overlap control
+      let x, y, attempts = 0;
+      do {
+        x = Math.random() * width;
+        y = Math.random() * height;
+        attempts++;
+      } while (attempts < 100 && state.blobs.some(b => {
+        const dx = x - b.x;
+        const dy = y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        return dist < (b.radius + baseRadius * (state.minSize / 100)) * (1 - state.overlap);
+      }));
+
+      const sizePercent = state.minSize + Math.random() * (state.maxSize - state.minSize);
+      const radius = baseRadius * (sizePercent / 100);
+
+      state.blobs.push({
+        x, y, radius,
+        complexity: Math.floor(5 + Math.random() * 10),
+        smoothness: 0.3 + Math.random() * 0.5,
+        variation: 0.2 + Math.random() * 0.4,
+        rotation: Math.random() * 360,
+        opacity: 0.7 + Math.random() * 0.3,
+        direction: Math.random() > 0.5 ? 1 : -1 // animation direction
+      });
+    }
+  }
+
+  // ============================================
+  // ANIMATION WITH DIRECTION CONTROL
+  // ============================================
+
+  function animateBlob() {
+    if (state.mode !== 'animated' || state.isAnimating) return;
+
+    const width = state.size === 'custom' ? state.customWidth : (state.size === 'wide' ? 800 : state.size === 'tall' ? 400 : 500);
+    const height = state.size === 'custom' ? state.customHeight : (state.size === 'wide' ? 400 : state.size === 'tall' ? 800 : 500);
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const baseRadius = Math.min(width, height) * 0.35;
+
+    state.animationTime += 0.016 * state.animSpeed * state.rotationDirection;
+
+    if (state.mode === 'animated') {
+      // Morph the blob with rotation direction
+      const points = [];
+      const angleStep = (Math.PI * 2) / state.complexity;
+
+      for (let i = 0; i < state.complexity; i++) {
+        const angle = i * angleStep + state.animationTime;
+        const radiusVariation = baseRadius * (
+          1 - state.variation +
+          Math.sin(state.animationTime * 2 + i * state.rotationDirection) * state.variation * state.morphIntensity +
+          Math.cos(state.animationTime * 1.5 + i * 2 * state.rotationDirection) * state.variation * state.morphIntensity * 0.5
+        );
+        const x = centerX + Math.cos(angle) * radiusVariation;
+        const y = centerY + Math.sin(angle) * radiusVariation;
+        points.push({ x, y });
+      }
+
+      const smoothed = state.smoothness > 0 ? smoothPoints(points, state.smoothness) : points;
+      const path = pointsToPath(smoothed);
+
+      const blobPath = document.getElementById('animatedBlob');
+      if (blobPath) {
+        blobPath.setAttribute('d', path);
+      }
+    }
+
+    // In multiple mode, animate each blob
+    if (state.mode === 'multiple' && state.blobs) {
+      state.blobs.forEach(blob => {
+        blob.animationTime = blob.animationTime || 0;
+        blob.animationTime += 0.016 * state.animSpeed * blob.direction;
+
+        const points = [];
+        const angleStep = (Math.PI * 2) / blob.complexity;
+
+        for (let i = 0; i < blob.complexity; i++) {
+          const angle = i * angleStep + blob.animationTime;
+          const radiusVariation = blob.radius * (
+            1 - blob.variation +
+            Math.sin(blob.animationTime * 2 + i) * blob.variation * blob.morphIntensity
+          );
+          const x = blob.x + Math.cos(angle) * radiusVariation;
+          const y = blob.y + Math.sin(angle) * radiusVariation;
+          points.push({ x, y });
+        }
+
+        const smoothed = blob.smoothness > 0 ? smoothPoints(points, blob.smoothness) : points;
+        const path = pointsToPath(smoothed);
+
+        const svg = generateSVG();
+        els.blobSvg.outerHTML = svg;
+        els.blobSvg = document.getElementById('blobSvg');
+      });
+    }
+
+    state.animationFrame = requestAnimationFrame(animateBlob);
+  }
+
+  function stopAnimation() {
+    if (state.animationFrame) {
+      cancelAnimationFrame(state.animationFrame);
+      state.animationFrame = null;
+    }
+    state.isAnimating = false;
+  }
+
+  // ============================================
   // SVG GENERATION
   // ============================================
 
@@ -320,7 +532,6 @@
         <stop offset="100%" stop-color="${state.gradColor2}"/>
       </linearGradient></defs>`;
     } else if (state.colorScheme === 'gradient' && state.mode === 'multiple') {
-      // For multiple blobs, create a gradient for each
       state.blobs.forEach((blob, idx) => {
         const angle = state.gradAngle * Math.PI / 180;
         const x1 = blob.x - Math.cos(angle) * blob.radius;
@@ -333,8 +544,7 @@
         </linearGradient></defs>`;
       });
     } else if (state.colorScheme === 'palette') {
-      const palette = PALETTES[state.presetPalette] || PALETTES.sunset;
-      // Create radial gradients for each palette color
+      const palette = PALETTES[state.presetPalette] || PALETTES.aurora;
       palette.forEach((color, idx) => {
         svgContent += `<defs><radialGradient id="paletteGrad${idx}" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stop-color="${color}"/>
@@ -369,7 +579,7 @@
         if (state.colorScheme === 'gradient') fill = `url(#blobGrad${idx})`;
         else if (state.colorScheme === 'multi') fill = state.multiColors[idx % state.multiColors.length];
         else if (state.colorScheme === 'palette') {
-          const palette = PALETTES[state.presetPalette] || PALETTES.sunset;
+          const palette = PALETTES[state.presetPalette] || PALETTES.aurora;
           fill = `url(#paletteGrad${idx % palette.length})`;
         }
 
@@ -404,101 +614,6 @@
   }
 
   // ============================================
-  // MULTIPLE BLOBS SETUP
-  // ============================================
-
-  function generateMultipleBlobs() {
-    const width = state.size === 'custom' ? state.customWidth : (state.size === 'wide' ? 800 : state.size === 'tall' ? 400 : 500);
-    const height = state.size === 'custom' ? state.customHeight : (state.size === 'wide' ? 400 : state.size === 'tall' ? 800 : 500);
-    const baseRadius = Math.min(width, height) * 0.35;
-
-    state.blobs = [];
-
-    for (let i = 0; i < state.blobCount; i++) {
-      // Random position with overlap control
-      let x, y, attempts = 0;
-      do {
-        x = Math.random() * width;
-        y = Math.random() * height;
-        attempts++;
-      } while (attempts < 50 && state.blobs.some(b => {
-        const dx = x - b.x;
-        const dy = y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        return dist < (b.radius + baseRadius * (state.minSize / 100)) * (1 - state.overlap);
-      }));
-
-      const sizePercent = state.minSize + Math.random() * (state.maxSize - state.minSize);
-      const radius = baseRadius * (sizePercent / 100);
-
-      state.blobs.push({
-        x, y, radius,
-        complexity: Math.floor(5 + Math.random() * 10),
-        smoothness: 0.3 + Math.random() * 0.5,
-        variation: 0.2 + Math.random() * 0.4,
-        rotation: Math.random() * 360,
-        opacity: 0.7 + Math.random() * 0.3
-      });
-    }
-  }
-
-  // ============================================
-  // ANIMATION
-  // ============================================
-
-  function animateBlob() {
-    if (!state.autoRotate) return;
-
-    const width = state.size === 'custom' ? state.customWidth : (state.size === 'wide' ? 800 : state.size === 'tall' ? 400 : 500);
-    const height = state.size === 'custom' ? state.customHeight : (state.size === 'wide' ? 400 : state.size === 'tall' ? 800 : 500);
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const baseRadius = Math.min(width, height) * 0.35;
-
-    state.animationTime += 0.016 * state.animSpeed;
-
-    // Morph the blob
-    const points = [];
-    const angleStep = (Math.PI * 2) / state.complexity;
-
-    for (let i = 0; i < state.complexity; i++) {
-      const angle = i * angleStep + state.animationTime;
-      const radiusVariation = baseRadius * (
-        1 - state.variation +
-        Math.sin(state.animationTime * 2 + i) * state.variation * state.morphIntensity +
-        Math.cos(state.animationTime * 1.5 + i * 2) * state.variation * state.morphIntensity * 0.5
-      );
-      const x = centerX + Math.cos(angle) * radiusVariation;
-      const y = centerY + Math.sin(angle) * radiusVariation;
-      points.push({ x, y });
-    }
-
-    const smoothed = state.smoothness > 0 ? smoothPoints(points, state.smoothness) : points;
-    const path = pointsToPath(smoothed);
-
-    const blobPath = document.getElementById('animatedBlob');
-    if (blobPath) {
-      blobPath.setAttribute('d', path);
-    }
-
-    // Rotate if enabled
-    if (state.autoRotate) {
-      state.rotation = (state.animationTime * 50) % 360;
-      els.rotation.value = Math.round(state.rotation);
-      els.rotationValue.textContent = Math.round(state.rotation);
-    }
-
-    state.animationFrame = requestAnimationFrame(animateBlob);
-  }
-
-  function stopAnimation() {
-    if (state.animationFrame) {
-      cancelAnimationFrame(state.animationFrame);
-      state.animationFrame = null;
-    }
-  }
-
-  // ============================================
   // RENDER
   // ============================================
 
@@ -513,6 +628,7 @@
 
     // Start animation if in animated mode
     if (state.mode === 'animated') {
+      state.isAnimating = true;
       animateBlob();
     } else {
       stopAnimation();
@@ -528,6 +644,13 @@
     els.shareBtnModal.hidden = false;
     els.downloadBtnModal.hidden = false;
 
+    // Update canvas wrapper background
+    if (state.background === 'checkerboard') {
+      els.canvasWrapper.classList.add('checkerboard');
+    } else {
+      els.canvasWrapper.classList.remove('checkerboard');
+    }
+
     // Update modal
     els.resultMode.textContent = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
     els.resultPoints.textContent = state.complexity;
@@ -540,7 +663,26 @@
     els.resultsModal.hidden = false;
     els.gameStatus.textContent = 'Blob generated! Choose an export option.';
 
-    // Update stats
+    // Update canvas stats
+    els.canvasStats.innerHTML = `
+      <div class="stat-item">
+        <span class="stat-value">${state.mode.charAt(0).toUpperCase() + state.mode.slice(1)}</span>
+        <span class="stat-label">Mode</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">${state.complexity}</span>
+        <span class="stat-label">Points</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">${state.colorScheme.charAt(0).toUpperCase() + state.colorScheme.slice(1)}</span>
+        <span class="stat-label">Colors</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">${width}×${height}</span>
+        <span class="stat-label">Size</span>
+      </div>
+    `;
+
     state.blobsGenerated++;
     saveStats();
     updateStatsDisplay();
@@ -553,7 +695,7 @@
   function copySvg() {
     const svg = els.blobSvg.outerHTML;
     navigator.clipboard.writeText(svg).then(() => {
-      showToast('SVG copied to clipboard!');
+      showToast('SVG copied to clipboard!', 'success');
     }).catch(() => {
       showToast('Copy failed');
     });
@@ -570,7 +712,7 @@
     state.svgExports++;
     saveStats();
     updateStatsDisplay();
-    showToast('SVG downloaded!');
+    showToast('SVG downloaded!', 'success');
   }
 
   function downloadPng() {
@@ -586,7 +728,7 @@
     if (state.background === 'color') {
       ctx.fillStyle = state.bgColor;
       ctx.fillRect(0, 0, width, height);
-    } else if (state.background === 'checker') {
+    } else if (state.background === 'checkerboard') {
       const size = 20;
       for (let x = 0; x < width; x += size) {
         for (let y = 0; y < height; y += size) {
@@ -612,7 +754,7 @@
         state.pngExports++;
         saveStats();
         updateStatsDisplay();
-        showToast('PNG downloaded!');
+        showToast('PNG downloaded!', 'success');
       });
     };
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
@@ -650,7 +792,7 @@
     link.href = URL.createObjectURL(blob);
     link.click();
     URL.revokeObjectURL(link.href);
-    showToast('CSS downloaded!');
+    showToast('CSS downloaded!', 'success');
   }
 
   function shareBlob() {
@@ -662,9 +804,13 @@
       navigator.share({ files: [file], title: 'Blob Shape' }).catch(() => {});
     } else {
       copySvg();
-      showToast('Share not available. SVG copied to clipboard.');
+      showToast('Share not available. SVG copied to clipboard.', 'info');
     }
   }
+
+  // ============================================
+  // RANDOMIZE
+  // ============================================
 
   function randomize() {
     // Random mode
@@ -687,6 +833,8 @@
     state.animSpeed = 0.5 + Math.random() * 2;
     state.morphIntensity = 0.2 + Math.random() * 0.6;
     state.autoRotate = Math.random() > 0.3;
+    state.rotationDirection = Math.random() > 0.5 ? 1 : -1;
+    els.rotationDirectionValue.textContent = state.rotationDirection === 1 ? 'CW' : 'CCW';
 
     // Random colors
     const colorSchemes = ['solid', 'gradient', 'multi', 'palette'];
@@ -711,18 +859,23 @@
       state.presetPalette = palettes[Math.floor(Math.random() * palettes.length)];
     }
 
+    // Random rotation direction for animated mode
+    if (state.mode === 'animated') {
+      state.rotationDirection = Math.random() > 0.5 ? 1 : -1;
+    }
+
     // Random size
     const sizes = ['square', 'wide', 'tall', 'custom'];
     setSize(sizes[Math.floor(Math.random() * sizes.length)]);
 
     // Random background
-    const backgrounds = ['transparent', 'color', 'checker'];
+    const backgrounds = ['transparent', 'color', 'checkerboard'];
     setBackground(backgrounds[Math.floor(Math.random() * backgrounds.length)]);
 
     // Update UI
     updateUIFromState();
 
-    showToast('Randomized!');
+    showToast('Randomized!', 'success');
   }
 
   function updateUIFromState() {
@@ -734,6 +887,12 @@
     els.variationValue.textContent = state.variation.toFixed(2);
     els.rotation.value = Math.round(state.rotation);
     els.rotationValue.textContent = Math.round(state.rotation);
+
+    // Update rotation direction display
+    if (els.rotationDirectionValue) {
+      els.rotationDirectionValue.textContent = state.rotationDirection === 1 ? 'CW' : 'CCW';
+    }
+
     els.blobCount.value = state.blobCount;
     els.blobCountValue.textContent = state.blobCount;
     els.minSize.value = state.minSize;
@@ -766,7 +925,7 @@
 
   function setMode(mode) {
     state.mode = mode;
-    setActiveTab(els.modeTabs, mode);
+    setActiveTab(els.modeTabs, mode, 'data-mode');
 
     els.singleOptions.hidden = mode !== 'single';
     els.multipleOptions.hidden = mode !== 'multiple';
@@ -778,24 +937,34 @@
 
   function setColorScheme(scheme) {
     state.colorScheme = scheme;
-    setActiveTab(els.colorTabs, scheme);
+    setActiveTab(els.colorTabs, scheme, 'data-color');
 
     els.solidColorOptions.hidden = scheme !== 'solid';
     els.gradientColorOptions.hidden = scheme !== 'gradient';
     els.multiColorOptions.hidden = scheme !== 'multi';
     els.paletteColorOptions.hidden = scheme !== 'palette';
+
+    // Update preset palette options visibility
+    if (els.presetPalette) {
+      els.paletteColorOptions.hidden = scheme !== 'palette';
+    }
   }
 
   function setSize(size) {
     state.size = size;
-    setActiveTab(els.sizeTabs, size);
+    setActiveTab(els.sizeTabs, size, 'data-size');
     els.customSizeOptions.hidden = size !== 'custom';
   }
 
   function setBackground(bg) {
     state.background = bg;
-    setActiveTab(els.bgTabs, bg);
+    setActiveTab(els.bgTabs, bg, 'data-bg');
     els.bgColorOptions.hidden = bg !== 'color';
+  }
+
+  function toggleRotationDirection() {
+    state.rotationDirection = state.rotationDirection === 1 ? -1 : 1;
+    els.rotationDirectionValue.textContent = state.rotationDirection === 1 ? 'CW' : 'CCW';
   }
 
   // ============================================
@@ -877,6 +1046,12 @@
       state.autoRotate = els.autoRotate.checked;
     });
 
+    // Rotation direction control (only for animated mode)
+    els.rotationDirectionBtn = document.querySelector('.rotation-direction-btn');
+    if (els.rotationDirectionBtn) {
+      els.rotationDirectionBtn.addEventListener('click', toggleRotationDirection);
+    }
+
     // Color controls
     els.solidColor.addEventListener('input', () => state.solidColor = els.solidColor.value);
     els.gradientType.addEventListener('change', () => state.gradientType = els.gradientType.value);
@@ -910,38 +1085,110 @@
     els.shareBtn.addEventListener('click', shareBlob);
     els.newBlobBtn.addEventListener('click', () => {
       els.resultsModal.hidden = true;
-      els.gameStatus.textContent = 'Configure options and click "Generate Blob"';
+      els.gameStatus.textContent = 'Configure options and click "Generate"';
     });
     els.shareBtnModal.addEventListener('click', shareBlob);
     els.downloadBtnModal.addEventListener('click', downloadSvg);
     els.newBlobBtnModal.addEventListener('click', () => {
       els.resultsModal.hidden = true;
-      els.gameStatus.textContent = 'Configure options and click "Generate Blob"';
+      els.gameStatus.textContent = 'Configure options and click "Generate"';
     });
 
-    // Theme
+    // Theme toggle
     els.uiTheme.addEventListener('change', () => saveTheme(els.uiTheme.value));
+
+    // Theme toggle button
+    els.themeToggle.addEventListener('click', () => {
+      const newTheme = document.body.classList.contains('light-theme') ? 'dark' : 'light';
+      saveTheme(newTheme);
+    });
+
+    // Preset gallery
+    generatePresetGallery();
   }
 
   // ============================================
-  // BUBBLE ANIMATION
+  // PRESET GALLERY GENERATOR (Task 9)
   // ============================================
 
-  function initBubbles() {
-    const colors = ['var(--accent)', 'var(--accent-2)', 'var(--accent-3)', 'var(--accent-4)', 'var(--accent-5)'];
-    const count = 25;
+  function generatePresetGallery() {
+    els.presetGallery.innerHTML = '';
 
-    for (let i = 0; i < count; i++) {
-      const bubble = document.createElement('div');
-      bubble.className = 'float';
-      bubble.style.setProperty('--c', colors[Math.floor(Math.random() * colors.length)]);
-      bubble.style.setProperty('--dx', `${(Math.random() - 0.5) * 200}px`);
-      bubble.style.setProperty('--duration', `${15 + Math.random() * 20}s`);
-      bubble.style.left = `${Math.random() * 100}%`;
-      bubble.style.width = bubble.style.height = `${10 + Math.random() * 40}px`;
-      bubble.style.animationDelay = `${-Math.random() * 30}s`;
-      els.bubbles.appendChild(bubble);
-    }
+    let idx = 0;
+    Object.keys(PALETTES).forEach(paletteName => {
+      const palette = PALETTES[paletteName];
+
+      // Generate a blob SVG for this palette
+      const width = 500;
+      const height = 500;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const baseRadius = Math.min(width, height) * 0.35;
+
+      // Generate points for a simple blob
+      const complexity = 30;
+      const angleStep = (Math.PI * 2) / complexity;
+      const points = [];
+
+      for (let i = 0; i < complexity; i++) {
+        const angle = i * angleStep;
+        const radiusVariation = baseRadius * (1 - 0.3 + Math.random() * 0.6);
+        const x = centerX + Math.cos(angle) * radiusVariation;
+        const y = centerY + Math.sin(angle) * radiusVariation;
+        points.push({ x, y });
+      }
+
+      // Smooth points
+      const smoothed = state.smoothness > 0 ? smoothPoints(points, state.smoothness) : points;
+      const path = pointsToPath(smoothed);
+
+      // Use first palette color as fill
+      const color = palette[0];
+
+      const svg = `
+        <svg width="80" height="80" viewBox="0 0 500 500" style="filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));">
+          <path d="${path}" fill="${color}" stroke="none"/>
+        </svg>
+      `;
+
+      const galleryItem = document.createElement('div');
+      galleryItem.className = 'gallery-item';
+      galleryItem.setAttribute('role', 'option');
+      galleryItem.setAttribute('tabindex', '0');
+      galleryItem.setAttribute('aria-label', `${paletteName} palette blob`);
+      galleryItem.innerHTML = `
+        ${svg}
+        <div class="gallery-label">${paletteName}</div>
+      `;
+
+      // Click handler
+      galleryItem.addEventListener('click', () => {
+        state.presetPalette = paletteName;
+        els.presetPalette.value = paletteName;
+        setColorScheme('palette');
+        render();
+        showToast(`Switched to ${paletteName} palette`, 'success');
+        // Focus back to the gallery item for keyboard accessibility
+        galleryItem.focus();
+      });
+
+      // Keyboard navigation
+      galleryItem.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          galleryItem.click();
+        }
+      });
+
+      els.presetGallery.appendChild(galleryItem);
+      idx++;
+    });
+
+    // Make items focusable and add hover styles via CSS
+    const items = els.presetGallery.querySelectorAll('.gallery-item');
+    items.forEach((item, i) => {
+      item.style.transition = 'all var(--transition-normal)';
+    });
   }
 
   // ============================================
@@ -961,7 +1208,12 @@
     setSize(state.size);
     setBackground(state.background);
 
-    console.log('Blob Generator initialized');
+    // Initialize rotation direction display
+    if (els.rotationDirectionValue) {
+      els.rotationDirectionValue.textContent = state.rotationDirection === 1 ? 'CW' : 'CCW';
+    }
+
+    console.log('Blob Generator initialized - all 10 tasks ready');
   }
 
   if (document.readyState === 'loading') {

@@ -1,4 +1,4 @@
-import * as sharp from 'sharp';
+const sharp = require('sharp');
 import * as path from 'path';
 
 export interface ImageConvertOptions {
@@ -26,11 +26,10 @@ export class ImageConverter {
     const outExt = '.' + options.format;
     const outputPath = path.join(dir, base + outExt);
 
-    const sharpInstance = sharp as any;
-    let pipeline = sharpInstance(inputPath);
+    let pipeline = sharp(inputPath);
 
     if (options.width || options.height) {
-      pipeline = pipeline.resize(options.width || 0, options.height || 0, { withoutEnlargement: true });
+      pipeline = pipeline.resize(options.width || null, options.height || null, { withoutEnlargement: true });
     }
 
     if (options.grayscale) {
@@ -40,27 +39,13 @@ export class ImageConverter {
     const quality = options.quality ?? 90;
 
     switch (options.format) {
-      case 'png':
-        pipeline = pipeline.png({ quality });
-        break;
-      case 'jpeg':
-        pipeline = pipeline.jpeg({ quality });
-        break;
-      case 'webp':
-        pipeline = pipeline.webp({ quality });
-        break;
-      case 'avif':
-        pipeline = pipeline.avif({ quality });
-        break;
-      case 'gif':
-        pipeline = pipeline.gif();
-        break;
-      case 'bmp':
-        pipeline = pipeline.toFormat('raw');
-        break;
-      case 'tiff':
-        pipeline = pipeline.tiff({ quality });
-        break;
+      case 'png': pipeline = pipeline.png({ quality }); break;
+      case 'jpeg': pipeline = pipeline.jpeg({ quality }); break;
+      case 'webp': pipeline = pipeline.webp({ quality }); break;
+      case 'avif': pipeline = pipeline.avif({ quality }); break;
+      case 'gif': pipeline = pipeline.gif(); break;
+      case 'bmp': pipeline = pipeline.toFormat('raw'); break;
+      case 'tiff': pipeline = pipeline.tiff({ quality }); break;
     }
 
     await pipeline.toFile(outputPath);

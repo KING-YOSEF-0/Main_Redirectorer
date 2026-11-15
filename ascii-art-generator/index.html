@@ -5,227 +5,295 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ASCII Art Generator | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
-
-<header class="hero">
-  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
-  <p class="tagline">Convert images to ASCII art, generate text banners, and create ASCII animations. Multiple character sets, color modes, and export options.</p>
-</header>
-
-<main class="container">
-  <aside class="panel config-panel">
-    <h2>ASCII Generator</h2>
-
-    <div class="field">
-      <label>Mode</label>
-      <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" role="tab" data-mode="image" aria-selected="true">Image to ASCII</button>
-        <button class="mode-tab" role="tab" data-mode="text" aria-selected="false">Text Banner</button>
-        <button class="mode-tab" role="tab" data-mode="animation" aria-selected="false">ASCII Animation</button>
+<div id="app">
+  <header class="terminal-header">
+    <div class="terminal-title">
+      <span class="terminal-prompt">$</span>
+      <h1>ASCII-ART-GENERATOR</h1>
+      <span class="version">v2.0.0</span>
+    </div>
+    <div class="terminal-status">
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">READY</span>
       </div>
+      <span class="kbd">CTRL+S</span> Save
+      <span class="kbd">CTRL+C</span> Copy
+      <span class="kbd">CTRL+N</span> New
     </div>
+  </header>
 
-    <div class="field" id="imageOptions">
-      <label>Source Image</label>
-      <input type="file" id="imageUpload" accept="image/*" hidden>
-      <div class="file-drop-zone" id="dropZone">
-        <p>Drag & drop an image or click to select</p>
-        <p class="file-info">Supports: PNG, JPG, JPEG, GIF, WebP</p>
+  <main id="mainContent">
+    <aside class="panel config-panel">
+      <div class="panel-header">
+        <h2>CONFIGURATION</h2>
       </div>
-      <div class="camera-controls" style="display:none;">
-        <button class="btn secondary" id="cameraBtn">Use Camera</button>
-      </div>
-    </div>
-
-    <div class="field" id="textOptions" hidden>
-      <label>Text Input</label>
-      <input type="text" id="textInput" placeholder="Enter text for banner..." value="KING_YOSEF_">
-      <label style="margin-top:0.5rem;">Font Style</label>
-      <select id="bannerFont">
-        <option value="standard">Standard</option>
-        <option value="big">Big</option>
-        <option value="block">Block</option>
-        <option value="lean">Lean</option>
-        <option value="shadow">Shadow</option>
-        <option value="slant">Slant</option>
-        <option value="bubble">Bubble</option>
-        <option value="digital">Digital</option>
-      </select>
-    </div>
-
-    <div class="field" id="animationOptions" hidden>
-      <label>Animation Type</label>
-      <select id="animationType">
-        <option value="spinner">Spinner</option>
-        <option value="bouncing">Bouncing Ball</option>
-        <option value="wave">Wave</option>
-        <option value="loading">Loading Bar</option>
-        <option value="pulse">Pulse</option>
-        <option value="rotate">Rotating Cube</option>
-        <option value="matrix">Matrix Rain</option>
-        <option value="fire">Fire</option>
-      </select>
-      <label style="margin-top:0.5rem;">Frames</label>
-      <input type="range" id="animFrames" min="8" max="60" value="16">
-      <span id="framesValue">16</span>
-    </div>
-
-    <div class="field">
-      <label>Character Set</label>
-      <select id="charset">
-        <option value="standard">Standard (@%#*+=-:. )</option>
-        <option value="blocks">Blocks (█▓▒░ )</option>
-        <option value="braille">Braille (⣿⣷⣦⣤⣀ )</option>
-        <option value="minimal">Minimal (#+-:. )</option>
-        <option value="extended">Extended ($@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,"^`'. )</option>
-        <option value="custom">Custom</option>
-      </select>
-    </div>
-
-    <div class="field" id="customCharsetOptions" hidden>
-      <label>Custom Characters (darkest to lightest)</label>
-      <input type="text" id="customCharset" placeholder="e.g. @#$%*+=-:." value="@#$%*+=-:.">
-    </div>
-
-    <div class="field">
-      <label>Color Mode</label>
-      <div class="mode-tabs" role="tablist" style="flex-wrap:wrap;">
-        <button class="mode-tab color-tab active" role="tab" data-color="mono" aria-selected="true">Monochrome</button>
-        <button class="mode-tab color-tab" role="tab" data-color="ansi" aria-selected="false">ANSI 16-color</button>
-        <button class="mode-tab color-tab" role="tab" data-color="truecolor" aria-selected="false">True Color</button>
-        <button class="mode-tab color-tab" role="tab" data-color="custom" aria-selected="false">Custom Palette</button>
-      </div>
-    </div>
-
-    <div class="field" id="customPaletteOptions" hidden>
-      <label>Palette Colors (comma-separated hex)</label>
-      <input type="text" id="customPalette" placeholder="#ff0000,#00ff00,#0000ff,#ffffff" value="#ff4fa3,#ff9f1c,#2ee6a6,#35c3ff,#9b5cff,#f5f5f7">
-    </div>
-
-    <div class="field">
-      <label>Output Width</label>
-      <input type="range" id="outputWidth" min="40" max="300" value="120">
-      <span id="widthValue">120</span> chars
-    </div>
-
-    <div class="field">
-      <label>Aspect Ratio Correction</label>
-      <input type="range" id="aspectRatio" min="0.3" max="1.0" step="0.05" value="0.5">
-      <span id="aspectValue">0.5</span> (char height/width)
-    </div>
-
-    <div class="field">
-      <label>Invert</label>
-      <label style="display:flex;align-items:center;gap:0.5rem;"><input type="checkbox" id="invertToggle"> Invert brightness</label>
-    </div>
-
-    <div class="field">
-      <label>Dithering</label>
-      <select id="dithering">
-        <option value="none">None</option>
-        <option value="floydsteinberg">Floyd-Steinberg</option>
-        <option value="ordered">Ordered (Bayer)</option>
-        <option value="atkinson">Atkinson</option>
-      </select>
-    </div>
-
-    <div class="actions">
-      <button class="btn primary" id="generateBtn">Generate ASCII</button>
-      <button class="btn secondary" id="randomBtn">Random Image</button>
-    </div>
-
-    <div class="stats-panel">
-      <h3>Statistics</h3>
-      <div class="stat-row">
-        <span class="stat-label">Images Converted</span>
-        <span class="stat-value" id="imagesConverted">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Banners Created</span>
-        <span class="stat-value" id="bannersCreated">0</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-label">Animations Made</span>
-        <span class="stat-value" id="animationsMade">0</span>
-      </div>
-    </div>
-
-    <div class="theme-selector">
-      <label>UI Theme</label>
-      <select id="uiTheme">
-        <option value="dark">Dark</option>
-        <option value="light">Light</option>
-      </select>
-    </div>
-  </aside>
-
-  <section class="panel game-panel">
-    <div class="game-header">
-      <div class="puzzle-info">
-        <span class="puzzle-label" id="puzzleLabel">ASCII Art Generator</span>
-        <span class="puzzle-meta" id="puzzleMeta">Ready to generate</span>
-      </div>
-    </div>
-
-    <div class="game-status" id="gameStatus">
-      Select a mode and configure options, then click "Generate ASCII"
-    </div>
-
-    <div class="preview-area" id="previewArea">
-      <pre id="asciiOutput" class="ascii-output"></pre>
-    </div>
-
-    <div class="controls-row">
-      <button class="btn secondary" id="copyBtn" hidden>Copy ASCII</button>
-      <button class="btn secondary" id="downloadTxtBtn" hidden>Download .txt</button>
-      <button class="btn secondary" id="downloadHtmlBtn" hidden>Download .html</button>
-      <button class="btn secondary" id="downloadGifBtn" hidden>Download .gif</button>
-    </div>
-
-    <div class="game-footer">
-      <button class="btn secondary" id="shareBtn" hidden>Share</button>
-      <button class="btn primary" id="newAsciiBtn" hidden>New ASCII</button>
-    </div>
-
-    <div id="resultsModal" class="modal" hidden>
-      <div class="modal-content">
-        <h2 id="modalTitle">ASCII Generated!</h2>
-        <div class="results-grid">
-          <div class="result-card">
-            <span class="result-label">Width</span>
-            <span class="result-value" id="resultWidth">120</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Height</span>
-            <span class="result-value" id="resultHeight">0</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Charset</span>
-            <span class="result-value" id="resultCharset">Standard</span>
-          </div>
-          <div class="result-card">
-            <span class="result-label">Color Mode</span>
-            <span class="result-value" id="resultColorMode">Monochrome</span>
+      <div class="panel-content">
+        <div class="field">
+          <label>MODE</label>
+          <div class="mode-tabs" role="tablist" id="modeTabs">
+            <button class="mode-tab active" role="tab" data-mode="image" aria-selected="true">IMAGE</button>
+            <button class="mode-tab" role="tab" data-mode="text" aria-selected="false">TEXT</button>
+            <button class="mode-tab" role="tab" data-mode="animation" aria-selected="false">ANIMATION</button>
           </div>
         </div>
-        <div class="modal-actions">
-          <button class="btn secondary" id="shareBtnModal">Share</button>
-          <button class="btn primary" id="downloadBtnModal">Download</button>
-          <button class="btn primary" id="newAsciiBtnModal">Create Another</button>
+
+        <div class="field" id="imageOptions">
+          <label>SOURCE IMAGE</label>
+          <div class="file-drop-zone" id="dropZone">
+            <div class="drop-icon">▼</div>
+            <p>DRAG & DROP IMAGE HERE</p>
+            <p class="file-info">OR CLICK TO SELECT FILE</p>
+            <p class="file-info">PNG, JPG, JPEG, GIF, WEBP, BMP</p>
+          </div>
+          <div class="field" style="margin-top: 0.5rem;">
+            <label>OR LOAD FROM URL</label>
+            <div class="url-input-group">
+              <input type="url" id="imageUrl" placeholder="https://example.com/image.png" title="Enter image URL">
+              <button class="btn btn-secondary" id="loadUrlBtn" style="padding: 0.5rem 0.75rem;">LOAD</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field hidden" id="textOptions">
+          <label>INPUT TEXT</label>
+          <input type="text" id="textInput" placeholder="Enter text for banner..." value="KING_YOSEF_">
+          <label style="margin-top: 0.5rem;">FIGLET FONT</label>
+          <select id="bannerFont">
+            <option value="standard">Standard</option>
+            <option value="slant">Slant</option>
+            <option value="shadow">Shadow</option>
+            <option value="block">Block</option>
+            <option value="banner">Banner</option>
+            <option value="digital">Digital</option>
+            <option value="big">Big</option>
+            <option value="small">Small</option>
+          </select>
+        </div>
+
+        <div class="field hidden" id="animationOptions">
+          <label>ANIMATION TYPE</label>
+          <select id="animationType">
+            <option value="spinner">Spinner</option>
+            <option value="bouncing">Bouncing Ball</option>
+            <option value="wave">Wave</option>
+            <option value="loading">Loading Bar</option>
+            <option value="pulse">Pulse</option>
+            <option value="rotate">Rotating Cube</option>
+            <option value="matrix">Matrix Rain</option>
+            <option value="fire">Fire</option>
+            <option value="dna">DNA Helix</option>
+            <option value="earth">Rotating Earth</option>
+          </select>
+          <div class="field-row" style="margin-top: 0.5rem;">
+            <label>FRAMES</label>
+            <input type="range" id="animFrames" min="8" max="60" value="16">
+            <span class="range-value" id="framesValue">16</span>
+          </div>
+          <div class="field-row">
+            <label>FPS</label>
+            <input type="range" id="animFps" min="5" max="30" value="10">
+            <span class="range-value" id="fpsValue">10</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>CHARACTER SET</label>
+          <select id="charset">
+            <option value="standard">Standard (@%#*+=-:. )</option>
+            <option value="blocks">Blocks (█▓▒░ )</option>
+            <option value="braille">Braille (⣿⣷⣦⣤⣀ )</option>
+            <option value="minimal">Minimal (#+-:. )</option>
+            <option value="extended">Extended ($@B%8&WM#*oahkbdpq...)</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+
+        <div class="field hidden" id="customCharsetOptions">
+          <label>CUSTOM CHARS (DARK TO LIGHT)</label>
+          <input type="text" id="customCharset" placeholder="e.g. @#$%*+=-:." value="@#$%*+=-:.">
+        </div>
+
+        <div class="field">
+          <label>COLOR MODE</label>
+          <div class="mode-tabs" role="tablist" id="colorTabs">
+            <button class="mode-tab color-tab active" role="tab" data-color="mono" aria-selected="true">MONO</button>
+            <button class="mode-tab color-tab" role="tab" data-color="ansi" aria-selected="false">ANSI</button>
+            <button class="mode-tab color-tab" role="tab" data-color="truecolor" aria-selected="false">TRUECOLOR</button>
+            <button class="mode-tab color-tab" role="tab" data-color="custom" aria-selected="false">PALETTE</button>
+          </div>
+        </div>
+
+        <div class="field hidden" id="customPaletteOptions">
+          <label>CUSTOM PALETTE (HEX, COMMA SEPARATED)</label>
+          <input type="text" id="customPalette" placeholder="#ff0000,#00ff00,#0000ff,#ffffff" value="#00ff41,#00cc33,#009926,#00661a,#00330d">
+          <div class="color-preview" id="palettePreview"></div>
+        </div>
+
+        <div class="field">
+          <div class="field-row">
+            <label>WIDTH</label>
+            <input type="range" id="outputWidth" min="40" max="400" value="120">
+            <span class="range-value" id="widthValue">120</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-row">
+            <label>ASPECT</label>
+            <input type="range" id="aspectRatio" min="0.2" max="1.0" step="0.05" value="0.5">
+            <span class="range-value" id="aspectValue">0.50</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-row">
+            <label>CONTRAST</label>
+            <input type="range" id="contrast" min="0.5" max="3.0" step="0.1" value="1.0">
+            <span class="range-value" id="contrastValue">1.0</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-row">
+            <label>BRIGHTNESS</label>
+            <input type="range" id="brightness" min="-100" max="100" value="0">
+            <span class="range-value" id="brightnessValue">0</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-row">
+            <label>DENSITY</label>
+            <input type="range" id="density" min="0.5" max="2.0" step="0.1" value="1.0">
+            <span class="range-value" id="densityValue">1.0</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-row">
+            <label>
+              <input type="checkbox" id="invertToggle">
+              INVERT
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>DITHERING</label>
+          <select id="dithering">
+            <option value="none">NONE</option>
+            <option value="floydsteinberg">FLOYD-STEINBERG</option>
+            <option value="ordered">ORDERED (BAYER)</option>
+            <option value="atkinson">ATKINSON</option>
+          </select>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" id="generateBtn">
+            <span class="loading-spinner hidden" id="genSpinner"></span>
+            GENERATE
+          </button>
+          <button class="btn btn-secondary" id="randomBtn">RANDOM</button>
+        </div>
+
+        <div class="field" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+          <label>STATISTICS</label>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">IMAGES</span>
+              <span class="stat-value" id="statImages">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">BANNERS</span>
+              <span class="stat-value" id="statBanners">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">ANIMS</span>
+              <span class="stat-value" id="statAnims">0</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-</main>
+    </aside>
 
-<footer>
-  Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
-</footer>
+    <section class="panel output-panel">
+      <div class="output-header">
+        <div class="output-title">OUTPUT</div>
+        <div class="output-meta">
+          <span><span class="label">W:</span><span class="value" id="outWidth">-</span></span>
+          <span><span class="label">H:</span><span class="value" id="outHeight">-</span></span>
+          <span><span class="label">CHARS:</span><span class="value" id="outChars">-</span></span>
+          <span><span class="label">MODE:</span><span class="value" id="outMode">-</span></span>
+        </div>
+      </div>
+      <div class="ascii-viewport" id="asciiViewport">
+        <pre class="ascii-output" id="asciiOutput"></pre>
+      </div>
+      <div class="controls-bar">
+        <button class="btn btn-secondary" id="copyBtn" disabled>COPY</button>
+        <button class="btn btn-secondary" id="downloadTxtBtn" disabled>SAVE .TXT</button>
+        <button class="btn btn-secondary" id="downloadHtmlBtn" disabled>SAVE .HTML</button>
+        <button class="btn btn-secondary" id="downloadGifBtn" disabled>SAVE .GIF</button>
+        <button class="btn btn-secondary" id="clearBtn">CLEAR</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="terminal-footer">
+    <div class="footer-left">
+      <span>MADE WITH</span>
+      <span style="color: var(--error);">♥</span>
+      <span>BY</span>
+      <strong>KING_YOSEF_</strong>
+    </div>
+    <div class="footer-right">
+      <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">ABOUT ME</a>
+      <span>|</span>
+      <span>v2.0.0</span>
+    </div>
+  </footer>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal-overlay hidden" id="helpModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>KEYBOARD SHORTCUTS</h3>
+      <button class="modal-close" id="helpClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <table style="width:100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 0.7rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border); color: var(--accent);">
+            <th style="text-align: left; padding: 0.5rem;">KEY</th>
+            <th style="text-align: left; padding: 0.5rem;">ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">CTRL+G</kbd></td><td style="padding: 0.5rem;">Generate ASCII</td></tr>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">CTRL+C</kbd></td><td style="padding: 0.5rem;">Copy to Clipboard</td></tr>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">CTRL+S</kbd></td><td style="padding: 0.5rem;">Save as Text</td></tr>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">CTRL+SHIFT+S</kbd></td><td style="padding: 0.5rem;">Save as HTML</td></tr>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">CTRL+SHIFT+G</kbd></td><td style="padding: 0.5rem;">Save as GIF (Animation)</td></tr>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">CTRL+N</kbd></td><td style="padding: 0.5rem;">Clear / New</td></tr>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">CTRL+1</kbd></td><td style="padding: 0.5rem;">Switch to Image Mode</td></tr>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">CTRL+2</kbd></td><td style="padding: 0.5rem;">Switch to Text Mode</td></tr>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">CTRL+3</kbd></td><td style="padding: 0.5rem;">Switch to Animation Mode</td></tr>
+          <tr><td style="padding: 0.5rem;"><kbd class="kbd">F1</kbd></td><td style="padding: 0.5rem;">Show This Help</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="helpOk">GOT IT</button>
+    </div>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>

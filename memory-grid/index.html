@@ -5,23 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Memory Grid | KING_YOSEF_</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="bubbles" aria-hidden="true"></div>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="grid-bg" aria-hidden="true"></div>
 
 <header class="hero">
-  <h1 class="logo" aria-label="KING_YOSEF_">KING_YOSEF_</h1>
-  <p class="tagline">Memorize the pattern. Recall it perfectly. How far can you go?</p>
+  <div class="hero-content">
+    <h1 class="logo" aria-label="KING_YOSEF_">MEMORY<span class="accent">GRID</span></h1>
+    <p class="tagline">[ NEURAL PATTERN RECALL SYSTEM v2.6 ]</p>
+    <div class="version-badge">KING_YOSEF_</div>
+  </div>
 </header>
 
 <main class="container">
   <aside class="panel config-panel">
-    <h2>Game Setup</h2>
+    <div class="panel-header">
+      <span class="panel-title">[ CONFIGURATION ]</span>
+      <span class="panel-corner"></span>
+    </div>
 
     <div class="field">
-      <label>Grid Size</label>
+      <label class="field-label">GRID DIMENSION</label>
       <div class="size-tabs" role="tablist">
         <button class="size-tab active" role="tab" data-size="3" aria-selected="true">3×3</button>
         <button class="size-tab" role="tab" data-size="4" aria-selected="false">4×4</button>
@@ -31,73 +38,85 @@
     </div>
 
     <div class="field">
-      <label>Mode</label>
+      <label class="field-label">OPERATION MODE</label>
       <div class="mode-tabs" role="tablist">
-        <button class="mode-tab active" role="tab" data-mode="classic" aria-selected="true">Classic</button>
-        <button class="mode-tab" role="tab" data-mode="sequence" aria-selected="false">Sequence</button>
-        <button class="mode-tab" role="tab" data-mode="chess" aria-selected="false">Chess Knight</button>
+        <button class="mode-tab active" role="tab" data-mode="classic" aria-selected="true">CLASSIC</button>
+        <button class="mode-tab" role="tab" data-mode="sequence" aria-selected="false">SEQUENCE</button>
+        <button class="mode-tab" role="tab" data-mode="chess" aria-selected="false">CHESS KNIGHT</button>
       </div>
     </div>
 
     <div class="field" id="displayTimeField">
-      <label>Display Time <span id="displayTimeValue">3.0</span>s</label>
-      <input type="range" id="displayTime" min="1" max="10" value="3" step="0.5">
+      <label class="field-label">DISPLAY DURATION <span id="displayTimeValue" class="value-readout">3.0s</span></label>
+      <input type="range" id="displayTime" min="0.5" max="3" value="3" step="0.1">
+      <div class="slider-track"></div>
     </div>
 
     <div class="field" id="sequenceLengthField" hidden>
-      <label>Start Length <span id="seqLengthValue">3</span></label>
+      <label class="field-label">SEQUENCE LENGTH <span id="seqLengthValue" class="value-readout">3</span></label>
       <input type="range" id="sequenceLength" min="2" max="8" value="3" step="1">
+      <div class="slider-track"></div>
     </div>
 
     <div class="field">
-      <label>Tile Style</label>
-      <select id="tileStyle">
-        <option value="solid">Solid</option>
-        <option value="pattern">Patterned</option>
-        <option value="emoji">Emoji</option>
-        <option value="number">Numbered</option>
+      <label class="field-label">CELL VISUALIZATION</label>
+      <select id="tileStyle" class="select-input">
+        <option value="solid">SOLID NEON</option>
+        <option value="pattern">PATTERN MATRIX</option>
+        <option value="emoji">GLYPH SYMBOLS</option>
+        <option value="number">INDEX CODES</option>
       </select>
     </div>
 
     <div class="actions">
-      <button class="btn primary" id="startBtn">Start Game</button>
-      <button class="btn secondary" id="dailyBtn">Daily Challenge</button>
+      <button class="btn primary" id="startBtn">[ INITIALIZE ]</button>
+      <button class="btn secondary" id="dailyBtn">[ DAILY CHALLENGE ]</button>
     </div>
 
+    <div class="panel-divider"></div>
+
     <div class="stats-panel">
-      <h3>Statistics</h3>
+      <div class="panel-header">
+        <span class="panel-title">[ PERFORMANCE METRICS ]</span>
+        <span class="panel-corner"></span>
+      </div>
       <div class="stat-row">
-        <span class="stat-label">Best Level (Classic)</span>
+        <span class="stat-label">BEST LEVEL — CLASSIC</span>
         <span class="stat-value" id="bestClassic">—</span>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Best Level (Sequence)</span>
+        <span class="stat-label">BEST LEVEL — SEQUENCE</span>
         <span class="stat-value" id="bestSequence">—</span>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Best Level (Chess)</span>
+        <span class="stat-label">BEST LEVEL — CHESS KNIGHT</span>
         <span class="stat-value" id="bestChess">—</span>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Current Streak</span>
+        <span class="stat-label">CURRENT STREAK</span>
         <span class="stat-value" id="currentStreak">0</span>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Best Streak</span>
+        <span class="stat-label">MAX STREAK</span>
         <span class="stat-value" id="bestStreak">0</span>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Daily Best</span>
+        <span class="stat-label">DAILY BEST</span>
         <span class="stat-value" id="dailyBest">—</span>
       </div>
       <div class="stat-row">
-        <span class="stat-label">Games Played</span>
+        <span class="stat-label">TOTAL OPERATIONS</span>
         <span class="stat-value" id="gamesPlayed">0</span>
       </div>
     </div>
 
+    <div class="panel-divider"></div>
+
     <div class="leaderboard-section">
-      <h3>Leaderboard (Local)</h3>
+      <div class="panel-header">
+        <span class="panel-title">[ LOCAL RANKINGS ]</span>
+        <span class="panel-corner"></span>
+      </div>
       <div id="leaderboard" class="leaderboard"></div>
     </div>
   </aside>
@@ -105,16 +124,19 @@
   <section class="panel game-panel">
     <div class="game-header">
       <div class="level-display">
-        <span class="level-label">Level</span>
-        <span class="level-value" id="currentLevel">1</span>
+        <span class="level-label">LEVEL</span>
+        <span class="level-value" id="currentLevel">01</span>
       </div>
-      <div class="mode-badge" id="modeBadge">Classic</div>
-      <div class="size-badge" id="sizeBadge">3×3</div>
-      <div class="daily-badge" id="dailyBadge" hidden>Daily Challenge</div>
+      <div class="badges">
+        <span class="mode-badge" id="modeBadge">CLASSIC</span>
+        <span class="size-badge" id="sizeBadge">3×3</span>
+        <span class="daily-badge" id="dailyBadge" hidden>DAILY</span>
+      </div>
     </div>
 
     <div class="game-status" id="gameStatus">
-      Press Start to begin
+      <span class="status-text">AWAITING INITIALIZATION...</span>
+      <div class="status-bar"><div class="status-fill"></div></div>
     </div>
 
     <div class="grid-container" id="gridContainer" role="region" aria-label="Memory grid">
@@ -122,43 +144,46 @@
     </div>
 
     <div class="sequence-display" id="sequenceDisplay" hidden>
-      <div class="seq-step" id="seqStep">Step 1</div>
+      <div class="seq-step" id="seqStep">STEP 01 / 03</div>
       <div class="seq-progress" id="seqProgress"></div>
     </div>
 
     <div class="game-footer">
-      <button class="btn secondary" id="replayBtn" hidden>Replay Pattern</button>
-      <button class="btn primary" id="restartBtn" hidden>Restart</button>
+      <button class="btn secondary" id="replayBtn" hidden>[ REPLAY PATTERN ]</button>
+      <button class="btn primary" id="restartBtn" hidden>[ RESTART ]</button>
     </div>
 
     <div id="resultsModal" class="modal" hidden>
       <div class="modal-content">
-        <h2 id="modalTitle">Game Over!</h2>
+        <div class="modal-header">
+          <h2 id="modalTitle">OPERATION COMPLETE</h2>
+          <span class="modal-corner"></span>
+        </div>
         <div class="results-grid">
           <div class="result-card">
-            <span class="result-label">Level Reached</span>
-            <span class="result-value" id="finalLevel">1</span>
+            <span class="result-label">LEVEL REACHED</span>
+            <span class="result-value" id="finalLevel">01</span>
           </div>
           <div class="result-card">
-            <span class="result-label">Grid Size</span>
+            <span class="result-label">GRID DIMENSION</span>
             <span class="result-value" id="finalSize">3×3</span>
           </div>
           <div class="result-card">
-            <span class="result-label">Mode</span>
-            <span class="result-value" id="finalMode">Classic</span>
+            <span class="result-label">OPERATION MODE</span>
+            <span class="result-value" id="finalMode">CLASSIC</span>
           </div>
           <div class="result-card">
-            <span class="result-label">Accuracy</span>
+            <span class="result-label">ACCURACY</span>
             <span class="result-value" id="finalAccuracy">100%</span>
           </div>
         </div>
         <div class="daily-result" id="dailyResult" hidden>
-          <h3>Daily Challenge Result</h3>
+          <h3>DAILY CHALLENGE RESULT</h3>
           <p id="dailyMessage"></p>
         </div>
         <div class="modal-actions">
-          <button class="btn secondary" id="shareBtn">Share Result</button>
-          <button class="btn primary" id="playAgainBtn">Play Again</button>
+          <button class="btn secondary" id="shareBtn">[ SHARE RESULT ]</button>
+          <button class="btn primary" id="playAgainBtn">[ RE-RUN ]</button>
         </div>
       </div>
     </div>
@@ -166,8 +191,11 @@
 </main>
 
 <footer>
-  Made with 💖 by <strong>KING_YOSEF_</strong>
-  <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/">About Me</a>
+  <div class="footer-content">
+    <span>MADE WITH <span class="heart">♥</span> BY <strong>KING_YOSEF_</strong></span>
+    <a class="about-link" href="https://king-yosef-0.github.io/Protfolio/" target="_blank" rel="noopener">[ ABOUT ME ]</a>
+  </div>
+  <div class="footer-dec"></div>
 </footer>
 
 <script src="script.js"></script>
