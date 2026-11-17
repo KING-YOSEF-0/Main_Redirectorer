@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust 3D Cyber World — Large Scaled Browser Game</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Three.js for WebGL 3D Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 3D Canvas -->
+        <canvas id="webgl-canvas"></canvas>
+
+        <!-- HUD Overlay -->
+        <div class="hud-header">
+            <div class="brand">
+                <i class="fa-solid fa-cube text-cyan-400"></i>
+                <span>Rust3D Engine</span>
+                <span class="badge">WASM Active</span>
+            </div>
+            <div class="stats">
+                <div class="stat-box">Score: <span id="score-val">0</span></div>
+                <div class="stat-box">FPS: <span id="fps-val">60</span></div>
+                <div class="stat-box">Objects: <span id="obj-val">0</span></div>
+            </div>
+        </div>
+
+        <!-- Instructions Overlay -->
+        <div class="instructions-card" id="instructions">
+            <h2>Cyber Realm 3D</h2>
+            <p>Powered by <strong>Rust + WebAssembly</strong> and <strong>Three.js</strong></p>
+            <div class="controls-grid">
+                <span><strong>W A S D / Arrows</strong> Move</span>
+                <span><strong>Mouse / Touch</strong> Look around</span>
+                <span><strong>Space</strong> Jump / Pulse</span>
+                <span><strong>Click Canvas</strong> Lock Pointer</span>
+            </div>
+            <button id="start-btn" class="primary-btn">Enter World</button>
+        </div>
+
+        <!-- Crosshair -->
+        <div class="crosshair" id="crosshair"></div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
