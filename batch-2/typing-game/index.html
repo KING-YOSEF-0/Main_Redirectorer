@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Typing Speed Game</h1>
+    <div class="game-container">
+        <div class="stats">
+            <span id="wpm">WPM: 0</span>
+            <span id="accuracy">Accuracy: 100%</span>
+            <span id="time">Time: 60s</span>
+        </div>
+        <div class="text-display">
+            <p id="text-to-type">Press Start to begin</p>
+        </div>
+        <input type="text" id="input-field" placeholder="Start typing..." disabled>
+        <div class="controls">
+            <button id="start-btn">Start Game</button>
+            <button id="reset-btn">Reset</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
