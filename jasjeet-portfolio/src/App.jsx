@@ -360,7 +360,7 @@ export default function App() {
                     <span>Live Demo & Source</span>
                     <ExternalLink className="w-4 h-4" />
                   </a>
-                  <Github className="w-5 h-5 text-slate-400 hover:text-slate-900 cursor-pointer transition-colors" />
+                  <GitBranch className="w-5 h-5 text-slate-400 hover:text-slate-900 cursor-pointer transition-colors" />
                 </div>
               </div>
             </motion.div>
@@ -393,7 +393,7 @@ export default function App() {
               rel="noreferrer"
               className="px-8 py-4 rounded-2xl bg-sky-700/50 backdrop-blur-md border border-sky-400/30 text-white font-bold text-base hover:bg-sky-700 hover:scale-105 transition-all duration-300 flex items-center space-x-2"
             >
-              <Github className="w-5 h-5" />
+              <GitBranch className="w-5 h-5" />
               <span>GitHub Profile</span>
             </a>
           </div>
