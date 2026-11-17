@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-sky-50 via-white to-sky-100 text-slate-800 min-h-screen font-sans antialiased selection:bg-sky-500 selection:text-white;
+  }
+}
