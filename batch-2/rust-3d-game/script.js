@@ -1,24 +1,25 @@
-// Main Entry Point for Rust + Three.js 3D Game
-import init, { GameWorld } from './pkg/rust_3d_game.js';
+// Main Entry Point for JS-Only 3D Game
+import { GameLoop } from './game-loop.js';
+import { PhysicsWorld, Vector3, Sphere } from './physics_engine.js';
+import { GameHUD, ScoreDisplay, HealthDisplay, InputPrompt } from './ui-controller.js';
 
-let scene, camera, renderer, gameWorld;
+let scene, camera, renderer, physicsWorld, gameLoop, hud;
 let meshes = new Map();
+let objects = new Map();
 let isStarted = false;
-let lastTime = performance.now();
-let frameCount = 0;
-let lastFpsUpdate = performance.now();
 
 const keys = { w: false, a: false, s: false, d: false, ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false };
 
-async function main() {
-    // Initialize WASM module
-    try {
-        await init();
-        console.log("Rust WASM module loaded successfully!");
-    } catch (e) {
-        console.warn("WASM module failed to load in static preview mode. Falling back to JS simulation engine.", e);
-    }
+// Player state
+const player = {
+    position: new Vector3(0, 2, 10),
+    velocity: new Vector3(),
+    moveSpeed: 5.0,
+    jumpForce: 7.0,
+    onGround: true
+};
 
+async function main() {
     // Initialize Three.js Scene
     const canvas = document.getElementById('webgl-canvas');
     scene = new THREE.Scene();
@@ -55,24 +56,146 @@ async function main() {
     floor.receiveShadow = true;
     scene.add(floor);
 
-    // Initialize Game World (Rust if available, or fallback JS)
-    try {
-        gameWorld = new GameWorld();
-    } catch (e) {
-        // Fallback mock if WASM is not built yet
-        gameWorld = {
-            update: (dt) => {},
-            get_objects: () => [],
-            get_player_state: () => [0, 10, 0],
-            get_score: () => 0
-        };
+    // Initialize Physics Engine
+    physicsWorld = new PhysicsWorld();
+
+    // Initialize Game Loop
+    gameLoop = new GameLoop(update, render, handleInput);
+
+    // Initialize UI
+    hud = new GameHUD();
+    hud.addTo(document.body);
+    hud.createScoreDisplay();
+    hud.createHealthDisplay();
+    hud.createTimerDisplay();
+    hud.createLevelDisplay();
+    hud.createPerformanceDisplay();
+
+    // Setup Input
+    setupInput();
+
+    // Generate Game World
+    generateWorld();
+
+    // Start Game Loop
+    gameLoop.start();
+}
+
+function generateWorld() {
+    // Procedural grid of 3D objects (cubes, spheres, pyramids)
+    const gridRange = 5;
+    const objectCount = gridRange * gridRange;
+
+    for (let x = -gridRange; x <= gridRange; x++) {
+        for (let z = -gridRange; z <= gridRange; z++) {
+            const id = `obj_${x}_${z}`;
+            const type = Math.floor(Math.random() * 3);
+            const y = 1 + Math.random() * 2;
+
+            const pos = new Vector3(x * 3, y, z * 3);
+
+            // Add to physics world
+            if (type === 0) {
+                physicsWorld.add_sphere(id, pos, 1.0, 1.0);
+            } else if (type === 1) {
+                physicsWorld.add_mesh(id, pos, 1.5, 1.0);
+            } else {
+                physicsWorld.add_sphere(id, pos, 0.8, 0.5);
+            }
+
+            // Create Three.js mesh
+            let geometry;
+            if (type === 0) geometry = new THREE.BoxGeometry(2, 2, 2);
+            else if (type === 1) geometry = new THREE.SphereGeometry(1.2, 16, 16);
+            else geometry = new THREE.ConeGeometry(1.5, 3, 16);
+
+            const material = new THREE.MeshStandardMaterial({
+                color: type === 0 ? 0x38bdf4 : type === 1 ? 0xf43f5e : 0xa855f7,
+                roughness: 0.3,
+                metalness: 0.8,
+                emissive: type === 0 ? 0x0284c7 : type === 1 ? 0xe11d48 : 0xc084fc,
+                emissiveIntensity: 0.2
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.castShadow = true;
+            mesh.position.copy(pos);
+            scene.add(mesh);
+            meshes.set(id, mesh);
+            objects.set(id, { type, mesh });
+        }
     }
 
-    setupInput();
-    setupUI();
+    console.log(`Generated ${objectCount} 3D objects`);
+}
 
-    // Start Animation Loop
-    requestAnimationFrame(animate);
+function handleInput(dt) {
+    if (!isStarted || document.pointerLockElement !== document.body) return;
+
+    let moveX = 0;
+    let moveZ = 0;
+
+    if (keys['w'] || keys['W'] || keys['ArrowUp']) moveZ -= 1;
+    if (keys['s'] || keys['S'] || keys['ArrowDown']) moveZ += 1;
+    if (keys['a'] || keys['A'] || keys['ArrowLeft']) moveX -= 1;
+    if (keys['d'] || keys['D'] || keys['ArrowRight']) moveX += 1;
+
+    if (moveX !== 0 || moveZ !== 0) {
+        const dir = new Vector3(moveX, 0, moveZ).normalize();
+        const move = dir.mul(player.moveSpeed * dt);
+        player.position = player.position.add(move);
+        player.onGround = true;
+    }
+
+    // Jump
+    if (keys[' ']) {
+        if (player.onGround) {
+            player.velocity.y = player.jumpForce;
+            player.onGround = false;
+        }
+    }
+
+    // Apply gravity
+    if (!player.onGround) {
+        player.velocity.y -= 9.8 * dt;
+        player.position.y += player.velocity.y * dt;
+        if (player.position.y <= 2) {
+            player.position.y = 2;
+            player.velocity.y = 0;
+            player.onGround = true;
+        }
+    }
+
+    // Update camera position
+    camera.position.copy(player.position);
+}
+
+function update(dt) {
+    if (!isStarted) return;
+
+    // Update physics
+    physicsWorld.step_simulation(dt);
+
+    // Sync objects from physicsWorld to Three.js meshes
+    for (const [id, obj] of objects) {
+        const pos = physicsWorld.get_position(id);
+        if (pos) {
+            obj.mesh.position.copy(pos);
+        }
+    }
+
+    // Update HUD
+    hud.update({
+        score: gameLoop.getState().score,
+        lives: gameLoop.getState().lives,
+        level: gameLoop.getState().level,
+        timeRemaining: gameLoop.getState().timeRemaining,
+        fps: gameLoop.getPerformanceStats().fps
+    });
+}
+
+function render(dt) {
+    renderer.render(scene, camera);
 }
 
 function setupInput() {
@@ -95,108 +218,19 @@ function setupInput() {
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
-}
 
-function setupUI() {
     const startBtn = document.getElementById('start-btn');
     const instructions = document.getElementById('instructions');
     const crosshair = document.getElementById('crosshair');
 
-    startBtn.addEventListener('click', () => {
-        isStarted = true;
-        instructions.style.display = 'none';
-        crosshair.classList.add('active');
-        document.body.requestPointerLock();
-    });
-
-    document.addEventListener('pointerlockchange', () => {
-        if (document.pointerLockElement !== document.body && isStarted) {
-            // Optional: Pause or show menu on unlock
-        }
-    });
-
-    window.addEventListener('mousemove', (e) => {
-        if (!isStarted || document.pointerLockElement !== document.body) return;
-        const sensitivity = 0.002;
-        camera.rotation.y -= e.movementX * sensitivity;
-    });
-}
-
-function animate(currentTime) {
-    requestAnimationFrame(animate);
-
-    const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
-    lastTime = currentTime;
-
-    // FPS calculation
-    frameCount++;
-    if (currentTime - lastFpsUpdate > 1000) {
-        document.getElementById('fps-val').textContent = Math.round((frameCount * 1000) / (currentTime - lastFpsUpdate));
-        frameCount = 0;
-        lastFpsUpdate = currentTime;
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            isStarted = true;
+            if (instructions) instructions.style.display = 'none';
+            if (crosshair) crosshair.classList.add('active');
+            document.body.requestPointerLock();
+        });
     }
-
-    if (isStarted && gameWorld) {
-        let moveX = 0;
-        let moveZ = 0;
-
-        if (keys['w'] || keys['W'] || keys['ArrowUp']) moveZ -= 1;
-        if (keys['s'] || keys['S'] || keys['ArrowDown']) moveZ += 1;
-        if (keys['a'] || keys['A'] || keys['ArrowLeft']) moveX -= 1;
-        if (keys['d'] || keys['D'] || keys['ArrowRight']) moveX += 1;
-
-        // Update Rust game state
-        try {
-            gameWorld.update(dt, moveX, moveZ);
-
-            // Get player position from Rust
-            const pState = gameWorld.get_player_state();
-            if (pState) {
-                camera.position.x = pState[0];
-                camera.position.z = pState[1];
-            }
-
-            // Sync objects from Rust to Three.js
-            const objects = gameWorld.get_objects();
-            if (objects) {
-                document.getElementById('obj-val').textContent = objects.length;
-
-                objects.forEach(obj => {
-                    let mesh = meshes.get(obj.id);
-                    if (!mesh) {
-                        // Create mesh based on obj_type
-                        let geometry;
-                        if (obj.obj_type === 0) geometry = new THREE.BoxGeometry(2, 2, 2);
-                        else if (obj.obj_type === 1) geometry = new THREE.SphereGeometry(1.2, 16, 16);
-                        else geometry = new THREE.ConeGeometry(1.5, 3, 16);
-
-                        const material = new THREE.MeshStandardMaterial({
-                            color: obj.obj_type === 0 ? 0x38bdf8 : obj.obj_type === 1 ? 0xf43f5e : 0xa855f7,
-                            roughness: 0.3,
-                            metalness: 0.8,
-                            emissive: obj.obj_type === 0 ? 0x0284c7 : 0xe11d48,
-                            emissiveIntensity: 0.2
-                        });
-
-                        mesh = new THREE.Mesh(geometry, material);
-                        mesh.castShadow = true;
-                        scene.add(mesh);
-                        meshes.set(obj.id, mesh);
-                    }
-
-                    mesh.position.set(obj.x, obj.y, obj.z);
-                    mesh.rotation.x = obj.rot_x;
-                    mesh.rotation.y = obj.rot_y;
-                });
-            }
-
-            document.getElementById('score-val').textContent = gameWorld.get_score();
-        } catch (e) {
-            // Fallback if WASM methods are not fully linked yet
-        }
-    }
-
-    renderer.render(scene, camera);
 }
 
 main();

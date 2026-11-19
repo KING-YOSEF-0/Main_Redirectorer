@@ -1,6 +1,10 @@
 use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
 
+// Game object for 3D representation - using JavaScript/Three.js based implementation
+// This Rust code serves as reference and documentation for the game engine architecture
+// Note: This module is now implemented as a reference in JavaScript with Three.js
+
 #[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct GameObject {
     pub id: u32,
